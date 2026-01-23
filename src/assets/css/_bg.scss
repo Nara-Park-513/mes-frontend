@@ -1,0 +1,21 @@
+.bg-gradient-primary{
+    background-color: #4e73df;
+    background-image: linear-gradient(45deg, #4e73df 50%, #224abe 400%);
+    background-size: cover;//백그라운드 요소에 패딩 마진값을 포함하는 방법
+    background-repeat: no-repeat !important;
+}
+.bg-register-image {
+    background: url('/img/lee.png');    
+    background-position: center;
+    background-size: cover;
+}
+.bg-password-image{
+    background: url('/img/new.png');    
+    background-position: center;
+    background-size: cover;
+}
+.bg-login-image{
+    background: url('/img/new.png');    
+    background-position: center;
+    background-size: cover;
+}
