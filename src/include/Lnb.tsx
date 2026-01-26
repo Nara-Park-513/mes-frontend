@@ -104,26 +104,27 @@ const Lnb = () => {
 
             {/*  Nav Item - Charts */}
             <li className="nav-item">
-                <a className="nav-link" href="charts.html">
+                <a className="nav-link" href="/im">
+                     <a className="collapse-item" href="/kpi"></a>
                     <i className="fas fa-fw fa-chart-area"></i>
                     <span>재고관리</span></a>
             </li>
 
             {/*  Nav Item - Tables */}
             <li className="nav-item">
-                <a className="nav-link" href="tables.html">
+                <a className="nav-link" href="/kpi">
                     <i className="fas fa-fw fa-table"></i>
                     <span>KPI 관리</span></a>
             </li>
 
             <li className="nav-item">
-                <a className="nav-link" href="tables.html">
+                <a className="nav-link" href="/standard">
                     <i className="fas fa-fw fa-table"></i>
                     <span>기준정보 관리</span></a>
             </li>
 
             <li className="nav-item">
-                <a className="nav-link" href="tables.html">
+                <a className="nav-link" href="/system">
                     <i className="fas fa-fw fa-table"></i>
                     <span>시스템 관리</span></a>
             </li>

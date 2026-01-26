@@ -71,7 +71,7 @@ prev → 기존에 있던 입력값들
 
 const onEditChange = (e:React.ChangeEvent<any>) => {
     const {name, value} = e.target;
-    setCreateForm((prev) => ({...prev,[name]:value}));
+    setEditForm((prev) => ({...prev,[name]:value}));
 }
 
 //목록조회 (페이징)
@@ -148,7 +148,7 @@ createForm.qty || 0 qty가 비어있으면("", null, undefined) → 0으로 처�
 const unitPrice: number = Number(createForm.unitPrice) || 0;
 const amount = qty * unitPrice;
 
-await fetch(`${API_BASE}/api/purchase/materials`, {
+const res = await fetch(`${API_BASE}/api/purchase/materials`, {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ 
@@ -166,6 +166,13 @@ status:createForm.status || "대기",
 remark:createForm.remark || "",
   }),
 });
+
+if(!res.ok){
+  const raw = await res.text().catch(() => "");
+  alert(raw || "등록실패");
+  return;
+}
+
 setShowCreate(false);
 //현재 페이지 재조회
 fetchList(page);

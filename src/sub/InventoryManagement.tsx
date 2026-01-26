@@ -159,32 +159,47 @@ const InventoryManagement = () => {
 
   // ✅ 등록 저장
   const handleSave = async () => {
+//필수값 체크 (백앤드 @NotBlank 대응)
+if(!createForm.itemCode.trim()) return alert("품목코드는 필수 입니다");
+if(!createForm.itemName.trim()) return alert("품목명은 필수 입니다");
+if(!createForm.itemGroup.trim()) return alert("품목그룹은 필수 입니다");
+if(!createForm.warehouse.trim()) return alert("창고는 필수 입니다");
+if(!createForm.location.trim()) return alert("위치는 필수 입니다");
+if(!createForm.spec.trim()) return alert("규격은  필수 입니다");
+
     const stockQty = Number(createForm.stockQty || 0);
     const safetyStock = Number(createForm.safetyStock || 0);
     const inPrice = Number(createForm.inPrice || 0);
     const outPrice = Number(createForm.outPrice || 0);
 
+//add 백엔드 검증(@NotBlank, @Pattern) 규칙 
+//프론트에서 보내는 값(null/빈문자열)”**이 서로 안 맞아서
+//그 불일치를 맞추기 위한 데이터 정규화(정리)
+const payload = {
+  itemCode: createForm.itemCode.trim(),
+  itemName: createForm.itemName.trim(),
+
+  //notblank 필수 3종 세트 (null/""금지)
+  itemGroup:createForm.itemGroup.trim(),
+  spec:createForm.spec.trim(),
+  warehouse:createForm.warehouse.trim(),
+  location:createForm.location.trim(),
+  stockQty, safetyStock, inPrice, outPrice,
+  useYn : createForm.useYn || "Y",
+  remark : createForm.remark.trim() ? createForm.remark.trim():null,
+
+
+}
+
     const res = await fetch(`${API_BASE}/api/inventory/items`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        itemCode: createForm.itemCode,
-        itemName: createForm.itemName,
-        itemGroup: createForm.itemGroup || null,
-        spec: createForm.spec || null,
-        warehouse: createForm.warehouse || null,
-        location: createForm.location || null,
-        stockQty,
-        safetyStock,
-        inPrice,
-        outPrice,
-        useYn: createForm.useYn || "Y",
-        remark: createForm.remark || "",
-      }),
+      body: JSON.stringify(payload),
     });
 
     if (!res.ok) {
       const raw = await res.text().catch(() => "");
+      console.log("등록 실패 응답: ", raw);
       alert(raw || "등록 실패");
       return;
     }
@@ -239,25 +254,47 @@ const InventoryManagement = () => {
   const handleUpdate = async () => {
     if (!selected) return;
 
+    //필수값 체크
+    if(!editForm.itemCode.trim()) return alert("품목코드는 필수입니다");
+    if(!editForm.itemName.trim()) return alert("품목명은 필수입니다");
+    if(!editForm.itemGroup.trim()) return alert("품목그룹은 필수입니다");
+    if(!editForm.warehouse.trim()) return alert("창고는 필수입니다");
+    if(!editForm.location.trim()) return alert("위치는 필수입니다");
+    if(!editForm.spec.trim()) return alert("규격은 필수입니다");
+
     const stockQty = Number(editForm.stockQty || 0);
     const safetyStock = Number(editForm.safetyStock || 0);
     const inPrice = Number(editForm.inPrice || 0);
     const outPrice = Number(editForm.outPrice || 0);
 
+    const payload = {
+  itemCode: editForm.itemCode.trim(),
+  itemName: editForm.itemName.trim(),
+
+  //notblank 필수 3종 세트 (null/""금지)
+  itemGroup:editForm.itemGroup.trim(),
+  warehouse:editForm.warehouse.trim(),
+  location:editForm.location.trim(),
+
+  //선택값은 빈값이면 null
+  spec:editForm.spec.trim(),
+  stockQty, safetyStock, inPrice, outPrice,
+
+  useYn : editForm.useYn || "Y",
+  remark : editForm.remark.trim() ? editForm.remark.trim():null,
+
+
+}
+
     const res = await fetch(`${API_BASE}/api/inventory/items/${selected.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...editForm,
-        stockQty,
-        safetyStock,
-        inPrice,
-        outPrice,
-      }),
+      body: JSON.stringify(payload),
     });
 
     if (!res.ok) {
       const raw = await res.text().catch(() => "");
+      console.log("수정 실패 응답: ", raw);
       alert(raw || "수정 실패");
       return;
     }
@@ -286,6 +323,11 @@ const InventoryManagement = () => {
     setShowDetail(false);
     fetchList(page);
   };
+
+//필수값이 없으면 비활성화 되게
+const canSave = !!createForm.itemCode.trim() && !!createForm.itemName.trim() &&
+!!createForm.itemGroup.trim() && !!createForm.warehouse.trim() &&
+!!createForm.location.trim()
 
   return (
     <>
@@ -390,11 +432,11 @@ const InventoryManagement = () => {
             <Form.Control className="mb-2" name="itemCode" placeholder="품목코드" value={createForm.itemCode} onChange={onCreateChange} />
             <Form.Control className="mb-2" name="itemName" placeholder="품목명" value={createForm.itemName} onChange={onCreateChange} />
 
-            <Form.Control className="mb-2" name="itemGroup" placeholder="품목그룹" value={createForm.itemGroup} onChange={onCreateChange} />
+            <Form.Control className="mb-2" name="itemGroup" placeholder="품목그룹 *" value={createForm.itemGroup} onChange={onCreateChange} required/>
             <Form.Control className="mb-2" name="spec" placeholder="규격" value={createForm.spec} onChange={onCreateChange} />
 
-            <Form.Control className="mb-2" name="warehouse" placeholder="창고" value={createForm.warehouse} onChange={onCreateChange} />
-            <Form.Control className="mb-2" name="location" placeholder="위치" value={createForm.location} onChange={onCreateChange} />
+            <Form.Control className="mb-2" name="warehouse" placeholder="창고 *" value={createForm.warehouse} onChange={onCreateChange} required/>
+            <Form.Control className="mb-2" name="location" placeholder="위치 *" value={createForm.location} onChange={onCreateChange} required/>
 
             <Form.Control className="mb-2" type="number" name="stockQty" placeholder="현재고" value={createForm.stockQty} onChange={onCreateChange} />
             <Form.Control className="mb-2" type="number" name="safetyStock" placeholder="안전재고" value={createForm.safetyStock} onChange={onCreateChange} />
@@ -415,7 +457,7 @@ const InventoryManagement = () => {
           <Button variant="secondary" onClick={() => setShowCreate(false)}>
             닫기
           </Button>
-          <Button onClick={handleSave}>저장</Button>
+          <Button onClick={handleSave} disabled={!canSave}>저장</Button>
         </Modal.Footer>
       </Modal>
 
