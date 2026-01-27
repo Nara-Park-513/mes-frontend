@@ -8,10 +8,11 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import SalesManagement from './sub/SalesManagement';
 import ProductionManagement from './sub/ProductionManagement';
 import PurchaseMaterial from './sub/PurchaseMaterial';
-import InventoryManagement from './sub/InventoryManagement';
 import KpiManagement from './sub/KpiManagement';
-import StandardManagement from './sub/StandardManagement';
+import InventoryManagement from './sub/InventoryManagement';
+import StandardManagement from "./sub/StandardManagement"
 import SystemManagement from './sub/SystemManagement';
+import SearchPage from './sub/SearchPage';
 
 const App = () => {
 return (
@@ -33,6 +34,8 @@ return (
 <Route path="/" element={<Navigate to="/login" replace/>}/>
 <Route path="/forgot" element={<Forgot/>}/>
 <Route path="/reset" element={<Reset/>}/>
+<Route path="/search" element={<SearchPage />} />
+
 </Routes>
 </BrowserRouter>
 </>
