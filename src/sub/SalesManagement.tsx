@@ -412,9 +412,9 @@ const SalesManagement = () => {
             <Row>
               <Col>
                 <Ctap>
-                  <h5>영업관리</h5>
+                  <h5 className="mb-5">영업관리</h5>
 
-                  <DflexColumn2 className="mt-4 mb-3">
+                  <DflexColumn2 className="mb-5">
                     <Left>
                       <Dflex>
                         <Group>
@@ -472,7 +472,7 @@ const SalesManagement = () => {
 
                   <Tabs defaultActiveKey="orders" className="mb-3" fill>
                     <Tab eventKey="orders" title="수주관리">
-                      <Table responsive>
+                      <Table responsive className="mt-4">
                         <thead>
                           <tr>
                             <th className="bg-secondary text-white">#</th>
@@ -523,7 +523,6 @@ const SalesManagement = () => {
                           </tr>
                         </tfoot>
                       </Table>
-
                       <Center>
                         {totalPages > 1 && (
                           <>
