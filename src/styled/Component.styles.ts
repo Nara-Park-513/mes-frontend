@@ -37,6 +37,9 @@ display:flex;
 justify-content:center;
 align-items:center;
 flex-direction:column;
+
+margin-top: auto; 
+  padding: 20px 0;
 `;
 
 export const PageTotal = styled.div`

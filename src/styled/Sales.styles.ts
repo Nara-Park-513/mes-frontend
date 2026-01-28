@@ -20,9 +20,14 @@ export const Ctap = styled.div`
 border-top:1px solid #ccc;
 width:1660px;
 max-width:100%;
-height:100vh;
+height:90vh;
 background-color:white;
 padding:10px 20px;
 margin-top:-24px;
 overflow-x:hidden !important;
+
+/* ✅ 페이징 버튼 고정을 위해 추가 */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 `;
