@@ -3,12 +3,14 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import * as S from "../styled/Login.styles";
 import "@fortawesome/fontawesome-free/css/all.min.css";
+import SimpleModal from "../commons/SimpleModal";
 
 const Login = () => {
   // 초기화
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [rememberMe, setRememberMe] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
@@ -57,14 +59,17 @@ const Login = () => {
       window.dispatchEvent(new Event("storage"));
 
 
-      alert("로그인 성공");
+      setIsModalOpen(true);
 
-      // ✅ 2) window.location.href 말고 SPA 라우팅으로 이동
-      navigate("/admin", { replace: true });
     } catch (err) {
       console.error(err);
       alert("로그인 실패! 이메일 또는 비밀번호를 확인해 주세요");
     }
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false); // 모달 닫기
+    navigate("/admin", { replace: true }); // 메인 페이지로 이동
   };
 
   const handleGoogleLogin = () => {
@@ -141,6 +146,11 @@ const Login = () => {
           </S.Right>
       </S.Card>
     </S.Wrapper>
+    <SimpleModal 
+        open={isModalOpen} 
+        message={`${localStorage.getItem("lastName")}${localStorage.getItem("firstName")}님, 환영합니다!`} 
+        onClose={handleModalClose} 
+      />
     </>
   );
 };

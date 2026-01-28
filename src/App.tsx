@@ -12,7 +12,6 @@ import KpiManagement from './sub/KpiManagement';
 import InventoryManagement from './sub/InventoryManagement';
 import StandardManagement from "./sub/StandardManagement"
 import SystemManagement from './sub/SystemManagement';
-import SearchPage from './sub/SearchPage';
 
 const App = () => {
 return (
@@ -34,7 +33,6 @@ return (
 <Route path="/" element={<Navigate to="/login" replace/>}/>
 <Route path="/forgot" element={<Forgot/>}/>
 <Route path="/reset" element={<Reset/>}/>
-<Route path="/search" element={<SearchPage />} />
 
 </Routes>
 </BrowserRouter>
