@@ -44,10 +44,10 @@ const Home = () => {
 
                                         <hr/>
                                         <a href="" className="btn btn-google btn-user btn-block">
-                                            <i className="fab fa-google fa-fw"></i> Login with Google
+                                            <i className="fab fa-google fa-fw"></i> SSO Login
                                         </a>
                                         <a href="" className="btn btn-facebook btn-user btn-block">
-                                            <i className="fab fa-facebook-f fa-fw"></i> Login with Insta
+                                            <i className="fab fa-facebook-f fa-fw"></i> Company Account Login
                                         </a>
                                     </form>
                                     <hr/>
