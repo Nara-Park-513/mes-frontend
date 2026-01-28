@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import * as S from "../styled/Login.styles";
@@ -8,8 +8,17 @@ const Login = () => {
   // 초기화
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [rememberMe, setRememberMe] = useState<boolean>(false);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("rememberEmail");
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setRememberMe(true);
+    }
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -32,6 +41,12 @@ const Login = () => {
         alert("로그인 응답에 token이 없습니다. 백엔드 응답을 확인하세요!");
         console.log("login response:", res.data);
         return;
+      }
+
+      if (rememberMe) {
+        localStorage.setItem("rememberEmail", email);
+      } else {
+        localStorage.removeItem("rememberEmail");
       }
 
       // ✅ 1) 토큰 저장 (ProtectedRoute가 읽는 키 = "token" 맞춰야 함)
@@ -85,6 +100,8 @@ const Login = () => {
                             <input
                               type="checkbox"
                               id="remember"
+                              checked={rememberMe}
+                              onChange={(e) => setRememberMe(e.target.checked)}
                             />{" "}
                             <label htmlFor="remember">
                               Remember Me
