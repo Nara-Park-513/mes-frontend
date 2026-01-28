@@ -427,7 +427,7 @@ onClick={() => openDetail(r.id)}
             삭제
           </Button>
           <Button variant="success" onClick={handleUpdate}>
-            수정 저장
+            수정
           </Button>
         </Modal.Footer>
       </Modal>

@@ -440,7 +440,7 @@ onChange={(e) => setEditForm(prev =>({...prev, status:e.target.value}))}/>{/*여
 
 <Modal.Footer>
 <Button variant="danger" onClick={handleDelete}>삭제</Button>
-<Button variant="success" onClick={handleUpdate}>수정 저장</Button>
+<Button variant="success" onClick={handleUpdate}>수정</Button>
 </Modal.Footer>
 
 </Modal>

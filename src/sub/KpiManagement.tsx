@@ -282,15 +282,24 @@ const KpiManagement = () => {
               </Table>
 
               <Center>
-                <Pagination>
-                  <Pagination.Prev disabled={page === 0} onClick={() => goPage(page - 1)} />
-                  {Array.from({ length: totalPages }).map((_, i) => (
-                    <Pagination.Item key={i} active={i === page} onClick={() => goPage(i)}>
-                      {i + 1}
-                    </Pagination.Item>
-                  ))}
-                  <Pagination.Next disabled={page >= totalPages - 1} onClick={() => goPage(page + 1)} />
-                </Pagination>
+                    {totalPages > 0 && (
+                      <Pagination>
+                        <Pagination.First disabled={page === 0} onClick={() => goPage(0)} />
+                        <Pagination.Prev disabled={page === 0} onClick={() => goPage(page - 1)} />
+
+                        {Array.from({ length: totalPages })
+                          .map((_, i) => i)
+                          .filter((i) => i >= page - 2 && i <= page + 2)
+                          .map((i) => (
+                            <Pagination.Item key={i} active={i === page} onClick={() => goPage(i)}>
+                              {i + 1}
+                            </Pagination.Item>
+                          ))}
+
+                        <Pagination.Next disabled={page >= totalPages - 1} onClick={() => goPage(page + 1)} />
+                        <Pagination.Last disabled={page >= totalPages - 1} onClick={() => goPage(totalPages - 1)} />
+                      </Pagination>
+                    )}
                 <PageTotal>
                   총 {totalElements}건 / {page + 1}페이지
                 </PageTotal>
