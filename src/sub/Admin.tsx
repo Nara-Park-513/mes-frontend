@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Lnb from "../include/Lnb";
 import Top from "../include/Top";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // 🔹 ProgressBar 인터페이스 정의
 interface ProgressBarProps {
@@ -33,6 +34,24 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
 
 //🔹 App 컴포넌트
 const Admin: React.FC = () => {
+
+const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    // URL 뒤에 붙은 파라미터(예: ?token=...)를 가져옵니다.
+    const params = new URLSearchParams(location.search);
+    const token = params.get("token");
+
+    if (token) {
+      // 1. 토큰이 있다면 브라우저에 저장합니다.
+      localStorage.setItem("accessToken", token);
+      // 2. 주소창을 깔끔하게 만들기 위해 파라미터를 지우고 /admin으로 리다이렉트합니다.
+      navigate("/admin", { replace: true });
+      console.log("구글 로그인 성공 및 토큰 저장 완료!");
+    }
+  }, [location, navigate]);
+
   return (
     <>
        {/*  Page Wrapper */}

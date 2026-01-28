@@ -294,8 +294,8 @@ const StandardManagement = () => {
         </Modal.Header>
         <Modal.Body>
           <Form>
-            <Form.Control className="mb-2" name="stdCode" placeholder="기준코드" value={createForm.stdCode} onChange={onCreateChange} />
-            <Form.Control className="mb-2" name="stdName" placeholder="기준명" value={createForm.stdName} onChange={onCreateChange} />
+            <Form.Control className="mb-2" name="stdCode" placeholder="기준코드 (품목 기준)" value={createForm.stdCode} onChange={onCreateChange} />
+            <Form.Control className="mb-2" name="stdName" placeholder="기준명 (품목 기준)" value={createForm.stdName} onChange={onCreateChange} />
             <Form.Control className="mb-2" name="stdGroup" placeholder="그룹" value={createForm.stdGroup} onChange={onCreateChange} />
             {/* ✅ FIX */}
             <Form.Control className="mb-2" name="unit" placeholder="단위" value={createForm.unit} onChange={onCreateChange} />
