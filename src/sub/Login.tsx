@@ -52,6 +52,11 @@ const Login = () => {
     }
   };
 
+  const handleGoogleLogin = () => {
+  // 백엔드(Spring Boot)의 OAuth2 인증 시작 경로로 이동
+  window.location.href = "http://localhost:9500/oauth2/authorization/google";
+};
+
   return (
     <>
     <S.Wrapper>
@@ -91,7 +96,11 @@ const Login = () => {
                         </S.Button>
 
                         <S.Divider/>
-                          <S.SocialButton variant="google">
+                          <S.SocialButton 
+                            variant="google" 
+                            type="button"  // ⬅️ 중요: submit이 아닌 일반 버튼으로 지정
+                            onClick={handleGoogleLogin} // ⬅️ 클릭 이벤트 연결
+                          >
                             <i className="fab fa-google"/>
                             Login with Google
                           </S.SocialButton>
