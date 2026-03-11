@@ -157,6 +157,14 @@ const Lnb = () => {
           </a>
         </li>
 
+        {/* Nav Item - 시스템 */}
+        <li className="nav-item">
+          <a className="nav-link" href="/quality">
+            <i className="fas fa-fw fa-table" />
+            <span>품질 관리</span>
+          </a>
+        </li>
+
         <Divider className="sidebar-divider d-none d-md-block" />
 
         {/* Sidebar Toggler */}

@@ -11,7 +11,8 @@ import PurchaseMaterial from './sub/PurchaseMaterial';
 import KpiManagement from './sub/KpiManagement';
 import InventoryManagement from './sub/InventoryManagement';
 import StandardManagement from "./sub/StandardManagement"
-import SystemManagement from './sub/SystemManagement';
+import SystemManagement from './sub/Systemmanagement';
+import QualityManagement from './sub/QualityManagement';
 
 const App = () => {
 return (
@@ -33,6 +34,7 @@ return (
 <Route path="/" element={<Navigate to="/login" replace/>}/>
 <Route path="/forgot" element={<Forgot/>}/>
 <Route path="/reset" element={<Reset/>}/>
+<Route path="/quality" element={<QualityManagement/>}/>
 
 </Routes>
 </BrowserRouter>
