@@ -29,7 +29,7 @@ export const Ctap = styled.div`
   border-top: 1px solid #ccc;
   width: 1660px;
   max-width: 100%;
-  height: 90vh; /* 고정 높이는 유지 */
+  height: 92vh; /* 고정 높이는 유지 */
   background-color: white;
   padding: 20px; /* 상단 패딩 제거 */
   margin-top: -24px;

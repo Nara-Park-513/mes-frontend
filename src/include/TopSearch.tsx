@@ -51,7 +51,17 @@ export default function TopSearch() {
   const navigate = useNavigate();
 
   const [keyword, setKeyword] = useState("");
-  const [type, setType] = useState<"all" | "inventory" | "kpi" | "member" | "production" | "purchase" | "sales" | "standard" | "system">("all");
+  const [type, setType] = useState<
+    | "all"
+    | "inventory"
+    | "kpi"
+    | "member"
+    | "production"
+    | "purchase"
+    | "sales"
+    | "standard"
+    | "system"
+  >("all");
 
   const [loading, setLoading] = useState(false);
   const [hits, setHits] = useState<SearchHit[]>([]);
@@ -129,42 +139,50 @@ export default function TopSearch() {
         onSubmit={onSubmit}
         className="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search"
       >
-        <div className="input-group">
-          {/* (선택) type 필터 */}
-          <div className="input-group-prepend">
-            <select
-              className="custom-select bg-light border-0 small"
-              value={type}
-              onChange={(e) => setType(e.target.value as any)}
-              style={{ maxWidth: 140 }}
-            >
-              <option value="all">전체</option>
-              <option value="inventory">재고</option>
-              <option value="kpi">KPI</option>
-              <option value="sales">영업</option>
-              <option value="production">생산</option>
-              <option value="purchase">구매</option>
-              <option value="standard">기준</option>
-              <option value="system">시스템</option>
-              <option value="member">회원</option>
-            </select>
-          </div>
+        <div className="d-flex align-items-center" style={{ width: "100%" }}>
+          {/* type 필터 */}
+          <select
+            className="custom-select bg-light border-0 small"
+            value={type}
+            onChange={(e) => setType(e.target.value as any)}
+            style={{
+              maxWidth: 140,
+              marginRight: "10px",
+              borderRadius: "0.35rem",
+            }}
+          >
+            <option value="all">전체</option>
+            <option value="inventory">재고</option>
+            <option value="kpi">KPI</option>
+            <option value="sales">영업</option>
+            <option value="production">생산</option>
+            <option value="purchase">구매</option>
+            <option value="standard">기준</option>
+            <option value="system">시스템</option>
+            <option value="member">회원</option>
+          </select>
 
-          <input
-            type="text"
-            className="form-control bg-light border-0 small"
-            placeholder="Search for..."
-            aria-label="Search"
-            aria-describedby="basic-addon2"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            onFocus={() => keyword.trim() && setOpen(true)}
-          />
+          <div className="input-group">
+            <input
+              type="text"
+              className="form-control bg-light border-0 small"
+              placeholder="Search for..."
+              aria-label="Search"
+              aria-describedby="basic-addon2"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              onFocus={() => keyword.trim() && setOpen(true)}
+            />
 
-          <div className="input-group-append">
-            <button className="btn btn-primary" type="submit" disabled={loading}>
-              <i className="fas fa-search fa-sm"></i>
-            </button>
+            <div className="input-group-append">
+              <button
+                className="btn btn-primary"
+                type="submit"
+                disabled={loading}
+              >
+                <i className="fas fa-search fa-sm"></i>
+              </button>
+            </div>
           </div>
         </div>
       </form>
@@ -186,7 +204,9 @@ export default function TopSearch() {
           )}
 
           {!loading && hits.length === 0 && (
-            <div className="dropdown-item text-muted">검색 결과가 없습니다.</div>
+            <div className="dropdown-item text-muted">
+              검색 결과가 없습니다.
+            </div>
           )}
 
           {!loading &&
@@ -199,10 +219,14 @@ export default function TopSearch() {
               >
                 <div className="d-flex justify-content-between">
                   <strong>{h.title || "(제목없음)"}</strong>
-                  <span className="badge badge-light text-uppercase">{h.type}</span>
+                  <span className="badge badge-light text-uppercase">
+                    {h.type}
+                  </span>
                 </div>
                 <div className="small text-muted">{h.sub}</div>
-                {h.extra ? <div className="small text-muted">{h.extra}</div> : null}
+                {h.extra ? (
+                  <div className="small text-muted">{h.extra}</div>
+                ) : null}
               </button>
             ))}
         </div>

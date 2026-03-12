@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import Lnb from "../include/Lnb";
 import Top from "../include/Top";
 
-import { Wrapper, DflexColumn, Content, Ctap } from "../styled/Sales.styles";
-import { SpaceBetween, Center, Dflex, PageTotal } from "../styled/Component.styles";
+import { Wrapper, DflexColumn, Content, Ctap, DflexColumn2 } from "../styled/Sales.styles";
+import { Center, PageTotal } from "../styled/Component.styles";
 
 import { Container, Row, Col, Table, Button, Modal, Form, Pagination } from "react-bootstrap";
 
@@ -235,83 +235,329 @@ const KpiManagement = () => {
             <Top />
           </Content>
 
-          <Container fluid>
-            <Ctap>
-              <SpaceBetween>
-                <h4>KPI관리</h4>
-                <Dflex>
-                  <Button className="mx-2" onClick={handleExcelDownload}>
-                    엑셀다운로드
-                  </Button>
-                  <Button onClick={() => setShowCreate(true)}>KPI등록</Button>
-                </Dflex>
-              </SpaceBetween>
+          <Container fluid className="p-0">
+            <Row className="g-0 m-0">
+              <Col className="p-0">
+                <Ctap
+                  style={{
+                    background: "#fff",
+                    padding: "24px 28px",
+                    border: "1px solid #e5e7eb",
+                  }}
+                >
+                  <div
+                    style={{
+                      paddingBottom: "16px",
+                      marginBottom: "20px",
+                      borderBottom: "1px solid #e5e7eb",
+                    }}
+                  >
+                    <h4
+                      className="mb-0"
+                      style={{
+                        fontWeight: 700,
+                        color: "#111827",
+                      }}
+                    >
+                      KPI관리
+                    </h4>
+                  </div>
 
-              <Table bordered hover>
-                <thead>
-                  <tr className="text-center">
-                    <th>#</th>
-                    {TABLE_HEADERS.map((h) => (
-                      <th key={h.key as string}>{h.label}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((r, i) => (
-                    <tr key={r.id} className="text-center">
-                      <td>{i + 1 + page * size}</td>
-                      <td
-                        style={{ cursor: "pointer", textDecoration: "underline" }}
-                        onClick={() => openDetail(r.id)}
+                  <DflexColumn2
+                    className="mb-4"
+                    style={{
+                      border: "1px solid #e5e7eb",
+                      padding: "16px 20px",
+                      background: "#f9fafb",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "100%",
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        alignItems: "center",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "flex-end",
+                          alignItems: "center",
+                          gap: "12px",
+                          flexWrap: "nowrap",
+                        }}
                       >
-                        {r.kpiName}
-                      </td>
-                      <td>{r.kpiGroup}</td>
-                      <td>{r.owner}</td>
-                      <td>{r.periodType}</td>
-                      <td>{r.periodValue}</td>
-                      <td>{r.targetValue}</td>
-                      <td>{r.actualValue}</td>
-                      <td>{r.unit}</td>
-                      <td>{r.status}</td>
-                      <td>{r.useYn}</td>
-                      <td>{r.remark}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
+                        <Button
+                          onClick={handleExcelDownload}
+                          variant="success"
+                          style={{
+                            height: "44px",
+                            minWidth: "120px",
+                            borderRadius: "6px",
+                            fontWeight: 600,
+                            margin: 0,
+                          }}
+                        >
+                          엑셀 다운
+                        </Button>
 
-              <Center>
-                    {totalPages > 0 && (
-                      <Pagination>
-                        <Pagination.First disabled={page === 0} onClick={() => goPage(0)} />
-                        <Pagination.Prev disabled={page === 0} onClick={() => goPage(page - 1)} />
+                        <Button
+                          onClick={() => setShowCreate(true)}
+                          style={{
+                            height: "44px",
+                            minWidth: "120px",
+                            borderRadius: "6px",
+                            fontWeight: 600,
+                            margin: 0,
+                          }}
+                        >
+                          KPI 등록
+                        </Button>
+                      </div>
+                    </div>
+                  </DflexColumn2>
 
-                        {Array.from({ length: totalPages })
-                          .map((_, i) => i)
-                          .filter((i) => i >= page - 2 && i <= page + 2)
-                          .map((i) => (
-                            <Pagination.Item key={i} active={i === page} onClick={() => goPage(i)}>
-                              {i + 1}
-                            </Pagination.Item>
+                  <div
+                    style={{
+                      background: "#fff",
+                      border: "1px solid #e5e7eb",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <div style={{ padding: "12px 12px 0 12px" }}>
+                      <Table responsive className="mt-3 mb-0 align-middle">
+                        <thead>
+                          <tr className="text-center">
+                            <th
+                              className="bg-secondary text-white"
+                              style={{
+                                whiteSpace: "nowrap",
+                                padding: "14px 12px",
+                                fontSize: "14px",
+                                fontWeight: 700,
+                                borderBottom: "none",
+                              }}
+                            >
+                              #
+                            </th>
+                            {TABLE_HEADERS.map((h) => (
+                              <th
+                                key={h.key as string}
+                                className="bg-secondary text-white"
+                                style={{
+                                  whiteSpace: "nowrap",
+                                  padding: "14px 12px",
+                                  fontSize: "14px",
+                                  fontWeight: 700,
+                                  borderBottom: "none",
+                                }}
+                              >
+                                {h.label}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          {rows.map((r, i) => (
+                            <tr key={r.id} className="text-center">
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#475569",
+                                  fontWeight: 600,
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {i + 1 + page * size}
+                              </td>
+
+                              <td
+                                style={{
+                                  cursor: "pointer",
+                                  textDecoration: "underline",
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#0d6efd",
+                                  fontWeight: 600,
+                                  whiteSpace: "nowrap",
+                                }}
+                                onClick={() => openDetail(r.id)}
+                              >
+                                {r.kpiName}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.kpiGroup}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.owner}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.periodType}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.periodValue}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.targetValue}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.actualValue}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.unit}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.status}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.useYn}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.remark}
+                              </td>
+                            </tr>
                           ))}
+                        </tbody>
+                      </Table>
 
-                        <Pagination.Next disabled={page >= totalPages - 1} onClick={() => goPage(page + 1)} />
-                        <Pagination.Last disabled={page >= totalPages - 1} onClick={() => goPage(totalPages - 1)} />
-                      </Pagination>
-                    )}
-                <PageTotal>
-                  총 {totalElements}건 / {page + 1}페이지
-                </PageTotal>
-              </Center>
-            </Ctap>
+                      <Center
+                        style={{
+                          marginTop: "16px",
+                          paddingTop: "16px",
+                          borderTop: "1px solid #e5e7eb",
+                          flexDirection: "column",
+                          gap: "10px",
+                        }}
+                      >
+                        {totalPages > 0 && (
+                          <Pagination className="mb-0">
+                            <Pagination.First disabled={page === 0} onClick={() => goPage(0)} />
+                            <Pagination.Prev disabled={page === 0} onClick={() => goPage(page - 1)} />
+
+                            {Array.from({ length: totalPages })
+                              .map((_, i) => i)
+                              .filter((i) => i >= page - 2 && i <= page + 2)
+                              .map((i) => (
+                                <Pagination.Item key={i} active={i === page} onClick={() => goPage(i)}>
+                                  {i + 1}
+                                </Pagination.Item>
+                              ))}
+
+                            <Pagination.Next disabled={page >= totalPages - 1} onClick={() => goPage(page + 1)} />
+                            <Pagination.Last
+                              disabled={page >= totalPages - 1}
+                              onClick={() => goPage(totalPages - 1)}
+                            />
+                          </Pagination>
+                        )}
+
+                        <PageTotal
+                          style={{
+                            color: "#64748b",
+                            fontWeight: 600,
+                            marginBottom: "4px",
+                          }}
+                        >
+                          총 {totalElements}건 / {page + 1}페이지
+                        </PageTotal>
+                      </Center>
+                    </div>
+                  </div>
+                </Ctap>
+              </Col>
+            </Row>
           </Container>
         </DflexColumn>
       </Wrapper>
 
       {/* 등록 모달 */}
       <Modal show={showCreate} onHide={() => setShowCreate(false)} centered>
-        <Modal.Header closeButton />
+        <Modal.Header closeButton>
+          <Modal.Title>KPI 등록</Modal.Title>
+        </Modal.Header>
         <Modal.Body>
           <Form>
             {Object.entries(createForm).map(([k, v]) => (
@@ -327,12 +573,18 @@ const KpiManagement = () => {
           </Form>
         </Modal.Body>
         <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowCreate(false)}>
+            닫기
+          </Button>
           <Button onClick={handleSave}>저장</Button>
         </Modal.Footer>
       </Modal>
 
       {/* 상세 모달 */}
       <Modal show={showDetail} onHide={() => setShowDetail(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>KPI 상세</Modal.Title>
+        </Modal.Header>
         <Modal.Body>
           <Form>
             {Object.entries(editForm).map(([k, v]) => (

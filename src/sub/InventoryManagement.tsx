@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import Lnb from "../include/Lnb";
 import Top from "../include/Top";
-import { Wrapper, DflexColumn, Content, Ctap } from "../styled/Sales.styles";
-import { SpaceBetween, Center, Dflex, PageTotal } from "../styled/Component.styles";
+import { Wrapper, DflexColumn, Content, Ctap, DflexColumn2 } from "../styled/Sales.styles";
+import { Center, PageTotal } from "../styled/Component.styles";
 import { Container, Row, Col, Table, Button, Modal, Form, Pagination } from "react-bootstrap";
 
 import * as XLSX from "xlsx";
@@ -15,17 +15,17 @@ type InventoryItem = {
   id: number;
   itemCode: string;
   itemName: string;
-  itemGroup?: string;      // 품목그룹
-  spec?: string;           // 규격
-  warehouse?: string;      // 창고
-  location?: string;       // 위치
-  stockQty: number;        // 현재고
-  safetyStock?: number;    // 안전재고
-  inPrice?: number;        // 입고단가(평균/기준)
-  outPrice?: number;       // 출고단가(판매가)
-  useYn: "Y" | "N";        // 사용여부
-  remark?: string;         // 비고
-  updatedAt?: string;      // 최종수정일(있으면 표시)
+  itemGroup?: string;
+  spec?: string;
+  warehouse?: string;
+  location?: string;
+  stockQty: number;
+  safetyStock?: number;
+  inPrice?: number;
+  outPrice?: number;
+  useYn: "Y" | "N";
+  remark?: string;
+  updatedAt?: string;
 };
 
 type PageResponse<T> = {
@@ -98,7 +98,6 @@ const InventoryManagement = () => {
     setCreateForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ (중요) 네 코드에 버그 있었던 부분: setCreateForm ❌ → setEditForm ✅
   const onEditChange = (e: React.ChangeEvent<any>) => {
     const { name, value } = e.target;
     setEditForm((prev) => ({ ...prev, [name]: value }));
@@ -159,37 +158,32 @@ const InventoryManagement = () => {
 
   // ✅ 등록 저장
   const handleSave = async () => {
-//필수값 체크 (백앤드 @NotBlank 대응)
-if(!createForm.itemCode.trim()) return alert("품목코드는 필수 입니다");
-if(!createForm.itemName.trim()) return alert("품목명은 필수 입니다");
-if(!createForm.itemGroup.trim()) return alert("품목그룹은 필수 입니다");
-if(!createForm.warehouse.trim()) return alert("창고는 필수 입니다");
-if(!createForm.location.trim()) return alert("위치는 필수 입니다");
-if(!createForm.spec.trim()) return alert("규격은  필수 입니다");
+    if (!createForm.itemCode.trim()) return alert("품목코드는 필수 입니다");
+    if (!createForm.itemName.trim()) return alert("품목명은 필수 입니다");
+    if (!createForm.itemGroup.trim()) return alert("품목그룹은 필수 입니다");
+    if (!createForm.warehouse.trim()) return alert("창고는 필수 입니다");
+    if (!createForm.location.trim()) return alert("위치는 필수 입니다");
+    if (!createForm.spec.trim()) return alert("규격은  필수 입니다");
 
     const stockQty = Number(createForm.stockQty || 0);
     const safetyStock = Number(createForm.safetyStock || 0);
     const inPrice = Number(createForm.inPrice || 0);
     const outPrice = Number(createForm.outPrice || 0);
 
-//add 백엔드 검증(@NotBlank, @Pattern) 규칙 
-//프론트에서 보내는 값(null/빈문자열)”**이 서로 안 맞아서
-//그 불일치를 맞추기 위한 데이터 정규화(정리)
-const payload = {
-  itemCode: createForm.itemCode.trim(),
-  itemName: createForm.itemName.trim(),
-
-  //notblank 필수 3종 세트 (null/""금지)
-  itemGroup:createForm.itemGroup.trim(),
-  spec:createForm.spec.trim(),
-  warehouse:createForm.warehouse.trim(),
-  location:createForm.location.trim(),
-  stockQty, safetyStock, inPrice, outPrice,
-  useYn : createForm.useYn || "Y",
-  remark : createForm.remark.trim() ? createForm.remark.trim():null,
-
-
-}
+    const payload = {
+      itemCode: createForm.itemCode.trim(),
+      itemName: createForm.itemName.trim(),
+      itemGroup: createForm.itemGroup.trim(),
+      spec: createForm.spec.trim(),
+      warehouse: createForm.warehouse.trim(),
+      location: createForm.location.trim(),
+      stockQty,
+      safetyStock,
+      inPrice,
+      outPrice,
+      useYn: createForm.useYn || "Y",
+      remark: createForm.remark.trim() ? createForm.remark.trim() : null,
+    };
 
     const res = await fetch(`${API_BASE}/api/inventory/items`, {
       method: "POST",
@@ -207,7 +201,6 @@ const payload = {
     setShowCreate(false);
     fetchList(page);
 
-    // 폼 초기화
     setCreateForm({
       itemCode: "",
       itemName: "",
@@ -254,13 +247,12 @@ const payload = {
   const handleUpdate = async () => {
     if (!selected) return;
 
-    //필수값 체크
-    if(!editForm.itemCode.trim()) return alert("품목코드는 필수입니다");
-    if(!editForm.itemName.trim()) return alert("품목명은 필수입니다");
-    if(!editForm.itemGroup.trim()) return alert("품목그룹은 필수입니다");
-    if(!editForm.warehouse.trim()) return alert("창고는 필수입니다");
-    if(!editForm.location.trim()) return alert("위치는 필수입니다");
-    if(!editForm.spec.trim()) return alert("규격은 필수입니다");
+    if (!editForm.itemCode.trim()) return alert("품목코드는 필수입니다");
+    if (!editForm.itemName.trim()) return alert("품목명은 필수입니다");
+    if (!editForm.itemGroup.trim()) return alert("품목그룹은 필수입니다");
+    if (!editForm.warehouse.trim()) return alert("창고는 필수입니다");
+    if (!editForm.location.trim()) return alert("위치는 필수입니다");
+    if (!editForm.spec.trim()) return alert("규격은 필수입니다");
 
     const stockQty = Number(editForm.stockQty || 0);
     const safetyStock = Number(editForm.safetyStock || 0);
@@ -268,23 +260,19 @@ const payload = {
     const outPrice = Number(editForm.outPrice || 0);
 
     const payload = {
-  itemCode: editForm.itemCode.trim(),
-  itemName: editForm.itemName.trim(),
-
-  //notblank 필수 3종 세트 (null/""금지)
-  itemGroup:editForm.itemGroup.trim(),
-  warehouse:editForm.warehouse.trim(),
-  location:editForm.location.trim(),
-
-  //선택값은 빈값이면 null
-  spec:editForm.spec.trim(),
-  stockQty, safetyStock, inPrice, outPrice,
-
-  useYn : editForm.useYn || "Y",
-  remark : editForm.remark.trim() ? editForm.remark.trim():null,
-
-
-}
+      itemCode: editForm.itemCode.trim(),
+      itemName: editForm.itemName.trim(),
+      itemGroup: editForm.itemGroup.trim(),
+      warehouse: editForm.warehouse.trim(),
+      location: editForm.location.trim(),
+      spec: editForm.spec.trim(),
+      stockQty,
+      safetyStock,
+      inPrice,
+      outPrice,
+      useYn: editForm.useYn || "Y",
+      remark: editForm.remark.trim() ? editForm.remark.trim() : null,
+    };
 
     const res = await fetch(`${API_BASE}/api/inventory/items/${selected.id}`, {
       method: "PUT",
@@ -324,10 +312,12 @@ const payload = {
     fetchList(page);
   };
 
-//필수값이 없으면 비활성화 되게
-const canSave = !!createForm.itemCode.trim() && !!createForm.itemName.trim() &&
-!!createForm.itemGroup.trim() && !!createForm.warehouse.trim() &&
-!!createForm.location.trim()
+  const canSave =
+    !!createForm.itemCode.trim() &&
+    !!createForm.itemName.trim() &&
+    !!createForm.itemGroup.trim() &&
+    !!createForm.warehouse.trim() &&
+    !!createForm.location.trim();
 
   return (
     <>
@@ -339,81 +329,330 @@ const canSave = !!createForm.itemCode.trim() && !!createForm.itemName.trim() &&
           </Content>
 
           <Container fluid className="p-0">
-            <Row>
-              <Col>
-                <Ctap>
-                  <SpaceBetween>
-                    <h4>재고관리</h4>
-                    <Dflex>
-                      <Button className="mx-2 my-3" onClick={handleExcelDownload} variant="success">
-                        엑셀다운로드
-                      </Button>
-                      <Button className="my-3" onClick={() => setShowCreate(true)}>
-                        재고등록
-                      </Button>
-                    </Dflex>
-                  </SpaceBetween>
+            <Row className="g-0 m-0">
+              <Col className="p-0">
+                <Ctap
+                  style={{
+                    background: "#fff",
+                    padding: "24px 28px",
+                    border: "1px solid #e5e7eb",
+                  }}
+                >
+                  <div
+                    style={{
+                      paddingBottom: "16px",
+                      marginBottom: "20px",
+                      borderBottom: "1px solid #e5e7eb",
+                    }}
+                  >
+                    <h4
+                      className="mb-0"
+                      style={{
+                        fontWeight: 700,
+                        color: "#111827",
+                      }}
+                    >
+                      재고관리
+                    </h4>
+                  </div>
 
-                  <Table bordered hover>
-                    <thead>
-                      <tr className="text-center">
-                        <th>#</th>
-                        {TABLE_HEADERS.map((h) => (
-                          <th key={h.key as string}>{h.label}</th>
-                        ))}
-                      </tr>
-                    </thead>
+                  <DflexColumn2
+                    className="mb-4"
+                    style={{
+                      border: "1px solid #e5e7eb",
+                      padding: "16px 20px",
+                      background: "#f9fafb",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "100%",
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        alignItems: "center",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "flex-end",
+                          alignItems: "center",
+                          gap: "12px",
+                          flexWrap: "nowrap",
+                        }}
+                      >
+                        <Button
+                          onClick={handleExcelDownload}
+                          variant="success"
+                          style={{
+                            height: "44px",
+                            minWidth: "120px",
+                            borderRadius: "6px",
+                            fontWeight: 600,
+                            margin: 0,
+                          }}
+                        >
+                          엑셀 다운
+                        </Button>
 
-                    <tbody>
-                      {(rows || []).map((r, i) => (
-                        <tr key={r.id ?? i} className="text-center">
-                          <td>{i + 1 + page * size}</td>
+                        <Button
+                          onClick={() => setShowCreate(true)}
+                          style={{
+                            height: "44px",
+                            minWidth: "120px",
+                            borderRadius: "6px",
+                            fontWeight: 600,
+                            margin: 0,
+                          }}
+                        >
+                          재고 등록
+                        </Button>
+                      </div>
+                    </div>
+                  </DflexColumn2>
 
-                          <td>{r.itemCode}</td>
+                  <div
+                    style={{
+                      background: "#fff",
+                      border: "1px solid #e5e7eb",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <div style={{ padding: "12px 12px 0 12px" }}>
+                      <Table responsive className="mt-3 mb-0 align-middle">
+                        <thead>
+                          <tr className="text-center">
+                            <th
+                              className="bg-secondary text-white"
+                              style={{
+                                whiteSpace: "nowrap",
+                                padding: "14px 12px",
+                                fontSize: "14px",
+                                fontWeight: 700,
+                                borderBottom: "none",
+                              }}
+                            >
+                              #
+                            </th>
+                            {TABLE_HEADERS.map((h) => (
+                              <th
+                                key={h.key as string}
+                                className="bg-secondary text-white"
+                                style={{
+                                  whiteSpace: "nowrap",
+                                  padding: "14px 12px",
+                                  fontSize: "14px",
+                                  fontWeight: 700,
+                                  borderBottom: "none",
+                                }}
+                              >
+                                {h.label}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
 
-                          <td style={{ cursor: "pointer", textDecoration: "underline" }} onClick={() => openDetail(r.id)}>
-                            {r.itemName}
-                          </td>
+                        <tbody>
+                          {(rows || []).map((r, i) => (
+                            <tr key={r.id ?? i} className="text-center">
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#475569",
+                                  fontWeight: 600,
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {i + 1 + page * size}
+                              </td>
 
-                          <td>{r.itemGroup ?? ""}</td>
-                          <td>{r.spec ?? ""}</td>
-                          <td>{r.warehouse ?? ""}</td>
-                          <td>{r.location ?? ""}</td>
-                          <td>{r.stockQty}</td>
-                          <td>{r.safetyStock ?? 0}</td>
-                          <td>{r.inPrice ?? 0}</td>
-                          <td>{r.outPrice ?? 0}</td>
-                          <td>{r.useYn}</td>
-                          <td>{r.remark ?? ""}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.itemCode}
+                              </td>
 
-                  <Center>
-                    {totalPages > 0 && (
-                      <Pagination>
-                        <Pagination.First disabled={page === 0} onClick={() => goPage(0)} />
-                        <Pagination.Prev disabled={page === 0} onClick={() => goPage(page - 1)} />
+                              <td
+                                style={{
+                                  cursor: "pointer",
+                                  textDecoration: "underline",
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#0d6efd",
+                                  fontWeight: 600,
+                                  whiteSpace: "nowrap",
+                                }}
+                                onClick={() => openDetail(r.id)}
+                              >
+                                {r.itemName}
+                              </td>
 
-                        {Array.from({ length: totalPages })
-                          .map((_, i) => i)
-                          .filter((i) => i >= page - 2 && i <= page + 2)
-                          .map((i) => (
-                            <Pagination.Item key={i} active={i === page} onClick={() => goPage(i)}>
-                              {i + 1}
-                            </Pagination.Item>
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.itemGroup ?? ""}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.spec ?? ""}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.warehouse ?? ""}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.location ?? ""}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.stockQty}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.safetyStock ?? 0}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.inPrice ?? 0}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.outPrice ?? 0}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.useYn}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.remark ?? ""}
+                              </td>
+                            </tr>
                           ))}
+                        </tbody>
+                      </Table>
 
-                        <Pagination.Next disabled={page >= totalPages - 1} onClick={() => goPage(page + 1)} />
-                        <Pagination.Last disabled={page >= totalPages - 1} onClick={() => goPage(totalPages - 1)} />
-                      </Pagination>
-                    )}
+                      <Center
+                        style={{
+                          marginTop: "16px",
+                          paddingTop: "16px",
+                          borderTop: "1px solid #e5e7eb",
+                          flexDirection: "column",
+                          gap: "10px",
+                        }}
+                      >
+                        {totalPages > 0 && (
+                          <Pagination className="mb-0">
+                            <Pagination.First disabled={page === 0} onClick={() => goPage(0)} />
+                            <Pagination.Prev disabled={page === 0} onClick={() => goPage(page - 1)} />
 
-                    <PageTotal>
-                      총{totalElements}건 {page + 1} / {totalPages || 1} 페이지
-                    </PageTotal>
-                  </Center>
+                            {Array.from({ length: totalPages })
+                              .map((_, i) => i)
+                              .filter((i) => i >= page - 2 && i <= page + 2)
+                              .map((i) => (
+                                <Pagination.Item key={i} active={i === page} onClick={() => goPage(i)}>
+                                  {i + 1}
+                                </Pagination.Item>
+                              ))}
+
+                            <Pagination.Next
+                              disabled={page >= totalPages - 1}
+                              onClick={() => goPage(page + 1)}
+                            />
+                            <Pagination.Last
+                              disabled={page >= totalPages - 1}
+                              onClick={() => goPage(totalPages - 1)}
+                            />
+                          </Pagination>
+                        )}
+
+                        <PageTotal
+                          style={{
+                            color: "#64748b",
+                            fontWeight: 600,
+                            marginBottom: "4px",
+                          }}
+                        >
+                          총{totalElements}건 {page + 1} / {totalPages || 1} 페이지
+                        </PageTotal>
+                      </Center>
+                    </div>
+                  </div>
                 </Ctap>
               </Col>
             </Row>
@@ -429,27 +668,100 @@ const canSave = !!createForm.itemCode.trim() && !!createForm.itemName.trim() &&
 
         <Modal.Body>
           <Form>
-            <Form.Control className="mb-2" name="itemCode" placeholder="품목코드" value={createForm.itemCode} onChange={onCreateChange} />
-            <Form.Control className="mb-2" name="itemName" placeholder="품목명" value={createForm.itemName} onChange={onCreateChange} />
+            <Form.Control
+              className="mb-2"
+              name="itemCode"
+              placeholder="품목코드"
+              value={createForm.itemCode}
+              onChange={onCreateChange}
+            />
+            <Form.Control
+              className="mb-2"
+              name="itemName"
+              placeholder="품목명"
+              value={createForm.itemName}
+              onChange={onCreateChange}
+            />
 
-            <Form.Control className="mb-2" name="itemGroup" placeholder="품목그룹 *" value={createForm.itemGroup} onChange={onCreateChange} required/>
-            <Form.Control className="mb-2" name="spec" placeholder="규격" value={createForm.spec} onChange={onCreateChange} />
+            <Form.Control
+              className="mb-2"
+              name="itemGroup"
+              placeholder="품목그룹 *"
+              value={createForm.itemGroup}
+              onChange={onCreateChange}
+              required
+            />
+            <Form.Control
+              className="mb-2"
+              name="spec"
+              placeholder="규격"
+              value={createForm.spec}
+              onChange={onCreateChange}
+            />
 
-            <Form.Control className="mb-2" name="warehouse" placeholder="창고 *" value={createForm.warehouse} onChange={onCreateChange} required/>
-            <Form.Control className="mb-2" name="location" placeholder="위치 *" value={createForm.location} onChange={onCreateChange} required/>
+            <Form.Control
+              className="mb-2"
+              name="warehouse"
+              placeholder="창고 *"
+              value={createForm.warehouse}
+              onChange={onCreateChange}
+              required
+            />
+            <Form.Control
+              className="mb-2"
+              name="location"
+              placeholder="위치 *"
+              value={createForm.location}
+              onChange={onCreateChange}
+              required
+            />
 
-            <Form.Control className="mb-2" type="number" name="stockQty" placeholder="현재고" value={createForm.stockQty} onChange={onCreateChange} />
-            <Form.Control className="mb-2" type="number" name="safetyStock" placeholder="안전재고" value={createForm.safetyStock} onChange={onCreateChange} />
+            <Form.Control
+              className="mb-2"
+              type="number"
+              name="stockQty"
+              placeholder="현재고"
+              value={createForm.stockQty}
+              onChange={onCreateChange}
+            />
+            <Form.Control
+              className="mb-2"
+              type="number"
+              name="safetyStock"
+              placeholder="안전재고"
+              value={createForm.safetyStock}
+              onChange={onCreateChange}
+            />
 
-            <Form.Control className="mb-2" type="number" name="inPrice" placeholder="입고단가" value={createForm.inPrice} onChange={onCreateChange} />
-            <Form.Control className="mb-2" type="number" name="outPrice" placeholder="출고단가" value={createForm.outPrice} onChange={onCreateChange} />
+            <Form.Control
+              className="mb-2"
+              type="number"
+              name="inPrice"
+              placeholder="입고단가"
+              value={createForm.inPrice}
+              onChange={onCreateChange}
+            />
+            <Form.Control
+              className="mb-2"
+              type="number"
+              name="outPrice"
+              placeholder="출고단가"
+              value={createForm.outPrice}
+              onChange={onCreateChange}
+            />
 
             <Form.Select className="mb-2" name="useYn" value={createForm.useYn} onChange={onCreateChange}>
               <option value="Y">사용</option>
               <option value="N">미사용</option>
             </Form.Select>
 
-            <Form.Control className="mb-2" name="remark" placeholder="비고" value={createForm.remark} onChange={onCreateChange} />
+            <Form.Control
+              className="mb-2"
+              name="remark"
+              placeholder="비고"
+              value={createForm.remark}
+              onChange={onCreateChange}
+            />
           </Form>
         </Modal.Body>
 
@@ -457,7 +769,9 @@ const canSave = !!createForm.itemCode.trim() && !!createForm.itemName.trim() &&
           <Button variant="secondary" onClick={() => setShowCreate(false)}>
             닫기
           </Button>
-          <Button onClick={handleSave} disabled={!canSave}>저장</Button>
+          <Button onClick={handleSave} disabled={!canSave}>
+            저장
+          </Button>
         </Modal.Footer>
       </Modal>
 
@@ -469,28 +783,97 @@ const canSave = !!createForm.itemCode.trim() && !!createForm.itemName.trim() &&
 
         <Modal.Body>
           <Form>
-            {/* 품목코드/품목명 수정 막고 싶으면 disabled 처리하면 됨 */}
-            <Form.Control className="mb-2" name="itemCode" placeholder="품목코드" value={editForm.itemCode} onChange={onEditChange} />
-            <Form.Control className="mb-2" name="itemName" placeholder="품목명" value={editForm.itemName} onChange={onEditChange} />
+            <Form.Control
+              className="mb-2"
+              name="itemCode"
+              placeholder="품목코드"
+              value={editForm.itemCode}
+              onChange={onEditChange}
+            />
+            <Form.Control
+              className="mb-2"
+              name="itemName"
+              placeholder="품목명"
+              value={editForm.itemName}
+              onChange={onEditChange}
+            />
 
-            <Form.Control className="mb-2" name="itemGroup" placeholder="품목그룹" value={editForm.itemGroup} onChange={onEditChange} />
-            <Form.Control className="mb-2" name="spec" placeholder="규격" value={editForm.spec} onChange={onEditChange} />
+            <Form.Control
+              className="mb-2"
+              name="itemGroup"
+              placeholder="품목그룹"
+              value={editForm.itemGroup}
+              onChange={onEditChange}
+            />
+            <Form.Control
+              className="mb-2"
+              name="spec"
+              placeholder="규격"
+              value={editForm.spec}
+              onChange={onEditChange}
+            />
 
-            <Form.Control className="mb-2" name="warehouse" placeholder="창고" value={editForm.warehouse} onChange={onEditChange} />
-            <Form.Control className="mb-2" name="location" placeholder="위치" value={editForm.location} onChange={onEditChange} />
+            <Form.Control
+              className="mb-2"
+              name="warehouse"
+              placeholder="창고"
+              value={editForm.warehouse}
+              onChange={onEditChange}
+            />
+            <Form.Control
+              className="mb-2"
+              name="location"
+              placeholder="위치"
+              value={editForm.location}
+              onChange={onEditChange}
+            />
 
-            <Form.Control className="mb-2" type="number" name="stockQty" placeholder="현재고" value={editForm.stockQty} onChange={onEditChange} />
-            <Form.Control className="mb-2" type="number" name="safetyStock" placeholder="안전재고" value={editForm.safetyStock} onChange={onEditChange} />
+            <Form.Control
+              className="mb-2"
+              type="number"
+              name="stockQty"
+              placeholder="현재고"
+              value={editForm.stockQty}
+              onChange={onEditChange}
+            />
+            <Form.Control
+              className="mb-2"
+              type="number"
+              name="safetyStock"
+              placeholder="안전재고"
+              value={editForm.safetyStock}
+              onChange={onEditChange}
+            />
 
-            <Form.Control className="mb-2" type="number" name="inPrice" placeholder="입고단가" value={editForm.inPrice} onChange={onEditChange} />
-            <Form.Control className="mb-2" type="number" name="outPrice" placeholder="출고단가" value={editForm.outPrice} onChange={onEditChange} />
+            <Form.Control
+              className="mb-2"
+              type="number"
+              name="inPrice"
+              placeholder="입고단가"
+              value={editForm.inPrice}
+              onChange={onEditChange}
+            />
+            <Form.Control
+              className="mb-2"
+              type="number"
+              name="outPrice"
+              placeholder="출고단가"
+              value={editForm.outPrice}
+              onChange={onEditChange}
+            />
 
             <Form.Select className="mb-2" name="useYn" value={editForm.useYn} onChange={onEditChange}>
               <option value="Y">사용</option>
               <option value="N">미사용</option>
             </Form.Select>
 
-            <Form.Control className="mb-2" name="remark" placeholder="비고" value={editForm.remark} onChange={onEditChange} />
+            <Form.Control
+              className="mb-2"
+              name="remark"
+              placeholder="비고"
+              value={editForm.remark}
+              onChange={onEditChange}
+            />
           </Form>
         </Modal.Body>
 

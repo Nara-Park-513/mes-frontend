@@ -37,7 +37,6 @@ type SalesOrderResponse = {
   amount?: number;
   deliveryDate?: string | null;
   remark?: string | null;
-  // 필요하면 더 추가
 };
 
 type PageResponse<T> = {
@@ -82,7 +81,7 @@ const SalesManagement = () => {
   const [rows, setRows] = useState<TableRow[]>([]);
   const [orders, setOrders] = useState<SalesOrderResponse[]>([]);
 
-  // ✅ 등록 폼 (검색폼이랑 섞이면 헷갈리니까 그대로 유지)
+  // ✅ 등록 폼
   const [form, setForm] = useState({
     orderDate: "",
     customerCode: "",
@@ -96,7 +95,7 @@ const SalesManagement = () => {
     spec: "",
     remainQty: "",
     deliveryStatus: "미납",
-    // 검색 조건 (from/to/customer/item/deliveryYn)
+    // 검색 조건
     from: "",
     to: "",
     customer: "",
@@ -119,7 +118,7 @@ const SalesManagement = () => {
     remark: "",
   });
 
-  // ✅ 공용 change (form / editForm 분기)
+  // ✅ 공용 change
   const handleChange = (e: React.ChangeEvent<any>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -130,7 +129,7 @@ const SalesManagement = () => {
     setEditForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ 목록 조회 (페이징 포함)
+  // ✅ 목록 조회
   const fetchOrders = async (pageArg = page, sizeArg = size) => {
     const token = localStorage.getItem("token");
 
@@ -161,10 +160,8 @@ const SalesManagement = () => {
         ? JSON.parse(raw)
         : { content: [], totalElements: 0, totalPages: 0, number: pageArg, size: sizeArg };
 
-    // ✅ 원본 저장 (id 유지)
     setOrders(data.content);
 
-    // ✅ 화면용 rows 변환
     const mapped: TableRow[] = data.content.map((o) => {
       const qty = Number(o.orderQty ?? 0);
       const price = Number(o.price ?? 0);
@@ -176,12 +173,12 @@ const SalesManagement = () => {
         o.customerName ?? "",
         o.itemCode ?? "",
         o.itemName ?? "",
-        "-", // spec
-        String(qty), // remainQty(예시)
+        "-",
+        String(qty),
         String(price),
         String(amount),
         o.deliveryDate ?? "-",
-        "미납", // deliveryStatus
+        "미납",
         o.remark ?? "-",
         "보기",
       ];
@@ -189,31 +186,26 @@ const SalesManagement = () => {
 
     setRows(mapped);
 
-    // ✅ 페이징 상태 업데이트
     setPage(data.number);
     setSize(data.size);
     setTotalPages(data.totalPages);
     setTotalElements(data.totalElements);
   };
 
-  // ✅ 최초 로딩
   useEffect(() => {
     fetchOrders(0, size).catch((e) => console.error(e));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ✅ 검색 버튼 누르면 0페이지부터 다시 조회하고 싶으면 이 함수 쓰면 됨
   const handleSearch = () => {
     fetchOrders(0, size).catch((e) => console.error(e));
   };
 
-  // ✅ 모달 열 때 에러 초기화
   const openCreate = () => {
     setErrorMsg("");
     setShowCreate(true);
   };
 
-  // ✅ 엑셀 다운로드
   const handleExcelDownload = () => {
     const excelData: (string | number)[][] = [
       ["#", ...TABLE_HEADERS],
@@ -230,7 +222,6 @@ const SalesManagement = () => {
     saveAs(blob, "수주관리_리스트.xlsx");
   };
 
-  // ✅ 등록 저장 (POST 성공 시 현재 페이지 재조회)
   const handleCreateSave = async () => {
     setErrorMsg("");
 
@@ -282,10 +273,8 @@ const SalesManagement = () => {
         throw new Error(text || `저장 실패 (HTTP ${res.status})`);
       }
 
-      // ✅ 등록 성공 후 현재 페이지 재조회
       await fetchOrders(page, size);
 
-      // 폼 초기화
       setForm((prev) => ({
         ...prev,
         orderDate: "",
@@ -310,7 +299,6 @@ const SalesManagement = () => {
     }
   };
 
-  // ✅ 품목명 클릭 → 상세 모달 열기
   const openDetailByIndex = (rowIndex: number) => {
     const order = orders[rowIndex];
     if (!order) return;
@@ -331,7 +319,6 @@ const SalesManagement = () => {
     setShowDetail(true);
   };
 
-  // ✅ 수정
   const handleUpdate = async () => {
     if (!selectedOrder) return;
 
@@ -366,7 +353,6 @@ const SalesManagement = () => {
     await fetchOrders(page, size);
   };
 
-  // ✅ 삭제
   const handleDelete = async () => {
     if (!selectedOrder) return;
     if (!window.confirm("정말 삭제할까요?")) return;
@@ -388,12 +374,10 @@ const SalesManagement = () => {
 
     setShowDetail(false);
 
-    // ✅ 삭제 후 현재 페이지가 비어버릴 수 있으니 보정해서 재조회
     const nextPage = page > 0 && rows.length === 1 ? page - 1 : page;
     await fetchOrders(nextPage, size);
   };
 
-  // ✅ 페이지 이동
   const goPage = (p: number) => {
     const next = Math.max(0, Math.min(p, totalPages - 1));
     fetchOrders(next, size).catch((e) => console.error(e));
@@ -409,156 +393,500 @@ const SalesManagement = () => {
           </Content>
 
           <Container fluid className="p-0">
-            <Row>
-              <Col>
-                <Ctap>
-                  <h5 className="mb-5">영업관리</h5>
+            <Row className="g-0 m-0">
+              <Col className="p-0">
+                <Ctap
+                  style={{
+                    background: "#fff",
+                    padding: "24px 28px",
+                    border: "1px solid #e5e7eb",
+                  }}
+                >
+                  <div
+                    style={{
+                      paddingBottom: "16px",
+                      marginBottom: "20px",
+                      borderBottom: "1px solid #e5e7eb",
+                    }}
+                  >
+                    <h5
+                      className="mb-0"
+                      style={{
+                        fontWeight: 700,
+                        color: "#111827",
+                      }}
+                    >
+                      영업관리
+                    </h5>
+                  </div>
 
-                  <DflexColumn2 className="mb-5">
-                    <Left>
-                      <Dflex>
-                        <Group>
-                          <Text6>수주일자조회기간</Text6>
-                          <Dflex>
-                            <Time type="date" name="from" value={form.from} onChange={handleChange} />
-                            <span className="mx-2">-</span>
-                            <Time type="date" name="to" value={form.to} onChange={handleChange} />
-                          </Dflex>
+                  <DflexColumn2
+                    className="mb-4"
+                    style={{
+                      border: "1px solid #e5e7eb",
+                      padding: "20px 24px",
+                      background: "#f9fafb",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "flex-end",
+                        justifyContent: "space-between",
+                        gap: "20px",
+                        width: "100%",
+                        overflow: "hidden",
+                      }}
+                    >
+                      <Left
+                        style={{
+                          flex: 1,
+                          minWidth: 0,
+                          overflowX: "auto",
+                          overflowY: "hidden",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "flex-end",
+                            gap: "16px",
+                            flexWrap: "nowrap",
+                            minWidth: "max-content",
+                            paddingBottom: "2px",
+                          }}
+                        >
+                          <Group style={{ margin: 0, flexShrink: 0 }}>
+                            <Text6
+                              style={{
+                                display: "block",
+                                marginBottom: "8px",
+                                fontWeight: 600,
+                                color: "#374151",
+                                fontSize: "14px",
+                              }}
+                            >
+                              수주일자조회기간
+                            </Text6>
+
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "8px",
+                                height: "44px",
+                              }}
+                            >
+                              <Time
+                                type="date"
+                                name="from"
+                                value={form.from}
+                                onChange={handleChange}
+                                style={{
+                                  height: "44px",
+                                  width: "150px",
+                                  border: "1px solid #d1d5db",
+                                  borderRadius: "6px",
+                                  background: "#fff",
+                                  padding: "0 12px",
+                                }}
+                              />
+                              <span style={{ color: "#6b7280", fontWeight: 600, flexShrink: 0 }}>-</span>
+                              <Time
+                                type="date"
+                                name="to"
+                                value={form.to}
+                                onChange={handleChange}
+                                style={{
+                                  height: "44px",
+                                  width: "150px",
+                                  border: "1px solid #d1d5db",
+                                  borderRadius: "6px",
+                                  background: "#fff",
+                                  padding: "0 12px",
+                                }}
+                              />
+                            </div>
+                          </Group>
+
+                          <Group style={{ margin: 0, flexShrink: 0 }}>
+                            <Text6
+                              style={{
+                                display: "block",
+                                marginBottom: "8px",
+                                fontWeight: 600,
+                                color: "#374151",
+                                fontSize: "14px",
+                              }}
+                            >
+                              거래처
+                            </Text6>
+                            <Search
+                              type="search"
+                              name="customer"
+                              value={form.customer}
+                              onChange={handleChange}
+                              style={{
+                                height: "44px",
+                                width: "180px",
+                                border: "1px solid #d1d5db",
+                                borderRadius: "6px",
+                                background: "#fff",
+                                padding: "0 12px",
+                              }}
+                            />
+                          </Group>
+
+                          <Group style={{ margin: 0, flexShrink: 0 }}>
+                            <Text6
+                              style={{
+                                display: "block",
+                                marginBottom: "8px",
+                                fontWeight: 600,
+                                color: "#374151",
+                                fontSize: "14px",
+                              }}
+                            >
+                              품목
+                            </Text6>
+                            <Search
+                              type="search"
+                              name="item"
+                              value={form.item}
+                              onChange={handleChange}
+                              style={{
+                                height: "44px",
+                                width: "180px",
+                                border: "1px solid #d1d5db",
+                                borderRadius: "6px",
+                                background: "#fff",
+                                padding: "0 12px",
+                              }}
+                            />
+                          </Group>
+
+                          <Group style={{ margin: 0, flexShrink: 0 }}>
+                            <Text6
+                              style={{
+                                display: "block",
+                                marginBottom: "8px",
+                                fontWeight: 600,
+                                color: "#374151",
+                                fontSize: "14px",
+                              }}
+                            >
+                              납품여부
+                            </Text6>
+                            <Select
+                              name="deliveryYn"
+                              value={form.deliveryYn}
+                              onChange={handleChange}
+                              style={{
+                                height: "44px",
+                                width: "140px",
+                                border: "1px solid #d1d5db",
+                                borderRadius: "6px",
+                                background: "#fff",
+                                padding: "0 12px",
+                              }}
+                            >
+                              <option value="ALL">전체</option>
+                              <option value="N">미납</option>
+                              <option value="Y">납품완료</option>
+                            </Select>
+                          </Group>
+
+                          <Group style={{ margin: 0, flexShrink: 0 }}>
+                            <Button
+                              variant="dark"
+                              onClick={handleSearch}
+                              style={{
+                                height: "44px",
+                                minWidth: "92px",
+                                borderRadius: "6px",
+                                fontWeight: 600,
+                                padding: "0 20px",
+                              }}
+                            >
+                              검색
+                            </Button>
+                          </Group>
+                        </div>
+                      </Left>
+
+                      <Right
+                        style={{
+                          flexShrink: 0,
+                          display: "flex",
+                          justifyContent: "flex-end",
+                          alignItems: "flex-end",
+                        }}
+                      >
+                        <Group style={{ margin: 0 }}>
+                          <DflexEnd
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "flex-end",
+                              gap: "12px",
+                              flexWrap: "nowrap",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            <Button
+                              variant="success"
+                              onClick={handleExcelDownload}
+                              style={{
+                                height: "44px",
+                                minWidth: "110px",
+                                borderRadius: "6px",
+                                fontWeight: 600,
+                                margin: 0,
+                              }}
+                            >
+                              엑셀 다운
+                            </Button>
+
+                            <Button
+                              variant="primary"
+                              className="mx-0"
+                              style={{
+                                height: "44px",
+                                minWidth: "110px",
+                                borderRadius: "6px",
+                                fontWeight: 600,
+                                margin: 0,
+                              }}
+                            >
+                              일괄 납품
+                            </Button>
+
+                            <Button
+                              variant="secondary"
+                              onClick={openCreate}
+                              style={{
+                                height: "44px",
+                                minWidth: "110px",
+                                borderRadius: "6px",
+                                fontWeight: 600,
+                                margin: 0,
+                              }}
+                            >
+                              수주 등록
+                            </Button>
+                          </DflexEnd>
                         </Group>
-
-                        <Group className="mx-3">
-                          <Text6>거래처</Text6>
-                          <Search type="search" name="customer" value={form.customer} onChange={handleChange} />
-                        </Group>
-
-                        <Group>
-                          <Text6>품목</Text6>
-                          <Search type="search" name="item" value={form.item} onChange={handleChange} />
-                        </Group>
-
-                        <Group className="mx-2">
-                          <Text6>납품여부</Text6>
-                          <Select name="deliveryYn" value={form.deliveryYn} onChange={handleChange}>
-                            <option value="ALL">전체</option>
-                            <option value="N">미납</option>
-                            <option value="Y">납품완료</option>
-                          </Select>
-                        </Group>
-
-                        <Group className="mx-2">
-                          <Button variant="dark" onClick={handleSearch}>
-                            검색
-                          </Button>
-                        </Group>
-                      </Dflex>
-                    </Left>
-
-                    <Right>
-                      <Group>
-                        <DflexEnd>
-                          <Button variant="success" onClick={handleExcelDownload}>
-                            엑셀 다운
-                          </Button>
-                          <Button variant="primary" className="mx-3">
-                            일괄 납품
-                          </Button>
-                          <Button variant="secondary" onClick={openCreate}>
-                            수주 등록
-                          </Button>
-                        </DflexEnd>
-                      </Group>
-                    </Right>
+                      </Right>
+                    </div>
                   </DflexColumn2>
 
-                  <Tabs defaultActiveKey="orders" className="mb-3" fill>
-                    <Tab eventKey="orders" title="수주관리">
-                      <Table responsive className="mt-4">
-                        <thead>
-                          <tr>
-                            <th className="bg-secondary text-white">#</th>
-                            {TABLE_HEADERS.map((title, index) => (
-                              <th key={index} className="bg-secondary text-white">
-                                {title}
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-
-                        <tbody>
-                          {rows.map((row, rIdx) => (
-                            <tr key={rIdx}>
-                              <td>{rIdx + 1 + page * size}</td>
-
-                              {row.map((cell, cIdx) => {
-                                // ✅ 품목명 컬럼(인덱스 4)만 클릭 가능하게
-                                if (cIdx === 4) {
-                                  return (
-                                    <td
-                                      key={cIdx}
-                                      style={{ cursor: "pointer", textDecoration: "underline" }}
-                                      onClick={() => openDetailByIndex(rIdx)}
-                                    >
-                                      {cell}
-                                    </td>
-                                  );
-                                }
-
-                                return <td key={cIdx}>{cell}</td>;
-                              })}
-                            </tr>
-                          ))}
-                        </tbody>
-
-                        <tfoot>
-                          <tr>
-                            <th className="bg-secondary text-white text-center" colSpan={6}>
-                              합계
-                            </th>
-                            <th className="bg-secondary text-warning fw-bold">-</th>
-                            <th className="bg-secondary text-warning fw-bold">-</th>
-                            <th className="bg-secondary text-warning fw-bold">-</th>
-                            <th className="bg-secondary text-white"></th>
-                            <th className="bg-secondary text-white"></th>
-                            <th className="bg-secondary text-white" colSpan={5}></th>
-                          </tr>
-                        </tfoot>
-                      </Table>
-                      <Center>
-                        {totalPages > 1 && (
-                          <>
-                            <PageTotal>
-                              총 {totalElements}건 {page + 1} / {totalPages} 페이지
-                            </PageTotal>
-
-                            <Pagination className="mb-0">
-                              <Pagination.First disabled={page === 0} onClick={() => goPage(0)} />
-                              <Pagination.Prev disabled={page === 0} onClick={() => goPage(page - 1)} />
-                              {Array.from({ length: totalPages })
-                                .map((_, i) => i)
-                                .filter((i) => i >= page - 2 && i <= page + 2)
-                                .map((i) => (
-                                  <Pagination.Item key={i} active={i === page} onClick={() => goPage(i)}>
-                                    {i + 1}
-                                  </Pagination.Item>
+                  <div
+                    style={{
+                      background: "#fff",
+                      border: "1px solid #e5e7eb",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <Tabs
+                      defaultActiveKey="orders"
+                      className="mb-0"
+                      fill
+                      style={{
+                        borderBottom: "1px solid #e5e7eb",
+                        background: "#fff",
+                      }}
+                    >
+                      <Tab eventKey="orders" title="수주관리">
+                        <div style={{ padding: "8px 8px 0 8px" }}>
+                          <Table responsive className="mt-3 mb-0 align-middle">
+                            <thead>
+                              <tr>
+                                <th
+                                  className="bg-secondary text-white"
+                                  style={{
+                                    whiteSpace: "nowrap",
+                                    padding: "14px 12px",
+                                    fontSize: "14px",
+                                    fontWeight: 700,
+                                    borderBottom: "none",
+                                  }}
+                                >
+                                  #
+                                </th>
+                                {TABLE_HEADERS.map((title, index) => (
+                                  <th
+                                    key={index}
+                                    className="bg-secondary text-white"
+                                    style={{
+                                      whiteSpace: "nowrap",
+                                      padding: "14px 12px",
+                                      fontSize: "14px",
+                                      fontWeight: 700,
+                                      borderBottom: "none",
+                                    }}
+                                  >
+                                    {title}
+                                  </th>
                                 ))}
-                              <Pagination.Next
-                                disabled={page >= totalPages - 1}
-                                onClick={() => goPage(page + 1)}
-                              />
-                              <Pagination.Last
-                                disabled={page >= totalPages - 1}
-                                onClick={() => goPage(totalPages - 1)}
-                              />
-                            </Pagination>
-                          </>
-                        )}
-                      </Center>
-                    </Tab>
+                              </tr>
+                            </thead>
 
-                    <Tab eventKey="delivery" title="납품관리"></Tab>
-                    <Tab eventKey="search" title="수주내역조회"></Tab>
-                    <Tab eventKey="dsearch" title="납품내역조회"></Tab>
-                  </Tabs>
+                            <tbody>
+                              {rows.map((row, rIdx) => (
+                                <tr key={rIdx}>
+                                  <td
+                                    style={{
+                                      padding: "13px 12px",
+                                      verticalAlign: "middle",
+                                      color: "#475569",
+                                      fontWeight: 600,
+                                      whiteSpace: "nowrap",
+                                    }}
+                                  >
+                                    {rIdx + 1 + page * size}
+                                  </td>
+
+                                  {row.map((cell, cIdx) => {
+                                    if (cIdx === 4) {
+                                      return (
+                                        <td
+                                          key={cIdx}
+                                          style={{
+                                            cursor: "pointer",
+                                            textDecoration: "underline",
+                                            padding: "13px 12px",
+                                            verticalAlign: "middle",
+                                            color: "#0d6efd",
+                                            fontWeight: 600,
+                                            whiteSpace: "nowrap",
+                                          }}
+                                          onClick={() => openDetailByIndex(rIdx)}
+                                        >
+                                          {cell}
+                                        </td>
+                                      );
+                                    }
+
+                                    return (
+                                      <td
+                                        key={cIdx}
+                                        style={{
+                                          padding: "13px 12px",
+                                          verticalAlign: "middle",
+                                          color: "#334155",
+                                          whiteSpace: "nowrap",
+                                        }}
+                                      >
+                                        {cell}
+                                      </td>
+                                    );
+                                  })}
+                                </tr>
+                              ))}
+                            </tbody>
+
+                            <tfoot>
+                              <tr>
+                                <th
+                                  className="bg-secondary text-white text-center"
+                                  colSpan={6}
+                                  style={{
+                                    padding: "14px 12px",
+                                    borderTop: "none",
+                                  }}
+                                >
+                                  합계
+                                </th>
+                                <th
+                                  className="bg-secondary text-warning fw-bold"
+                                  style={{
+                                    padding: "14px 12px",
+                                    borderTop: "none",
+                                  }}
+                                >
+                                  -
+                                </th>
+                                <th
+                                  className="bg-secondary text-warning fw-bold"
+                                  style={{
+                                    padding: "14px 12px",
+                                    borderTop: "none",
+                                  }}
+                                >
+                                  -
+                                </th>
+                                <th
+                                  className="bg-secondary text-warning fw-bold"
+                                  style={{
+                                    padding: "14px 12px",
+                                    borderTop: "none",
+                                  }}
+                                >
+                                  -
+                                </th>
+                                <th className="bg-secondary text-white" style={{ borderTop: "none" }}></th>
+                                <th className="bg-secondary text-white" style={{ borderTop: "none" }}></th>
+                                <th
+                                  className="bg-secondary text-white"
+                                  colSpan={5}
+                                  style={{ borderTop: "none" }}
+                                ></th>
+                              </tr>
+                            </tfoot>
+                          </Table>
+
+                          <Center
+                            style={{
+                              marginTop: "16px",
+                              paddingTop: "16px",
+                              borderTop: "1px solid #e5e7eb",
+                              flexDirection: "column",
+                              gap: "10px",
+                            }}
+                          >
+                            {totalPages > 1 && (
+                              <>
+                                <PageTotal
+                                  style={{
+                                    color: "#64748b",
+                                    fontWeight: 600,
+                                    marginBottom: "4px",
+                                  }}
+                                >
+                                  총 {totalElements}건 {page + 1} / {totalPages} 페이지
+                                </PageTotal>
+
+                                <Pagination className="mb-3">
+                                  <Pagination.First disabled={page === 0} onClick={() => goPage(0)} />
+                                  <Pagination.Prev disabled={page === 0} onClick={() => goPage(page - 1)} />
+                                  {Array.from({ length: totalPages })
+                                    .map((_, i) => i)
+                                    .filter((i) => i >= page - 2 && i <= page + 2)
+                                    .map((i) => (
+                                      <Pagination.Item key={i} active={i === page} onClick={() => goPage(i)}>
+                                        {i + 1}
+                                      </Pagination.Item>
+                                    ))}
+                                  <Pagination.Next
+                                    disabled={page >= totalPages - 1}
+                                    onClick={() => goPage(page + 1)}
+                                  />
+                                  <Pagination.Last
+                                    disabled={page >= totalPages - 1}
+                                    onClick={() => goPage(totalPages - 1)}
+                                  />
+                                </Pagination>
+                              </>
+                            )}
+                          </Center>
+                        </div>
+                      </Tab>
+
+                      <Tab eventKey="delivery" title="납품관리"></Tab>
+                      <Tab eventKey="search" title="수주내역조회"></Tab>
+                      <Tab eventKey="dsearch" title="납품내역조회"></Tab>
+                    </Tabs>
+                  </div>
                 </Ctap>
               </Col>
             </Row>

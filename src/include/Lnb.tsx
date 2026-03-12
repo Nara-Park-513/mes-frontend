@@ -1,11 +1,14 @@
-import {Sidebar,Brand,BrandText,Divider,SidebarCard } from "../styled/Component.styles";
+import { useState } from "react";
+import { Sidebar, Brand, BrandText, Divider, SidebarCard } from "../styled/Component.styles";
 
 const Lnb = () => {
+  const [collapsed, setCollapsed] = useState(false);
+
   return (
     <>
       {/* Sidebar */}
       <Sidebar
-        className="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion"
+        className={`navbar-nav bg-gradient-primary sidebar sidebar-dark accordion ${collapsed ? "toggled" : ""}`}
         id="accordionSidebar"
       >
         {/* Sidebar - Brand */}
@@ -14,11 +17,11 @@ const Lnb = () => {
           href="/"
         >
           <div className="sidebar-brand-icon">
-            <i className="fas fa-cog"/>
+            <i className="fas fa-cog" />
           </div>
 
           <BrandText className="sidebar-brand-text mx-3">
-          SMART MES
+            SMART MES
           </BrandText>
         </Brand>
 
@@ -157,7 +160,7 @@ const Lnb = () => {
           </a>
         </li>
 
-        {/* Nav Item - 시스템 */}
+        {/* Nav Item - 품질 */}
         <li className="nav-item">
           <a className="nav-link" href="/quality">
             <i className="fas fa-fw fa-table" />
@@ -169,24 +172,59 @@ const Lnb = () => {
 
         {/* Sidebar Toggler */}
         <div className="text-center d-none d-md-inline">
-          <button className="rounded-circle border-0" id="sidebarToggle" />
+          <button
+            type="button"
+            className="rounded-circle border-0"
+            id="sidebarToggle"
+            onClick={() => setCollapsed((prev) => !prev)}
+          />
         </div>
 
-        {/* Sidebar Message */}
-        <SidebarCard className="sidebar-card d-none d-lg-flex">
-          <img
-            className="sidebar-card-illustration mb-2"
-            src="img/undraw_rocket.svg"
-            alt="..."
-          />
-          <p className="text-center mb-2">
-            <strong></strong>
-            Is Next
-          </p>
-          <a className="btng btn-success btn-sm" href="#">
-            MES
-          </a>
-        </SidebarCard>
+        {/* 하단 영역 */}
+        {!collapsed ? (
+          <SidebarCard className="sidebar-card d-none d-lg-flex">
+            <img
+              className="sidebar-card-illustration mb-2"
+              src="img/undraw_rocket.svg"
+              alt="MES"
+            />
+            <p className="text-center mb-2">MES</p>
+            <a className="btng btn-success btn-sm" href="/pmanagement">
+              바로가기
+            </a>
+          </SidebarCard>
+        ) : (
+          <div
+            className="d-none d-lg-flex"
+            style={{
+              width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "16px 0 24px",
+            }}
+          >
+            <a
+              href="/pmanagement"
+              title="MES 바로가기"
+              style={{
+                width: "48px",
+                height: "48px",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "#1cc88a",
+                color: "#fff",
+                textDecoration: "none",
+                boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+                fontSize: "18px",
+                transition: "all 0.2s ease",
+              }}
+            >
+              <i className="fas fa-play" />
+            </a>
+          </div>
+        )}
       </Sidebar>
       {/* End of Sidebar */}
     </>

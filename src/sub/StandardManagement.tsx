@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import Lnb from "../include/Lnb";
 import Top from "../include/Top";
 
-import { Wrapper, DflexColumn, Content, Ctap } from "../styled/Sales.styles";
-import { SpaceBetween, Center, Dflex, PageTotal } from "../styled/Component.styles";
+import { Wrapper, DflexColumn, Content, Ctap, DflexColumn2 } from "../styled/Sales.styles";
+import { Center, PageTotal } from "../styled/Component.styles";
 
 import { Container, Row, Col, Table, Button, Modal, Form, Pagination } from "react-bootstrap";
 
@@ -221,65 +221,261 @@ const StandardManagement = () => {
           </Content>
 
           <Container fluid className="p-0">
-            <Row>
-              <Col>
-                <Ctap>
-                  <SpaceBetween>
-                    <h4>기준정보관리</h4>
-                    <Dflex>
-                      <Button className="mx-2 my-3" onClick={handleExcelDownload} variant="success">
-                        엑셀다운로드
-                      </Button>
-                      <Button className="my-3" onClick={() => setShowCreate(true)} variant="success">
-                        기준정보등록
-                      </Button>
-                    </Dflex>
-                  </SpaceBetween>
+            <Row className="g-0 m-0">
+              <Col className="p-0">
+                <Ctap
+                  style={{
+                    background: "#fff",
+                    padding: "24px 28px",
+                    border: "1px solid #e5e7eb",
+                  }}
+                >
+                  <div
+                    style={{
+                      paddingBottom: "16px",
+                      marginBottom: "20px",
+                      borderBottom: "1px solid #e5e7eb",
+                    }}
+                  >
+                    <h4
+                      className="mb-0"
+                      style={{
+                        fontWeight: 700,
+                        color: "#111827",
+                      }}
+                    >
+                      기준정보관리
+                    </h4>
+                  </div>
 
-                  <Table bordered hover>
-                    <thead>
-                      <tr className="text-center">
-                        <th>#</th>
-                        {TABLE_HEADERS.map((h) => (
-                          <th key={h.key as string}>{h.label}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {rows.map((r, i) => (
-                        <tr key={r.id} className="text-center">
-                          <td>{i + 1 + page * size}</td>
-                          <td onClick={() => openDetail(r.id)} style={{ cursor: "pointer" }}>
-                            {r.stdCode}
-                          </td>
-                          <td>{r.stdName}</td>
-                          <td>{r.stdGroup}</td>
-                          <td>{r.unit ?? ""}</td>
-                          <td>{r.useYn}</td>
-                          <td>{r.remark ?? ""}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
+                  <DflexColumn2
+                    className="mb-4"
+                    style={{
+                      border: "1px solid #e5e7eb",
+                      padding: "16px 20px",
+                      background: "#f9fafb",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "100%",
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        alignItems: "center",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "flex-end",
+                          alignItems: "center",
+                          gap: "12px",
+                          flexWrap: "nowrap",
+                        }}
+                      >
+                        <Button
+                          onClick={handleExcelDownload}
+                          variant="success"
+                          style={{
+                            height: "44px",
+                            minWidth: "120px",
+                            borderRadius: "6px",
+                            fontWeight: 600,
+                            margin: 0,
+                          }}
+                        >
+                          엑셀 다운
+                        </Button>
 
-                  <Center>
-                    {totalPages > 0 && (
-                      <Pagination>
-                        <Pagination.First disabled={page === 0} onClick={() => goPage(0)} />
-                        <Pagination.Prev disabled={page === 0} onClick={() => goPage(page - 1)} />
-                        {Array.from({ length: totalPages }).map((_, i) => (
-                          <Pagination.Item key={i} active={i === page} onClick={() => goPage(i)}>
-                            {i + 1}
-                          </Pagination.Item>
-                        ))}
-                        <Pagination.Next disabled={page >= totalPages - 1} onClick={() => goPage(page + 1)} />
-                        <Pagination.Last disabled={page >= totalPages - 1} onClick={() => goPage(totalPages - 1)} />
-                      </Pagination>
-                    )}
-                    <PageTotal>
-                      총 {totalElements}건 {page + 1} / {totalPages || 1} 페이지
-                    </PageTotal>
-                  </Center>
+                        <Button
+                          onClick={() => setShowCreate(true)}
+                          variant="primary"
+                          style={{
+                            height: "44px",
+                            minWidth: "120px",
+                            borderRadius: "6px",
+                            fontWeight: 600,
+                            margin: 0,
+                          }}
+                        >
+                          기준정보 등록
+                        </Button>
+                      </div>
+                    </div>
+                  </DflexColumn2>
+
+                  <div
+                    style={{
+                      background: "#fff",
+                      border: "1px solid #e5e7eb",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <div style={{ padding: "12px 12px 0 12px" }}>
+                      <Table responsive className="mt-3 mb-0 align-middle">
+                        <thead>
+                          <tr className="text-center">
+                            <th
+                              className="bg-secondary text-white"
+                              style={{
+                                whiteSpace: "nowrap",
+                                padding: "14px 12px",
+                                fontSize: "14px",
+                                fontWeight: 700,
+                                borderBottom: "none",
+                              }}
+                            >
+                              #
+                            </th>
+                            {TABLE_HEADERS.map((h) => (
+                              <th
+                                key={h.key as string}
+                                className="bg-secondary text-white"
+                                style={{
+                                  whiteSpace: "nowrap",
+                                  padding: "14px 12px",
+                                  fontSize: "14px",
+                                  fontWeight: 700,
+                                  borderBottom: "none",
+                                }}
+                              >
+                                {h.label}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {rows.map((r, i) => (
+                            <tr key={r.id} className="text-center">
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#475569",
+                                  fontWeight: 600,
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {i + 1 + page * size}
+                              </td>
+
+                              <td
+                                onClick={() => openDetail(r.id)}
+                                style={{
+                                  cursor: "pointer",
+                                  textDecoration: "underline",
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#0d6efd",
+                                  fontWeight: 600,
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.stdCode}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.stdName}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.stdGroup}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.unit ?? ""}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.useYn}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.remark ?? ""}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </Table>
+
+                      <Center
+                        style={{
+                          marginTop: "16px",
+                          paddingTop: "16px",
+                          borderTop: "1px solid #e5e7eb",
+                          flexDirection: "column",
+                          gap: "10px",
+                        }}
+                      >
+                        {totalPages > 0 && (
+                          <Pagination className="mb-0">
+                            <Pagination.First disabled={page === 0} onClick={() => goPage(0)} />
+                            <Pagination.Prev disabled={page === 0} onClick={() => goPage(page - 1)} />
+
+                            {Array.from({ length: totalPages }).map((_, i) => (
+                              <Pagination.Item key={i} active={i === page} onClick={() => goPage(i)}>
+                                {i + 1}
+                              </Pagination.Item>
+                            ))}
+
+                            <Pagination.Next
+                              disabled={page >= totalPages - 1}
+                              onClick={() => goPage(page + 1)}
+                            />
+                            <Pagination.Last
+                              disabled={page >= totalPages - 1}
+                              onClick={() => goPage(totalPages - 1)}
+                            />
+                          </Pagination>
+                        )}
+
+                        <PageTotal
+                          style={{
+                            color: "#64748b",
+                            fontWeight: 600,
+                            marginBottom: "4px",
+                          }}
+                        >
+                          총 {totalElements}건 {page + 1} / {totalPages || 1} 페이지
+                        </PageTotal>
+                      </Center>
+                    </div>
+                  </div>
                 </Ctap>
               </Col>
             </Row>
@@ -294,16 +490,45 @@ const StandardManagement = () => {
         </Modal.Header>
         <Modal.Body>
           <Form>
-            <Form.Control className="mb-2" name="stdCode" placeholder="기준코드 (품목 기준)" value={createForm.stdCode} onChange={onCreateChange} />
-            <Form.Control className="mb-2" name="stdName" placeholder="기준명 (품목 기준)" value={createForm.stdName} onChange={onCreateChange} />
-            <Form.Control className="mb-2" name="stdGroup" placeholder="그룹" value={createForm.stdGroup} onChange={onCreateChange} />
-            {/* ✅ FIX */}
-            <Form.Control className="mb-2" name="unit" placeholder="단위" value={createForm.unit} onChange={onCreateChange} />
+            <Form.Control
+              className="mb-2"
+              name="stdCode"
+              placeholder="기준코드 (품목 기준)"
+              value={createForm.stdCode}
+              onChange={onCreateChange}
+            />
+            <Form.Control
+              className="mb-2"
+              name="stdName"
+              placeholder="기준명 (품목 기준)"
+              value={createForm.stdName}
+              onChange={onCreateChange}
+            />
+            <Form.Control
+              className="mb-2"
+              name="stdGroup"
+              placeholder="그룹"
+              value={createForm.stdGroup}
+              onChange={onCreateChange}
+            />
+            <Form.Control
+              className="mb-2"
+              name="unit"
+              placeholder="단위"
+              value={createForm.unit}
+              onChange={onCreateChange}
+            />
             <Form.Select className="mb-2" name="useYn" value={createForm.useYn} onChange={onCreateChange}>
               <option value="Y">사용</option>
               <option value="N">미사용</option>
             </Form.Select>
-            <Form.Control className="mb-2" name="remark" placeholder="비고" value={createForm.remark} onChange={onCreateChange} />
+            <Form.Control
+              className="mb-2"
+              name="remark"
+              placeholder="비고"
+              value={createForm.remark}
+              onChange={onCreateChange}
+            />
           </Form>
         </Modal.Body>
         <Modal.Footer>

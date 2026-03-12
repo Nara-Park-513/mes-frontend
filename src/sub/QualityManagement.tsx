@@ -6,13 +6,9 @@ import {
   DflexColumn,
   Content,
   Ctap,
+  DflexColumn2,
 } from "../styled/Sales.styles";
-import {
-  SpaceBetween,
-  Center,
-  Dflex,
-  PageTotal,
-} from "../styled/Component.styles";
+import { Center, PageTotal } from "../styled/Component.styles";
 import {
   Container,
   Row,
@@ -29,9 +25,9 @@ const API_BASE = "http://localhost:9500";
 type QualityManagementItem = {
   id: number;
   inspectionStandard: string; // 검사기준관리
-  processInspection: string;  // 공정검사
-  defectManagement: string;   // 불량관리
-  qualityHistory: string;     // 품질이력
+  processInspection: string; // 공정검사
+  defectManagement: string; // 불량관리
+  qualityHistory: string; // 품질이력
 };
 
 type PageResponse<T> = {
@@ -71,9 +67,7 @@ const QualityManagement = () => {
   const [createForm, setCreateForm] = useState(emptyForm);
   const [editForm, setEditForm] = useState(emptyForm);
 
-  const stockMenu = [
-    { key: "quality", label: "품질관리", path: "/quality" },
-  ];
+  const stockMenu = [{ key: "quality", label: "품질관리", path: "/quality" }];
 
   const onCreateChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -90,41 +84,41 @@ const QualityManagement = () => {
   };
 
   const fetchList = async (p: number) => {
-  try {
-    const res = await fetch(
-      `${API_BASE}/api/quality-management?page=${p}&size=${size}`
-    );
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/quality-management?page=${p}&size=${size}`
+      );
 
-    if (!res.ok) {
+      if (!res.ok) {
+        setRows([]);
+        setTotalPages(0);
+        setTotalElements(0);
+        return;
+      }
+
+      const data = await res.json();
+      console.log("quality list raw =", data);
+
+      const list = Array.isArray(data) ? data : data.content ?? [];
+
+      const normalized = list.map((item: any) => ({
+        id: item.id,
+        inspectionStandard: item.inspectionStandard ?? "",
+        processInspection: item.processInspection ?? "",
+        defectManagement: item.defectManagement ?? "",
+        qualityHistory: item.qualityHistory ?? "",
+      }));
+
+      setRows(normalized);
+      setTotalPages(Array.isArray(data) ? 1 : data.totalPages ?? 0);
+      setTotalElements(Array.isArray(data) ? normalized.length : data.totalElements ?? 0);
+    } catch (err) {
+      console.error("품질관리 목록 조회 실패", err);
       setRows([]);
       setTotalPages(0);
       setTotalElements(0);
-      return;
     }
-
-    const data = await res.json();
-    console.log("quality list raw =", data);
-
-    const list = Array.isArray(data) ? data : data.content ?? [];
-
-    const normalized = list.map((item: any) => ({
-      id: item.id,
-      inspectionStandard: item.inspectionStandard ?? "",
-      processInspection: item.processInspection ?? "",
-      defectManagement: item.defectManagement ?? "",
-      qualityHistory: item.qualityHistory ?? "",
-    }));
-
-    setRows(normalized);
-    setTotalPages(Array.isArray(data) ? 1 : (data.totalPages ?? 0));
-    setTotalElements(Array.isArray(data) ? normalized.length : (data.totalElements ?? 0));
-  } catch (err) {
-    console.error("품질관리 목록 조회 실패", err);
-    setRows([]);
-    setTotalPages(0);
-    setTotalElements(0);
-  }
-};
+  };
 
   useEffect(() => {
     fetchList(page);
@@ -247,16 +241,13 @@ const QualityManagement = () => {
     };
 
     try {
-      const res = await fetch(
-        `${API_BASE}/api/quality-management/${selected.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+      const res = await fetch(`${API_BASE}/api/quality-management/${selected.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
       if (!res.ok) {
         const raw = await res.text().catch(() => "");
@@ -279,12 +270,9 @@ const QualityManagement = () => {
     if (!ok) return;
 
     try {
-      const res = await fetch(
-        `${API_BASE}/api/quality-management/${selected.id}`,
-        {
-          method: "DELETE",
-        }
-      );
+      const res = await fetch(`${API_BASE}/api/quality-management/${selected.id}`, {
+        method: "DELETE",
+      });
 
       if (!res.ok) {
         const raw = await res.text().catch(() => "");
@@ -309,92 +297,222 @@ const QualityManagement = () => {
   return (
     <>
       <Wrapper>
-        <Lnb/>
+        <Lnb />
         <DflexColumn>
           <Content>
             <Top />
           </Content>
 
           <Container fluid className="p-0">
-            <Row>
-              <Col>
-                <Ctap>
-                  <SpaceBetween>
-                    <h4>품질관리</h4>
-                    <Dflex>
-                      <Button className="my-3" onClick={handleOpenCreate}>
-                        품질 관리 등록
-                      </Button>
-                    </Dflex>
-                  </SpaceBetween>
+            <Row className="g-0 m-0">
+              <Col className="p-0">
+                <Ctap
+                  style={{
+                    background: "#fff",
+                    padding: "24px 28px",
+                    border: "1px solid #e5e7eb",
+                  }}
+                >
+                  <div
+                    style={{
+                      paddingBottom: "16px",
+                      marginBottom: "20px",
+                      borderBottom: "1px solid #e5e7eb",
+                    }}
+                  >
+                    <h4
+                      className="mb-0"
+                      style={{
+                        fontWeight: 700,
+                        color: "#111827",
+                      }}
+                    >
+                      품질관리
+                    </h4>
+                  </div>
 
-                  <Table bordered hover>
-                    <thead>
-                      <tr className="text-center">
-                        {TABLE_HEADERS.map((h) => (
-                          <th key={h.key}>{h.label}</th>
-                        ))}
-                      </tr>
-                    </thead>
+                  <DflexColumn2
+                    className="mb-4"
+                    style={{
+                      border: "1px solid #e5e7eb",
+                      padding: "16px 20px",
+                      background: "#f9fafb",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "100%",
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        alignItems: "center",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "flex-end",
+                          alignItems: "center",
+                          gap: "12px",
+                          flexWrap: "nowrap",
+                        }}
+                      >
+                        <Button
+                          onClick={handleOpenCreate}
+                          variant="primary"
+                          style={{
+                            height: "44px",
+                            minWidth: "132px",
+                            borderRadius: "6px",
+                            fontWeight: 600,
+                            margin: 0,
+                          }}
+                        >
+                          품질 관리 등록
+                        </Button>
+                      </div>
+                    </div>
+                  </DflexColumn2>
+
+                  <div
+                    style={{
+                      background: "#fff",
+                      border: "1px solid #e5e7eb",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <div style={{ padding: "12px 12px 0 12px" }}>
+                      <Table responsive className="mt-3 mb-0 align-middle">
+                        <thead>
+                          <tr className="text-center">
+                            {TABLE_HEADERS.map((h) => (
+                              <th
+                                key={h.key}
+                                className="bg-secondary text-white"
+                                style={{
+                                  whiteSpace: "nowrap",
+                                  padding: "14px 12px",
+                                  fontSize: "14px",
+                                  fontWeight: 700,
+                                  borderBottom: "none",
+                                }}
+                              >
+                                {h.label}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
 
                         <tbody>
-  {rows.map((row) => (
-    <tr
-      key={row.id}
-      className="text-center"
-      style={{ cursor: "pointer" }}
-      onClick={() => openDetail(row.id)}
-    >
-      <td>{row.inspectionStandard}</td>
-      <td>{row.processInspection}</td>
-      <td>{row.defectManagement}</td>
-      <td>{row.qualityHistory}</td>
-    </tr>
-  ))}
-</tbody>
-                    
-                  </Table>
-
-                  <Center>
-                    {totalPages > 0 && (
-                      <Pagination>
-                        <Pagination.First
-                          disabled={page === 0}
-                          onClick={() => goPage(0)}
-                        />
-                        <Pagination.Prev
-                          disabled={page === 0}
-                          onClick={() => goPage(page - 1)}
-                        />
-
-                        {Array.from({ length: totalPages })
-                          .map((_, i) => i)
-                          .filter((i) => i >= page - 2 && i <= page + 2)
-                          .map((i) => (
-                            <Pagination.Item
-                              key={i}
-                              active={i === page}
-                              onClick={() => goPage(i)}
+                          {rows.map((row) => (
+                            <tr
+                              key={row.id}
+                              className="text-center"
+                              style={{ cursor: "pointer" }}
+                              onClick={() => openDetail(row.id)}
                             >
-                              {i + 1}
-                            </Pagination.Item>
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                  fontWeight: 600,
+                                  textDecoration: "underline",
+                                }}
+                              >
+                                {row.inspectionStandard}
+                              </td>
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {row.processInspection}
+                              </td>
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {row.defectManagement}
+                              </td>
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {row.qualityHistory}
+                              </td>
+                            </tr>
                           ))}
+                        </tbody>
+                      </Table>
 
-                        <Pagination.Next
-                          disabled={page >= totalPages - 1}
-                          onClick={() => goPage(page + 1)}
-                        />
-                        <Pagination.Last
-                          disabled={page >= totalPages - 1}
-                          onClick={() => goPage(totalPages - 1)}
-                        />
-                      </Pagination>
-                    )}
+                      <Center
+                        style={{
+                          marginTop: "16px",
+                          paddingTop: "16px",
+                          borderTop: "1px solid #e5e7eb",
+                          flexDirection: "column",
+                          gap: "10px",
+                        }}
+                      >
+                        {totalPages > 0 && (
+                          <Pagination className="mb-0">
+                            <Pagination.First
+                              disabled={page === 0}
+                              onClick={() => goPage(0)}
+                            />
+                            <Pagination.Prev
+                              disabled={page === 0}
+                              onClick={() => goPage(page - 1)}
+                            />
 
-                    <PageTotal>
-                      총 {totalElements}건 {page + 1} / {totalPages || 1} 페이지
-                    </PageTotal>
-                  </Center>
+                            {Array.from({ length: totalPages })
+                              .map((_, i) => i)
+                              .filter((i) => i >= page - 2 && i <= page + 2)
+                              .map((i) => (
+                                <Pagination.Item
+                                  key={i}
+                                  active={i === page}
+                                  onClick={() => goPage(i)}
+                                >
+                                  {i + 1}
+                                </Pagination.Item>
+                              ))}
+
+                            <Pagination.Next
+                              disabled={page >= totalPages - 1}
+                              onClick={() => goPage(page + 1)}
+                            />
+                            <Pagination.Last
+                              disabled={page >= totalPages - 1}
+                              onClick={() => goPage(totalPages - 1)}
+                            />
+                          </Pagination>
+                        )}
+
+                        <PageTotal
+                          style={{
+                            color: "#64748b",
+                            fontWeight: 600,
+                            marginBottom: "4px",
+                          }}
+                        >
+                          총 {totalElements}건 {page + 1} / {totalPages || 1} 페이지
+                        </PageTotal>
+                      </Center>
+                    </div>
+                  </div>
                 </Ctap>
               </Col>
             </Row>

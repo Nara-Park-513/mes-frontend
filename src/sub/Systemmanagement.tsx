@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import Lnb from "../include/Lnb";
 import Top from "../include/Top";
 
-import { Wrapper, DflexColumn, Content, Ctap } from "../styled/Sales.styles";
-import { SpaceBetween, Center, Dflex, PageTotal } from "../styled/Component.styles";
+import { Wrapper, DflexColumn, Content, Ctap, DflexColumn2 } from "../styled/Sales.styles";
+import { Center, PageTotal } from "../styled/Component.styles";
 
 import { Container, Row, Col, Table, Button, Modal, Form, Pagination } from "react-bootstrap";
 
@@ -50,7 +50,7 @@ const TABLE_HEADERS: { key: keyof SystemItem; label: string }[] = [
 const SystemManagement = () => {
   const [rows, setRows] = useState<SystemItem[]>([]);
   const [page, setPage] = useState(0);
-  const [size] = useState(10); // 페이지 사이즈 고정 (원하면 setSize로 바꿔도 됨)
+  const [size] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
 
@@ -93,18 +93,23 @@ const SystemManagement = () => {
 
   // ✅ 목록 조회
   const fetchList = async (p: number) => {
-    try {
-      const res = await fetch(`${API_BASE}/api/systems?page=${p}&size=${size}`);
-      if (!res.ok) throw new Error("서버 오류");
+  try {
+    const res = await fetch(`${API_BASE}/api/systems?page=${p}&size=${size}&sort=id,desc`, {
+      cache: "no-store",
+    });
+    if (!res.ok) throw new Error("서버 오류");
 
-      const data: PageResponse<SystemItem> = await res.json();
-      setRows(data.content);
-      setTotalPages(data.totalPages);
-      setTotalElements(data.totalElements);
-    } catch (err) {
-      console.error("시스템 목록 조회 실패", err);
-    }
-  };
+    const data: PageResponse<SystemItem> = await res.json();
+    console.log("systems list response", data);
+    console.log("systems content", data.content);
+
+    setRows(data.content);
+    setTotalPages(data.totalPages);
+    setTotalElements(data.totalElements);
+  } catch (err) {
+    console.error("시스템 목록 조회 실패", err);
+  }
+};
 
   useEffect(() => {
     fetchList(page);
@@ -144,41 +149,45 @@ const SystemManagement = () => {
 
   // ✅ 등록 저장
   const handleSave = async () => {
-    const res = await fetch(`${API_BASE}/api/systems`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        systemCode: createForm.systemCode,
-        systemName: createForm.systemName,
-        systemGroup: createForm.systemGroup || null,
-        owner: createForm.owner || null,
-        version: createForm.version || null,
-        status: createForm.status || null,
-        useYn: createForm.useYn || "Y",
-        remark: createForm.remark || "",
-      }),
-    });
+  const res = await fetch(`${API_BASE}/api/systems`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      systemCode: createForm.systemCode,
+      systemName: createForm.systemName,
+      systemGroup: createForm.systemGroup || null,
+      owner: createForm.owner || null,
+      version: createForm.version || null,
+      status: createForm.status || null,
+      useYn: createForm.useYn || "Y",
+      remark: createForm.remark || "",
+    }),
+  });
 
-    if (!res.ok) {
-      const raw = await res.text().catch(() => "");
-      alert(raw || "등록 실패");
-      return;
-    }
+  const raw = await res.text().catch(() => "");
+  console.log("system create status", res.status);
+  console.log("system create response", raw);
 
-    setShowCreate(false);
-    fetchList(page);
+  if (!res.ok) {
+    alert(raw || "등록 실패");
+    return;
+  }
 
-    setCreateForm({
-      systemCode: "",
-      systemName: "",
-      systemGroup: "",
-      owner: "",
-      version: "",
-      status: "ACTIVE",
-      useYn: "Y",
-      remark: "",
-    });
-  };
+  setShowCreate(false);
+  setPage(0);
+  fetchList(0);
+
+  setCreateForm({
+    systemCode: "",
+    systemName: "",
+    systemGroup: "",
+    owner: "",
+    version: "",
+    status: "ACTIVE",
+    useYn: "Y",
+    remark: "",
+  });
+};
 
   // ✅ 상세 열기
   const openDetail = async (id: number) => {
@@ -207,7 +216,7 @@ const SystemManagement = () => {
     }
   };
 
-  // ✅ 수정 저장 (여기가 핵심: 성공 처리 if 밖)
+  // ✅ 수정 저장
   const handleUpdate = async () => {
     if (!selected) return;
 
@@ -225,7 +234,6 @@ const SystemManagement = () => {
       return;
     }
 
-    // ✅ 성공 처리
     setShowDetail(false);
     fetchList(page);
   };
@@ -261,79 +269,283 @@ const SystemManagement = () => {
           </Content>
 
           <Container fluid className="p-0">
-            <Row>
-              <Col>
-                <Ctap>
-                  <SpaceBetween>
-                    <h4>시스템관리</h4>
-                    <Dflex>
-                      <Button className="mx-2 my-3" onClick={handleExcelDownload} variant="primary">
-                        엑셀다운로드
-                      </Button>
-                      <Button className="my-3" onClick={() => setShowCreate(true)} variant="success">
-                        시스템등록
-                      </Button>
-                    </Dflex>
-                  </SpaceBetween>
+            <Row className="g-0 m-0">
+              <Col className="p-0">
+                <Ctap
+                  style={{
+                    background: "#fff",
+                    padding: "24px 28px",
+                    border: "1px solid #e5e7eb",
+                  }}
+                >
+                  <div
+                    style={{
+                      paddingBottom: "16px",
+                      marginBottom: "20px",
+                      borderBottom: "1px solid #e5e7eb",
+                    }}
+                  >
+                    <h4
+                      className="mb-0"
+                      style={{
+                        fontWeight: 700,
+                        color: "#111827",
+                      }}
+                    >
+                      시스템관리
+                    </h4>
+                  </div>
 
-                  <Table bordered hover>
-                    <thead>
-                      <tr className="text-center">
-                        <th>#</th>
-                        {TABLE_HEADERS.map((h) => (
-                          <th key={h.key as string}>{h.label}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(rows || []).map((r, i) => (
-                        <tr key={r.id ?? i} className="text-center">
-                          <td>{i + 1 + page * size}</td>
-                          <td
-                            style={{ cursor: "pointer", textDecoration: "underline" }}
-                            onClick={() => openDetail(r.id)}
-                          >
-                            {r.systemCode}
-                          </td>
-                          <td>{r.systemName}</td>
-                          <td>{r.systemGroup ?? ""}</td>
-                          <td>{r.owner ?? ""}</td>
-                          <td>{r.version ?? ""}</td>
-                          <td>{r.status ?? ""}</td>
-                          <td>{r.useYn}</td>
-                          <td>{r.remark ?? ""}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
+                  <DflexColumn2
+                    className="mb-4"
+                    style={{
+                      border: "1px solid #e5e7eb",
+                      padding: "16px 20px",
+                      background: "#f9fafb",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "100%",
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        alignItems: "center",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "flex-end",
+                          alignItems: "center",
+                          gap: "12px",
+                          flexWrap: "nowrap",
+                        }}
+                      >
+                        <Button
+                          onClick={handleExcelDownload}
+                          variant="success"
+                          style={{
+                            height: "44px",
+                            minWidth: "120px",
+                            borderRadius: "6px",
+                            fontWeight: 600,
+                            margin: 0,
+                          }}
+                        >
+                          엑셀 다운
+                        </Button>
 
-                  <Center>
-                    {totalPages > 0 && (
-                      <Pagination>
-                        <Pagination.First disabled={page === 0} onClick={() => goPage(0)} />
-                        <Pagination.Prev disabled={page === 0} onClick={() => goPage(page - 1)} />
-                        {Array.from({ length: totalPages })
-                          .map((_, i) => i)
-                          .filter((i) => i >= page - 2 && i <= page + 2)
-                          .map((i) => (
-                            <Pagination.Item key={i} active={i === page} onClick={() => goPage(i)}>
-                              {i + 1}
-                            </Pagination.Item>
+                        <Button
+                          onClick={() => setShowCreate(true)}
+                          variant="primary"
+                          style={{
+                            height: "44px",
+                            minWidth: "120px",
+                            borderRadius: "6px",
+                            fontWeight: 600,
+                            margin: 0,
+                          }}
+                        >
+                          시스템 등록
+                        </Button>
+                      </div>
+                    </div>
+                  </DflexColumn2>
+
+                  <div
+                    style={{
+                      background: "#fff",
+                      border: "1px solid #e5e7eb",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <div style={{ padding: "12px 12px 0 12px" }}>
+                      <Table responsive className="mt-3 mb-0 align-middle">
+                        <thead>
+                          <tr className="text-center">
+                            <th
+                              className="bg-secondary text-white"
+                              style={{
+                                whiteSpace: "nowrap",
+                                padding: "14px 12px",
+                                fontSize: "14px",
+                                fontWeight: 700,
+                                borderBottom: "none",
+                              }}
+                            >
+                              #
+                            </th>
+                            {TABLE_HEADERS.map((h) => (
+                              <th
+                                key={h.key as string}
+                                className="bg-secondary text-white"
+                                style={{
+                                  whiteSpace: "nowrap",
+                                  padding: "14px 12px",
+                                  fontSize: "14px",
+                                  fontWeight: 700,
+                                  borderBottom: "none",
+                                }}
+                              >
+                                {h.label}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(rows || []).map((r, i) => (
+                            <tr key={r.id ?? i} className="text-center">
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#475569",
+                                  fontWeight: 600,
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {i + 1 + page * size}
+                              </td>
+
+                              <td
+                                style={{
+                                  cursor: "pointer",
+                                  textDecoration: "underline",
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#0d6efd",
+                                  fontWeight: 600,
+                                  whiteSpace: "nowrap",
+                                }}
+                                onClick={() => openDetail(r.id)}
+                              >
+                                {r.systemCode}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.systemName}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.systemGroup ?? ""}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.owner ?? ""}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.version ?? ""}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.status ?? ""}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.useYn}
+                              </td>
+
+                              <td
+                                style={{
+                                  padding: "13px 12px",
+                                  verticalAlign: "middle",
+                                  color: "#334155",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {r.remark ?? ""}
+                              </td>
+                            </tr>
                           ))}
-                        <Pagination.Next
-                          disabled={page >= totalPages - 1}
-                          onClick={() => goPage(page + 1)}
-                        />
-                        <Pagination.Last
-                          disabled={page >= totalPages - 1}
-                          onClick={() => goPage(totalPages - 1)}
-                        />
-                      </Pagination>
-                    )}
-                    <PageTotal>
-                      총 {totalElements}건 {page + 1} / {totalPages || 1} 페이지
-                    </PageTotal>
-                  </Center>
+                        </tbody>
+                      </Table>
+
+                      <Center
+                        style={{
+                          marginTop: "16px",
+                          paddingTop: "16px",
+                          borderTop: "1px solid #e5e7eb",
+                          flexDirection: "column",
+                          gap: "10px",
+                        }}
+                      >
+                        {totalPages > 0 && (
+                          <Pagination className="mb-0">
+                            <Pagination.First disabled={page === 0} onClick={() => goPage(0)} />
+                            <Pagination.Prev disabled={page === 0} onClick={() => goPage(page - 1)} />
+                            {Array.from({ length: totalPages })
+                              .map((_, i) => i)
+                              .filter((i) => i >= page - 2 && i <= page + 2)
+                              .map((i) => (
+                                <Pagination.Item key={i} active={i === page} onClick={() => goPage(i)}>
+                                  {i + 1}
+                                </Pagination.Item>
+                              ))}
+                            <Pagination.Next
+                              disabled={page >= totalPages - 1}
+                              onClick={() => goPage(page + 1)}
+                            />
+                            <Pagination.Last
+                              disabled={page >= totalPages - 1}
+                              onClick={() => goPage(totalPages - 1)}
+                            />
+                          </Pagination>
+                        )}
+                        <PageTotal
+                          style={{
+                            color: "#64748b",
+                            fontWeight: 600,
+                            marginBottom: "4px",
+                          }}
+                        >
+                          총 {totalElements}건 {page + 1} / {totalPages || 1} 페이지
+                        </PageTotal>
+                      </Center>
+                    </div>
+                  </div>
                 </Ctap>
               </Col>
             </Row>
