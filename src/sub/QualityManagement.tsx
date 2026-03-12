@@ -24,10 +24,10 @@ const API_BASE = "http://localhost:9500";
 
 type QualityManagementItem = {
   id: number;
-  inspectionStandard: string; // 검사기준관리
-  processInspection: string; // 공정검사
-  defectManagement: string; // 불량관리
-  qualityHistory: string; // 품질이력
+  inspectionStandard: string;
+  processInspection: string;
+  defectManagement: string;
+  qualityHistory: string;
 };
 
 type PageResponse<T> = {
@@ -294,23 +294,45 @@ const QualityManagement = () => {
     !!createForm.defectManagement.trim() &&
     !!createForm.qualityHistory.trim();
 
+  const thStyle: React.CSSProperties = {
+    whiteSpace: "nowrap",
+    padding: "13px 10px",
+    fontSize: "13px",
+    fontWeight: 700,
+    borderBottom: "none",
+    textAlign: "center",
+    verticalAlign: "middle",
+  };
+
+  const tdStyle: React.CSSProperties = {
+    padding: "12px 10px",
+    verticalAlign: "middle",
+    color: "#334155",
+    whiteSpace: "nowrap",
+    textAlign: "center",
+    fontSize: "13px",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  };
+
   return (
     <>
       <Wrapper>
         <Lnb />
-        <DflexColumn>
-          <Content>
+        <DflexColumn style={{ minWidth: 0 }}>
+          <Content style={{ minWidth: 0 }}>
             <Top />
           </Content>
 
-          <Container fluid className="p-0">
+          <Container fluid className="p-0" style={{ minWidth: 0 }}>
             <Row className="g-0 m-0">
-              <Col className="p-0">
+              <Col className="p-0" style={{ minWidth: 0 }}>
                 <Ctap
                   style={{
                     background: "#fff",
-                    padding: "24px 28px",
+                    padding: "24px 24px 20px",
                     border: "1px solid #e5e7eb",
+                    minWidth: 0,
                   }}
                 >
                   <div
@@ -352,19 +374,21 @@ const QualityManagement = () => {
                           display: "flex",
                           justifyContent: "flex-end",
                           alignItems: "center",
-                          gap: "12px",
-                          flexWrap: "nowrap",
+                          gap: "10px",
+                          flexWrap: "wrap",
                         }}
                       >
                         <Button
                           onClick={handleOpenCreate}
                           variant="primary"
                           style={{
-                            height: "44px",
-                            minWidth: "132px",
+                            height: "42px",
+                            minWidth: "120px",
                             borderRadius: "6px",
                             fontWeight: 600,
                             margin: 0,
+                            padding: "0 14px",
+                            fontSize: "13px",
                           }}
                         >
                           품질 관리 등록
@@ -380,21 +404,34 @@ const QualityManagement = () => {
                       overflow: "hidden",
                     }}
                   >
-                    <div style={{ padding: "12px 12px 0 12px" }}>
-                      <Table responsive className="mt-3 mb-0 align-middle">
+                    <div
+                      style={{
+                        padding: "10px 10px 0 10px",
+                        minWidth: 0,
+                      }}
+                    >
+                      <Table
+                        className="mt-3 mb-0 align-middle"
+                        style={{
+                          width: "100%",
+                          marginBottom: 0,
+                          tableLayout: "fixed",
+                        }}
+                      >
+                        <colgroup>
+                          <col style={{ width: "25%" }} />
+                          <col style={{ width: "25%" }} />
+                          <col style={{ width: "25%" }} />
+                          <col style={{ width: "25%" }} />
+                        </colgroup>
+
                         <thead>
                           <tr className="text-center">
                             {TABLE_HEADERS.map((h) => (
                               <th
                                 key={h.key}
                                 className="bg-secondary text-white"
-                                style={{
-                                  whiteSpace: "nowrap",
-                                  padding: "14px 12px",
-                                  fontSize: "14px",
-                                  fontWeight: 700,
-                                  borderBottom: "none",
-                                }}
+                                style={thStyle}
                               >
                                 {h.label}
                               </th>
@@ -412,44 +449,22 @@ const QualityManagement = () => {
                             >
                               <td
                                 style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
+                                  ...tdStyle,
                                   fontWeight: 600,
                                   textDecoration: "underline",
+                                  color: "#0d6efd",
                                 }}
+                                title={row.inspectionStandard}
                               >
                                 {row.inspectionStandard}
                               </td>
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
+                              <td style={tdStyle} title={row.processInspection}>
                                 {row.processInspection}
                               </td>
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
+                              <td style={tdStyle} title={row.defectManagement}>
                                 {row.defectManagement}
                               </td>
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
+                              <td style={tdStyle} title={row.qualityHistory}>
                                 {row.qualityHistory}
                               </td>
                             </tr>
@@ -467,7 +482,7 @@ const QualityManagement = () => {
                         }}
                       >
                         {totalPages > 0 && (
-                          <Pagination className="mb-0">
+                          <Pagination className="mb-0" size="sm">
                             <Pagination.First
                               disabled={page === 0}
                               onClick={() => goPage(0)}
@@ -506,6 +521,7 @@ const QualityManagement = () => {
                             color: "#64748b",
                             fontWeight: 600,
                             marginBottom: "4px",
+                            fontSize: "13px",
                           }}
                         >
                           총 {totalElements}건 {page + 1} / {totalPages || 1} 페이지
@@ -521,107 +537,336 @@ const QualityManagement = () => {
       </Wrapper>
 
       {/* 등록 모달 */}
-      <Modal show={showCreate} onHide={handleCloseCreate} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>품질 관리 등록</Modal.Title>
+      <Modal show={showCreate} onHide={handleCloseCreate} centered size="lg">
+        <Modal.Header
+          closeButton
+          style={{
+            borderBottom: "1px solid #dbe2ea",
+            padding: "20px 24px",
+            backgroundColor: "#f8fafc",
+          }}
+        >
+          <Modal.Title
+            style={{
+              fontSize: "20px",
+              fontWeight: 700,
+              color: "#111827",
+              letterSpacing: "-0.02em",
+            }}
+          >
+            품질 관리 등록
+          </Modal.Title>
         </Modal.Header>
 
-        <Modal.Body>
+        <Modal.Body
+          style={{
+            padding: "24px",
+            backgroundColor: "#ffffff",
+          }}
+        >
           <Form>
-            <Form.Control
-              className="mb-3"
-              name="inspectionStandard"
-              placeholder="검사기준관리"
-              value={createForm.inspectionStandard}
-              onChange={onCreateChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                검사기준관리
+              </Form.Label>
+              <Form.Control
+                name="inspectionStandard"
+                placeholder="검사기준관리"
+                value={createForm.inspectionStandard}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-3"
-              name="processInspection"
-              placeholder="공정검사"
-              value={createForm.processInspection}
-              onChange={onCreateChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                공정검사
+              </Form.Label>
+              <Form.Control
+                name="processInspection"
+                placeholder="공정검사"
+                value={createForm.processInspection}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-3"
-              name="defectManagement"
-              placeholder="불량관리"
-              value={createForm.defectManagement}
-              onChange={onCreateChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                불량관리
+              </Form.Label>
+              <Form.Control
+                name="defectManagement"
+                placeholder="불량관리"
+                value={createForm.defectManagement}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-3"
-              name="qualityHistory"
-              placeholder="품질이력"
-              value={createForm.qualityHistory}
-              onChange={onCreateChange}
-            />
+            <Form.Group className="mb-0">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                품질이력
+              </Form.Label>
+              <Form.Control
+                name="qualityHistory"
+                placeholder="품질이력"
+                value={createForm.qualityHistory}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
           </Form>
         </Modal.Body>
 
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseCreate}>
+        <Modal.Footer
+          style={{
+            borderTop: "1px solid #dbe2ea",
+            padding: "16px 24px",
+            backgroundColor: "#f8fafc",
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: "10px",
+          }}
+        >
+          <Button
+            variant="secondary"
+            onClick={handleCloseCreate}
+            style={{
+              minWidth: "96px",
+              height: "42px",
+              borderRadius: "4px",
+              fontWeight: 600,
+            }}
+          >
             닫기
           </Button>
-          <Button onClick={handleSave} disabled={!canSave}>
+          <Button
+            onClick={handleSave}
+            disabled={!canSave}
+            style={{
+              minWidth: "96px",
+              height: "42px",
+              borderRadius: "4px",
+              fontWeight: 600,
+            }}
+          >
             저장
           </Button>
         </Modal.Footer>
       </Modal>
 
       {/* 상세/수정 모달 */}
-      <Modal show={showDetail} onHide={handleCloseDetail} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>품질 관리 등록</Modal.Title>
+      <Modal show={showDetail} onHide={handleCloseDetail} centered size="lg">
+        <Modal.Header
+          closeButton
+          style={{
+            borderBottom: "1px solid #dbe2ea",
+            padding: "20px 24px",
+            backgroundColor: "#f8fafc",
+          }}
+        >
+          <Modal.Title
+            style={{
+              fontSize: "20px",
+              fontWeight: 700,
+              color: "#111827",
+              letterSpacing: "-0.02em",
+            }}
+          >
+            품질 관리 상세
+          </Modal.Title>
         </Modal.Header>
 
-        <Modal.Body>
+        <Modal.Body
+          style={{
+            padding: "24px",
+            backgroundColor: "#ffffff",
+          }}
+        >
           <Form>
-            <Form.Control
-              className="mb-3"
-              name="inspectionStandard"
-              placeholder="검사기준관리"
-              value={editForm.inspectionStandard}
-              onChange={onEditChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                검사기준관리
+              </Form.Label>
+              <Form.Control
+                name="inspectionStandard"
+                placeholder="검사기준관리"
+                value={editForm.inspectionStandard}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-3"
-              name="processInspection"
-              placeholder="공정검사"
-              value={editForm.processInspection}
-              onChange={onEditChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                공정검사
+              </Form.Label>
+              <Form.Control
+                name="processInspection"
+                placeholder="공정검사"
+                value={editForm.processInspection}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-3"
-              name="defectManagement"
-              placeholder="불량관리"
-              value={editForm.defectManagement}
-              onChange={onEditChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                불량관리
+              </Form.Label>
+              <Form.Control
+                name="defectManagement"
+                placeholder="불량관리"
+                value={editForm.defectManagement}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-3"
-              name="qualityHistory"
-              placeholder="품질이력"
-              value={editForm.qualityHistory}
-              onChange={onEditChange}
-            />
+            <Form.Group className="mb-0">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                품질이력
+              </Form.Label>
+              <Form.Control
+                name="qualityHistory"
+                placeholder="품질이력"
+                value={editForm.qualityHistory}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
           </Form>
         </Modal.Body>
 
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseDetail}>
-            닫기
-          </Button>
-          <Button variant="danger" onClick={handleDelete}>
+        <Modal.Footer
+          style={{
+            borderTop: "1px solid #dbe2ea",
+            padding: "16px 24px",
+            backgroundColor: "#f8fafc",
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: "10px",
+          }}
+        >
+          <Button
+            variant="danger"
+            onClick={handleDelete}
+            style={{
+              minWidth: "96px",
+              height: "42px",
+              borderRadius: "4px",
+              fontWeight: 600,
+            }}
+          >
             삭제
           </Button>
-          <Button variant="success" onClick={handleUpdate}>
+          <Button
+            variant="success"
+            onClick={handleUpdate}
+            style={{
+              minWidth: "96px",
+              height: "42px",
+              borderRadius: "4px",
+              fontWeight: 600,
+            }}
+          >
             저장
           </Button>
         </Modal.Footer>

@@ -93,23 +93,23 @@ const SystemManagement = () => {
 
   // ✅ 목록 조회
   const fetchList = async (p: number) => {
-  try {
-    const res = await fetch(`${API_BASE}/api/systems?page=${p}&size=${size}&sort=id,desc`, {
-      cache: "no-store",
-    });
-    if (!res.ok) throw new Error("서버 오류");
+    try {
+      const res = await fetch(`${API_BASE}/api/systems?page=${p}&size=${size}&sort=id,desc`, {
+        cache: "no-store",
+      });
+      if (!res.ok) throw new Error("서버 오류");
 
-    const data: PageResponse<SystemItem> = await res.json();
-    console.log("systems list response", data);
-    console.log("systems content", data.content);
+      const data: PageResponse<SystemItem> = await res.json();
+      console.log("systems list response", data);
+      console.log("systems content", data.content);
 
-    setRows(data.content);
-    setTotalPages(data.totalPages);
-    setTotalElements(data.totalElements);
-  } catch (err) {
-    console.error("시스템 목록 조회 실패", err);
-  }
-};
+      setRows(data.content);
+      setTotalPages(data.totalPages);
+      setTotalElements(data.totalElements);
+    } catch (err) {
+      console.error("시스템 목록 조회 실패", err);
+    }
+  };
 
   useEffect(() => {
     fetchList(page);
@@ -149,45 +149,45 @@ const SystemManagement = () => {
 
   // ✅ 등록 저장
   const handleSave = async () => {
-  const res = await fetch(`${API_BASE}/api/systems`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      systemCode: createForm.systemCode,
-      systemName: createForm.systemName,
-      systemGroup: createForm.systemGroup || null,
-      owner: createForm.owner || null,
-      version: createForm.version || null,
-      status: createForm.status || null,
-      useYn: createForm.useYn || "Y",
-      remark: createForm.remark || "",
-    }),
-  });
+    const res = await fetch(`${API_BASE}/api/systems`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        systemCode: createForm.systemCode,
+        systemName: createForm.systemName,
+        systemGroup: createForm.systemGroup || null,
+        owner: createForm.owner || null,
+        version: createForm.version || null,
+        status: createForm.status || null,
+        useYn: createForm.useYn || "Y",
+        remark: createForm.remark || "",
+      }),
+    });
 
-  const raw = await res.text().catch(() => "");
-  console.log("system create status", res.status);
-  console.log("system create response", raw);
+    const raw = await res.text().catch(() => "");
+    console.log("system create status", res.status);
+    console.log("system create response", raw);
 
-  if (!res.ok) {
-    alert(raw || "등록 실패");
-    return;
-  }
+    if (!res.ok) {
+      alert(raw || "등록 실패");
+      return;
+    }
 
-  setShowCreate(false);
-  setPage(0);
-  fetchList(0);
+    setShowCreate(false);
+    setPage(0);
+    fetchList(0);
 
-  setCreateForm({
-    systemCode: "",
-    systemName: "",
-    systemGroup: "",
-    owner: "",
-    version: "",
-    status: "ACTIVE",
-    useYn: "Y",
-    remark: "",
-  });
-};
+    setCreateForm({
+      systemCode: "",
+      systemName: "",
+      systemGroup: "",
+      owner: "",
+      version: "",
+      status: "ACTIVE",
+      useYn: "Y",
+      remark: "",
+    });
+  };
 
   // ✅ 상세 열기
   const openDetail = async (id: number) => {
@@ -259,23 +259,43 @@ const SystemManagement = () => {
     fetchList(page);
   };
 
+  const thStyle: React.CSSProperties = {
+    whiteSpace: "nowrap",
+    padding: "13px 10px",
+    fontSize: "13px",
+    fontWeight: 700,
+    borderBottom: "none",
+    textAlign: "center",
+    verticalAlign: "middle",
+  };
+
+  const tdStyle: React.CSSProperties = {
+    padding: "12px 10px",
+    verticalAlign: "middle",
+    color: "#334155",
+    whiteSpace: "nowrap",
+    textAlign: "center",
+    fontSize: "13px",
+  };
+
   return (
     <>
       <Wrapper>
         <Lnb />
-        <DflexColumn>
-          <Content>
+        <DflexColumn style={{ minWidth: 0 }}>
+          <Content style={{ minWidth: 0 }}>
             <Top />
           </Content>
 
-          <Container fluid className="p-0">
+          <Container fluid className="p-0" style={{ minWidth: 0 }}>
             <Row className="g-0 m-0">
-              <Col className="p-0">
+              <Col className="p-0" style={{ minWidth: 0 }}>
                 <Ctap
                   style={{
                     background: "#fff",
-                    padding: "24px 28px",
+                    padding: "24px 24px 20px",
                     border: "1px solid #e5e7eb",
+                    minWidth: 0,
                   }}
                 >
                   <div
@@ -317,19 +337,21 @@ const SystemManagement = () => {
                           display: "flex",
                           justifyContent: "flex-end",
                           alignItems: "center",
-                          gap: "12px",
-                          flexWrap: "nowrap",
+                          gap: "10px",
+                          flexWrap: "wrap",
                         }}
                       >
                         <Button
                           onClick={handleExcelDownload}
                           variant="success"
                           style={{
-                            height: "44px",
-                            minWidth: "120px",
+                            height: "42px",
+                            minWidth: "110px",
                             borderRadius: "6px",
                             fontWeight: 600,
                             margin: 0,
+                            padding: "0 14px",
+                            fontSize: "13px",
                           }}
                         >
                           엑셀 다운
@@ -339,11 +361,13 @@ const SystemManagement = () => {
                           onClick={() => setShowCreate(true)}
                           variant="primary"
                           style={{
-                            height: "44px",
-                            minWidth: "120px",
+                            height: "42px",
+                            minWidth: "110px",
                             borderRadius: "6px",
                             fontWeight: 600,
                             margin: 0,
+                            padding: "0 14px",
+                            fontSize: "13px",
                           }}
                         >
                           시스템 등록
@@ -359,34 +383,38 @@ const SystemManagement = () => {
                       overflow: "hidden",
                     }}
                   >
-                    <div style={{ padding: "12px 12px 0 12px" }}>
-                      <Table responsive className="mt-3 mb-0 align-middle">
+                    <div
+                      style={{
+                        padding: "10px 10px 0 10px",
+                        minWidth: 0,
+                      }}
+                    >
+                      <Table
+                        className="mt-3 mb-0 align-middle"
+                        style={{
+                          width: "100%",
+                          marginBottom: 0,
+                          tableLayout: "fixed",
+                        }}
+                      >
+                        <colgroup>
+                          <col style={{ width: "7%" }} />
+                          <col style={{ width: "16%" }} />
+                          <col style={{ width: "18%" }} />
+                          <col style={{ width: "13%" }} />
+                          <col style={{ width: "12%" }} />
+                          <col style={{ width: "10%" }} />
+                          <col style={{ width: "10%" }} />
+                          <col style={{ width: "14%" }} />
+                        </colgroup>
+
                         <thead>
                           <tr className="text-center">
-                            <th
-                              className="bg-secondary text-white"
-                              style={{
-                                whiteSpace: "nowrap",
-                                padding: "14px 12px",
-                                fontSize: "14px",
-                                fontWeight: 700,
-                                borderBottom: "none",
-                              }}
-                            >
+                            <th className="bg-secondary text-white" style={thStyle}>
                               #
                             </th>
                             {TABLE_HEADERS.map((h) => (
-                              <th
-                                key={h.key as string}
-                                className="bg-secondary text-white"
-                                style={{
-                                  whiteSpace: "nowrap",
-                                  padding: "14px 12px",
-                                  fontSize: "14px",
-                                  fontWeight: 700,
-                                  borderBottom: "none",
-                                }}
-                              >
+                              <th key={h.key as string} className="bg-secondary text-white" style={thStyle}>
                                 {h.label}
                               </th>
                             ))}
@@ -397,104 +425,97 @@ const SystemManagement = () => {
                             <tr key={r.id ?? i} className="text-center">
                               <td
                                 style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
+                                  ...tdStyle,
                                   color: "#475569",
                                   fontWeight: 600,
-                                  whiteSpace: "nowrap",
                                 }}
+                                title={String(i + 1 + page * size)}
                               >
                                 {i + 1 + page * size}
                               </td>
 
                               <td
                                 style={{
+                                  ...tdStyle,
                                   cursor: "pointer",
                                   textDecoration: "underline",
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
                                   color: "#0d6efd",
                                   fontWeight: 600,
-                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
                                 }}
                                 onClick={() => openDetail(r.id)}
+                                title={r.systemCode}
                               >
                                 {r.systemCode}
                               </td>
 
                               <td
                                 style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
+                                  ...tdStyle,
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
                                 }}
+                                title={r.systemName}
                               >
                                 {r.systemName}
                               </td>
 
                               <td
                                 style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
+                                  ...tdStyle,
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
                                 }}
+                                title={r.systemGroup ?? ""}
                               >
                                 {r.systemGroup ?? ""}
                               </td>
 
                               <td
                                 style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
+                                  ...tdStyle,
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
                                 }}
+                                title={r.owner ?? ""}
                               >
                                 {r.owner ?? ""}
                               </td>
 
                               <td
                                 style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
+                                  ...tdStyle,
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
                                 }}
+                                title={r.version ?? ""}
                               >
                                 {r.version ?? ""}
                               </td>
 
                               <td
                                 style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
+                                  ...tdStyle,
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
                                 }}
+                                title={r.status ?? ""}
                               >
                                 {r.status ?? ""}
                               </td>
 
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
+                              <td style={tdStyle} title={r.useYn}>
                                 {r.useYn}
                               </td>
 
                               <td
                                 style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
+                                  ...tdStyle,
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
                                 }}
+                                title={r.remark ?? ""}
                               >
                                 {r.remark ?? ""}
                               </td>
@@ -513,7 +534,7 @@ const SystemManagement = () => {
                         }}
                       >
                         {totalPages > 0 && (
-                          <Pagination className="mb-0">
+                          <Pagination className="mb-0" size="sm">
                             <Pagination.First disabled={page === 0} onClick={() => goPage(0)} />
                             <Pagination.Prev disabled={page === 0} onClick={() => goPage(page - 1)} />
                             {Array.from({ length: totalPages })
@@ -539,6 +560,7 @@ const SystemManagement = () => {
                             color: "#64748b",
                             fontWeight: 600,
                             marginBottom: "4px",
+                            fontSize: "13px",
                           }}
                         >
                           총 {totalElements}건 {page + 1} / {totalPages || 1} 페이지
@@ -554,148 +576,545 @@ const SystemManagement = () => {
       </Wrapper>
 
       {/* ✅ 등록 모달 */}
-      <Modal show={showCreate} onHide={() => setShowCreate(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>시스템 등록</Modal.Title>
+      <Modal show={showCreate} onHide={() => setShowCreate(false)} centered size="lg">
+        <Modal.Header
+          closeButton
+          style={{
+            borderBottom: "1px solid #dbe2ea",
+            padding: "20px 24px",
+            backgroundColor: "#f8fafc",
+          }}
+        >
+          <Modal.Title
+            style={{
+              fontSize: "20px",
+              fontWeight: 700,
+              color: "#111827",
+              letterSpacing: "-0.02em",
+            }}
+          >
+            시스템 등록
+          </Modal.Title>
         </Modal.Header>
 
-        <Modal.Body>
+        <Modal.Body
+          style={{
+            padding: "24px",
+            backgroundColor: "#ffffff",
+          }}
+        >
           <Form>
-            <Form.Control
-              className="mb-2"
-              name="systemCode"
-              placeholder="시스템코드"
-              value={createForm.systemCode}
-              onChange={onCreateChange}
-            />
-            <Form.Control
-              className="mb-2"
-              name="systemName"
-              placeholder="시스템명"
-              value={createForm.systemName}
-              onChange={onCreateChange}
-            />
-            <Form.Control
-              className="mb-2"
-              name="systemGroup"
-              placeholder="그룹"
-              value={createForm.systemGroup}
-              onChange={onCreateChange}
-            />
-            <Form.Control
-              className="mb-2"
-              name="owner"
-              placeholder="담당자"
-              value={createForm.owner}
-              onChange={onCreateChange}
-            />
-            <Form.Control
-              className="mb-2"
-              name="version"
-              placeholder="버전"
-              value={createForm.version}
-              onChange={onCreateChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                시스템코드
+              </Form.Label>
+              <Form.Control
+                name="systemCode"
+                placeholder="시스템코드"
+                value={createForm.systemCode}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Select className="mb-2" name="status" value={createForm.status} onChange={onCreateChange}>
-              <option value="ACTIVE">운영</option>
-              <option value="INACTIVE">중지</option>
-              <option value="MAINTENANCE">점검</option>
-            </Form.Select>
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                시스템명
+              </Form.Label>
+              <Form.Control
+                name="systemName"
+                placeholder="시스템명"
+                value={createForm.systemName}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Select className="mb-2" name="useYn" value={createForm.useYn} onChange={onCreateChange}>
-              <option value="Y">사용</option>
-              <option value="N">미사용</option>
-            </Form.Select>
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                그룹
+              </Form.Label>
+              <Form.Control
+                name="systemGroup"
+                placeholder="그룹"
+                value={createForm.systemGroup}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-2"
-              name="remark"
-              placeholder="비고"
-              value={createForm.remark}
-              onChange={onCreateChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                담당자
+              </Form.Label>
+              <Form.Control
+                name="owner"
+                placeholder="담당자"
+                value={createForm.owner}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                버전
+              </Form.Label>
+              <Form.Control
+                name="version"
+                placeholder="버전"
+                value={createForm.version}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                상태
+              </Form.Label>
+              <Form.Select
+                name="status"
+                value={createForm.status}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              >
+                <option value="ACTIVE">운영</option>
+                <option value="INACTIVE">중지</option>
+                <option value="MAINTENANCE">점검</option>
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                사용여부
+              </Form.Label>
+              <Form.Select
+                name="useYn"
+                value={createForm.useYn}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              >
+                <option value="Y">사용</option>
+                <option value="N">미사용</option>
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-0">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                비고
+              </Form.Label>
+              <Form.Control
+                name="remark"
+                placeholder="비고"
+                value={createForm.remark}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
           </Form>
         </Modal.Body>
 
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowCreate(false)}>
+        <Modal.Footer
+          style={{
+            borderTop: "1px solid #dbe2ea",
+            padding: "16px 24px",
+            backgroundColor: "#f8fafc",
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: "10px",
+          }}
+        >
+          <Button
+            variant="secondary"
+            onClick={() => setShowCreate(false)}
+            style={{
+              minWidth: "96px",
+              height: "42px",
+              borderRadius: "4px",
+              fontWeight: 600,
+            }}
+          >
             닫기
           </Button>
-          <Button onClick={handleSave}>저장</Button>
+          <Button
+            onClick={handleSave}
+            style={{
+              minWidth: "96px",
+              height: "42px",
+              borderRadius: "4px",
+              fontWeight: 600,
+            }}
+          >
+            저장
+          </Button>
         </Modal.Footer>
       </Modal>
 
       {/* ✅ 상세(수정/삭제) 모달 */}
-      <Modal show={showDetail} onHide={() => setShowDetail(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>시스템 상세</Modal.Title>
+      <Modal show={showDetail} onHide={() => setShowDetail(false)} centered size="lg">
+        <Modal.Header
+          closeButton
+          style={{
+            borderBottom: "1px solid #dbe2ea",
+            padding: "20px 24px",
+            backgroundColor: "#f8fafc",
+          }}
+        >
+          <Modal.Title
+            style={{
+              fontSize: "20px",
+              fontWeight: 700,
+              color: "#111827",
+              letterSpacing: "-0.02em",
+            }}
+          >
+            시스템 상세
+          </Modal.Title>
         </Modal.Header>
 
-        <Modal.Body>
+        <Modal.Body
+          style={{
+            padding: "24px",
+            backgroundColor: "#ffffff",
+          }}
+        >
           <Form>
-            <Form.Control
-              className="mb-2"
-              name="systemCode"
-              placeholder="시스템코드"
-              value={editForm.systemCode}
-              onChange={onEditChange}
-            />
-            <Form.Control
-              className="mb-2"
-              name="systemName"
-              placeholder="시스템명"
-              value={editForm.systemName}
-              onChange={onEditChange}
-            />
-            <Form.Control
-              className="mb-2"
-              name="systemGroup"
-              placeholder="그룹"
-              value={editForm.systemGroup}
-              onChange={onEditChange}
-            />
-            <Form.Control
-              className="mb-2"
-              name="owner"
-              placeholder="담당자"
-              value={editForm.owner}
-              onChange={onEditChange}
-            />
-            <Form.Control
-              className="mb-2"
-              name="version"
-              placeholder="버전"
-              value={editForm.version}
-              onChange={onEditChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                시스템코드
+              </Form.Label>
+              <Form.Control
+                name="systemCode"
+                placeholder="시스템코드"
+                value={editForm.systemCode}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Select className="mb-2" name="status" value={editForm.status} onChange={onEditChange}>
-              <option value="ACTIVE">운영</option>
-              <option value="INACTIVE">중지</option>
-              <option value="MAINTENANCE">점검</option>
-            </Form.Select>
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                시스템명
+              </Form.Label>
+              <Form.Control
+                name="systemName"
+                placeholder="시스템명"
+                value={editForm.systemName}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Select className="mb-2" name="useYn" value={editForm.useYn} onChange={onEditChange}>
-              <option value="Y">사용</option>
-              <option value="N">미사용</option>
-            </Form.Select>
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                그룹
+              </Form.Label>
+              <Form.Control
+                name="systemGroup"
+                placeholder="그룹"
+                value={editForm.systemGroup}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-2"
-              name="remark"
-              placeholder="비고"
-              value={editForm.remark}
-              onChange={onEditChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                담당자
+              </Form.Label>
+              <Form.Control
+                name="owner"
+                placeholder="담당자"
+                value={editForm.owner}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                버전
+              </Form.Label>
+              <Form.Control
+                name="version"
+                placeholder="버전"
+                value={editForm.version}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                상태
+              </Form.Label>
+              <Form.Select
+                name="status"
+                value={editForm.status}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              >
+                <option value="ACTIVE">운영</option>
+                <option value="INACTIVE">중지</option>
+                <option value="MAINTENANCE">점검</option>
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                사용여부
+              </Form.Label>
+              <Form.Select
+                name="useYn"
+                value={editForm.useYn}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              >
+                <option value="Y">사용</option>
+                <option value="N">미사용</option>
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-0">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                비고
+              </Form.Label>
+              <Form.Control
+                name="remark"
+                placeholder="비고"
+                value={editForm.remark}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
           </Form>
         </Modal.Body>
 
-        <Modal.Footer>
-          <Button variant="danger" onClick={handleDelete}>
+        <Modal.Footer
+          style={{
+            borderTop: "1px solid #dbe2ea",
+            padding: "16px 24px",
+            backgroundColor: "#f8fafc",
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: "10px",
+          }}
+        >
+          <Button
+            variant="danger"
+            onClick={handleDelete}
+            style={{
+              minWidth: "96px",
+              height: "42px",
+              borderRadius: "4px",
+              fontWeight: 600,
+            }}
+          >
             삭제
           </Button>
-          <Button variant="success" onClick={handleUpdate}>
+          <Button
+            variant="success"
+            onClick={handleUpdate}
+            style={{
+              minWidth: "96px",
+              height: "42px",
+              borderRadius: "4px",
+              fontWeight: 600,
+            }}
+          >
             수정
           </Button>
         </Modal.Footer>

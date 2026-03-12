@@ -272,23 +272,43 @@ const PurchaseMaterial = () => {
     fetchList(page);
   };
 
+  const thStyle: React.CSSProperties = {
+    whiteSpace: "nowrap",
+    padding: "13px 10px",
+    fontSize: "13px",
+    fontWeight: 700,
+    borderBottom: "none",
+    textAlign: "center",
+    verticalAlign: "middle",
+  };
+
+  const tdStyle: React.CSSProperties = {
+    padding: "12px 10px",
+    verticalAlign: "middle",
+    color: "#334155",
+    whiteSpace: "nowrap",
+    textAlign: "center",
+    fontSize: "13px",
+  };
+
   return (
     <>
       <Wrapper>
         <Lnb />
-        <DflexColumn>
-          <Content>
+        <DflexColumn style={{ minWidth: 0 }}>
+          <Content style={{ minWidth: 0 }}>
             <Top />
           </Content>
 
-          <Container fluid className="p-0">
+          <Container fluid className="p-0" style={{ minWidth: 0 }}>
             <Row className="g-0 m-0">
-              <Col className="p-0">
+              <Col className="p-0" style={{ minWidth: 0 }}>
                 <Ctap
                   style={{
                     background: "#fff",
-                    padding: "24px 28px",
+                    padding: "24px 24px 20px",
                     border: "1px solid #e5e7eb",
+                    minWidth: 0,
                   }}
                 >
                   <div
@@ -330,19 +350,21 @@ const PurchaseMaterial = () => {
                           display: "flex",
                           justifyContent: "flex-end",
                           alignItems: "center",
-                          gap: "12px",
-                          flexWrap: "nowrap",
+                          gap: "10px",
+                          flexWrap: "wrap",
                         }}
                       >
                         <Button
                           onClick={handleExcelDownload}
                           variant="success"
                           style={{
-                            height: "44px",
-                            minWidth: "120px",
+                            height: "42px",
+                            minWidth: "110px",
                             borderRadius: "6px",
                             fontWeight: 600,
                             margin: 0,
+                            padding: "0 14px",
+                            fontSize: "13px",
                           }}
                         >
                           엑셀 다운
@@ -351,11 +373,13 @@ const PurchaseMaterial = () => {
                         <Button
                           onClick={() => setShowCreate(true)}
                           style={{
-                            height: "44px",
-                            minWidth: "120px",
+                            height: "42px",
+                            minWidth: "110px",
                             borderRadius: "6px",
                             fontWeight: 600,
                             margin: 0,
+                            padding: "0 14px",
+                            fontSize: "13px",
                           }}
                         >
                           구매 등록
@@ -371,199 +395,206 @@ const PurchaseMaterial = () => {
                       overflow: "hidden",
                     }}
                   >
-                    <div style={{ padding: "12px 12px 0 12px" }}>
-                      <Table responsive className="mt-3 mb-0 align-middle">
-                        <thead>
-                          <tr className="text-center">
-                            <th
-                              className="bg-secondary text-white"
-                              style={{
-                                whiteSpace: "nowrap",
-                                padding: "14px 12px",
-                                fontSize: "14px",
-                                fontWeight: 700,
-                                borderBottom: "none",
-                              }}
-                            >
-                              #
-                            </th>
-                            {TABLE_HEADERS.map((h) => (
+                    <div
+                      style={{
+                        padding: "10px 10px 0 10px",
+                        minWidth: 0,
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "100%",
+                          overflowX: "auto",
+                          overflowY: "hidden",
+                        }}
+                      >
+                        <Table
+                          className="mt-3 mb-0 align-middle"
+                          style={{
+                            minWidth: "1450px",
+                            marginBottom: 0,
+                          }}
+                        >
+                          <thead>
+                            <tr className="text-center">
                               <th
-                                key={h.key as string}
                                 className="bg-secondary text-white"
                                 style={{
-                                  whiteSpace: "nowrap",
-                                  padding: "14px 12px",
-                                  fontSize: "14px",
-                                  fontWeight: 700,
-                                  borderBottom: "none",
+                                  ...thStyle,
+                                  minWidth: "60px",
                                 }}
                               >
-                                {h.label}
+                                #
                               </th>
-                            ))}
-                          </tr>
-                        </thead>
+                              {TABLE_HEADERS.map((h) => {
+                                const widthMap: Record<string, string> = {
+                                  purchaseDate: "110px",
+                                  purchaseNo: "130px",
+                                  supplierCode: "120px",
+                                  supplierName: "140px",
+                                  itemCode: "120px",
+                                  itemName: "160px",
+                                  qty: "90px",
+                                  unitPrice: "100px",
+                                  amount: "110px",
+                                  expectedDate: "120px",
+                                  status: "90px",
+                                  remark: "160px",
+                                };
 
-                        <tbody>
-                          {(rows || []).map((r, i) => (
-                            <tr key={r.id ?? i} className="text-center">
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#475569",
-                                  fontWeight: 600,
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {i + 1 + page * size}
-                              </td>
+                                return (
+                                  <th
+                                    key={h.key as string}
+                                    className="bg-secondary text-white"
+                                    style={{
+                                      ...thStyle,
+                                      minWidth: widthMap[h.key as string] || "100px",
+                                    }}
+                                  >
+                                    {h.label}
+                                  </th>
+                                );
+                              })}
+                            </tr>
+                          </thead>
 
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.purchaseDate}
-                              </td>
-
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                <span
-                                  onClick={() => openDetail(r.id)}
+                          <tbody>
+                            {(rows || []).map((r, i) => (
+                              <tr key={r.id ?? i} className="text-center">
+                                <td
                                   style={{
-                                    cursor: "pointer",
-                                    color: "#0d6efd",
-                                    textDecoration: "underline",
+                                    ...tdStyle,
+                                    color: "#475569",
                                     fontWeight: 600,
                                   }}
+                                  title={String(i + 1 + page * size)}
                                 >
-                                  {r.purchaseNo}
-                                </span>
-                              </td>
+                                  {i + 1 + page * size}
+                                </td>
 
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.supplierCode}
-                              </td>
+                                <td style={tdStyle} title={r.purchaseDate}>
+                                  {r.purchaseDate}
+                                </td>
 
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.supplierName}
-                              </td>
+                                <td
+                                  style={{
+                                    ...tdStyle,
+                                    maxWidth: "130px",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                  title={r.purchaseNo}
+                                >
+                                  <span
+                                    onClick={() => openDetail(r.id)}
+                                    style={{
+                                      cursor: "pointer",
+                                      color: "#0d6efd",
+                                      textDecoration: "underline",
+                                      fontWeight: 600,
+                                      display: "inline-block",
+                                      maxWidth: "100%",
+                                      overflow: "hidden",
+                                      textOverflow: "ellipsis",
+                                      verticalAlign: "middle",
+                                    }}
+                                  >
+                                    {r.purchaseNo}
+                                  </span>
+                                </td>
 
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.itemCode}
-                              </td>
+                                <td
+                                  style={{
+                                    ...tdStyle,
+                                    maxWidth: "120px",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                  title={r.supplierCode}
+                                >
+                                  {r.supplierCode}
+                                </td>
 
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.itemName}
-                              </td>
+                                <td
+                                  style={{
+                                    ...tdStyle,
+                                    maxWidth: "140px",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                  title={r.supplierName}
+                                >
+                                  {r.supplierName}
+                                </td>
 
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.qty}
-                              </td>
+                                <td
+                                  style={{
+                                    ...tdStyle,
+                                    maxWidth: "120px",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                  title={r.itemCode}
+                                >
+                                  {r.itemCode}
+                                </td>
 
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.unitPrice}
-                              </td>
+                                <td
+                                  style={{
+                                    ...tdStyle,
+                                    maxWidth: "160px",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                  title={r.itemName}
+                                >
+                                  {r.itemName}
+                                </td>
 
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.amount}
-                              </td>
+                                <td style={tdStyle} title={String(r.qty)}>
+                                  {r.qty}
+                                </td>
 
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.expectedDate}
-                              </td>
+                                <td style={tdStyle} title={String(r.unitPrice)}>
+                                  {r.unitPrice}
+                                </td>
 
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.status}
-                              </td>
+                                <td style={tdStyle} title={String(r.amount)}>
+                                  {r.amount}
+                                </td>
 
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.remark}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </Table>
+                                <td style={tdStyle} title={r.expectedDate}>
+                                  {r.expectedDate}
+                                </td>
+
+                                <td
+                                  style={{
+                                    ...tdStyle,
+                                    maxWidth: "90px",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                  title={r.status}
+                                >
+                                  {r.status}
+                                </td>
+
+                                <td
+                                  style={{
+                                    ...tdStyle,
+                                    maxWidth: "160px",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                  title={r.remark}
+                                >
+                                  {r.remark}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </Table>
+                      </div>
 
                       <Center
                         style={{
@@ -575,7 +606,7 @@ const PurchaseMaterial = () => {
                         }}
                       >
                         {totalPages > 0 && (
-                          <Pagination className="mb-0">
+                          <Pagination className="mb-0" size="sm">
                             <Pagination.First disabled={page === 0} onClick={() => goPage(0)} />
                             <Pagination.Prev disabled={page === 0} onClick={() => goPage(page - 1)} />
 
@@ -604,6 +635,7 @@ const PurchaseMaterial = () => {
                             color: "#64748b",
                             fontWeight: 600,
                             marginBottom: "4px",
+                            fontSize: "13px",
                           }}
                         >
                           총{totalElements}건 {page + 1} / {totalPages || 1} 페이지
@@ -619,202 +651,696 @@ const PurchaseMaterial = () => {
       </Wrapper>
 
       {/* ✅ 등록 모달 */}
-      <Modal show={showCreate} onHide={() => setShowCreate(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>구매 등록</Modal.Title>
+      <Modal show={showCreate} onHide={() => setShowCreate(false)} centered size="lg">
+        <Modal.Header
+          closeButton
+          style={{
+            borderBottom: "1px solid #dbe2ea",
+            padding: "20px 24px",
+            backgroundColor: "#f8fafc",
+          }}
+        >
+          <Modal.Title
+            style={{
+              fontSize: "20px",
+              fontWeight: 700,
+              color: "#111827",
+              letterSpacing: "-0.02em",
+            }}
+          >
+            구매 등록
+          </Modal.Title>
         </Modal.Header>
 
-        <Modal.Body>
+        <Modal.Body
+          style={{
+            padding: "24px",
+            backgroundColor: "#ffffff",
+          }}
+        >
           <Form>
-            <Form.Control
-              className="mb-2"
-              type="date"
-              name="purchaseDate"
-              value={createForm.purchaseDate}
-              onChange={onCreateChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                구매일자
+              </Form.Label>
+              <Form.Control
+                type="date"
+                name="purchaseDate"
+                value={createForm.purchaseDate}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-2"
-              name="purchaseNo"
-              placeholder="구매번호(비우면 자동생성)"
-              value={createForm.purchaseNo}
-              onChange={onCreateChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                구매번호
+              </Form.Label>
+              <Form.Control
+                name="purchaseNo"
+                placeholder="구매번호(비우면 자동생성)"
+                value={createForm.purchaseNo}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-2"
-              name="supplierCode"
-              placeholder="공급처코드"
-              value={createForm.supplierCode}
-              onChange={onCreateChange}
-            />
-            <Form.Control
-              className="mb-2"
-              name="supplierName"
-              placeholder="공급처명"
-              value={createForm.supplierName}
-              onChange={onCreateChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                공급처코드
+              </Form.Label>
+              <Form.Control
+                name="supplierCode"
+                placeholder="공급처코드"
+                value={createForm.supplierCode}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-2"
-              name="itemCode"
-              placeholder="품목코드"
-              value={createForm.itemCode}
-              onChange={onCreateChange}
-            />
-            <Form.Control
-              className="mb-2"
-              name="itemName"
-              placeholder="품목명"
-              value={createForm.itemName}
-              onChange={onCreateChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                공급처명
+              </Form.Label>
+              <Form.Control
+                name="supplierName"
+                placeholder="공급처명"
+                value={createForm.supplierName}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-2"
-              type="number"
-              name="qty"
-              placeholder="수량"
-              value={createForm.qty}
-              onChange={onCreateChange}
-            />
-            <Form.Control
-              className="mb-2"
-              type="number"
-              name="unitPrice"
-              placeholder="단가"
-              value={createForm.unitPrice}
-              onChange={onCreateChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                품목코드
+              </Form.Label>
+              <Form.Control
+                name="itemCode"
+                placeholder="품목코드"
+                value={createForm.itemCode}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-2"
-              type="date"
-              name="expectedDate"
-              value={createForm.expectedDate}
-              onChange={onCreateChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                품목명
+              </Form.Label>
+              <Form.Control
+                name="itemName"
+                placeholder="품목명"
+                value={createForm.itemName}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Select className="mb-2" name="status" value={createForm.status} onChange={onCreateChange}>
-              <option value="대기">대기</option>
-              <option value="진행">진행</option>
-              <option value="완료">완료</option>
-            </Form.Select>
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                수량
+              </Form.Label>
+              <Form.Control
+                type="number"
+                name="qty"
+                placeholder="수량"
+                value={createForm.qty}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-2"
-              name="remark"
-              placeholder="비고"
-              value={createForm.remark}
-              onChange={onCreateChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                단가
+              </Form.Label>
+              <Form.Control
+                type="number"
+                name="unitPrice"
+                placeholder="단가"
+                value={createForm.unitPrice}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                입고예정일
+              </Form.Label>
+              <Form.Control
+                type="date"
+                name="expectedDate"
+                value={createForm.expectedDate}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                상태
+              </Form.Label>
+              <Form.Select
+                name="status"
+                value={createForm.status}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              >
+                <option value="대기">대기</option>
+                <option value="진행">진행</option>
+                <option value="완료">완료</option>
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-0">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                비고
+              </Form.Label>
+              <Form.Control
+                name="remark"
+                placeholder="비고"
+                value={createForm.remark}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
           </Form>
         </Modal.Body>
 
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowCreate(false)}>
+        <Modal.Footer
+          style={{
+            borderTop: "1px solid #dbe2ea",
+            padding: "16px 24px",
+            backgroundColor: "#f8fafc",
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: "10px",
+          }}
+        >
+          <Button
+            variant="secondary"
+            onClick={() => setShowCreate(false)}
+            style={{
+              minWidth: "96px",
+              height: "42px",
+              borderRadius: "4px",
+              fontWeight: 600,
+            }}
+          >
             닫기
           </Button>
-          <Button onClick={handleSave}>저장</Button>
+          <Button
+            onClick={handleSave}
+            style={{
+              minWidth: "96px",
+              height: "42px",
+              borderRadius: "4px",
+              fontWeight: 600,
+            }}
+          >
+            저장
+          </Button>
         </Modal.Footer>
       </Modal>
 
       {/* ✅ 상세(수정/삭제) 모달 */}
-      <Modal show={showDetail} onHide={() => setShowDetail(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>구매 상세</Modal.Title>
+      <Modal show={showDetail} onHide={() => setShowDetail(false)} centered size="lg">
+        <Modal.Header
+          closeButton
+          style={{
+            borderBottom: "1px solid #dbe2ea",
+            padding: "20px 24px",
+            backgroundColor: "#f8fafc",
+          }}
+        >
+          <Modal.Title
+            style={{
+              fontSize: "20px",
+              fontWeight: 700,
+              color: "#111827",
+              letterSpacing: "-0.02em",
+            }}
+          >
+            구매 상세
+          </Modal.Title>
         </Modal.Header>
 
-        <Modal.Body>
+        <Modal.Body
+          style={{
+            padding: "24px",
+            backgroundColor: "#ffffff",
+          }}
+        >
           <Form>
-            <Form.Control
-              className="mb-2"
-              type="date"
-              name="purchaseDate"
-              value={editForm.purchaseDate}
-              onChange={onEditChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                구매일자
+              </Form.Label>
+              <Form.Control
+                type="date"
+                name="purchaseDate"
+                value={editForm.purchaseDate}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control className="mb-2" name="purchaseNo" value={editForm.purchaseNo} disabled />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                구매번호
+              </Form.Label>
+              <Form.Control
+                name="purchaseNo"
+                value={editForm.purchaseNo}
+                disabled
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  backgroundColor: "#f3f4f6",
+                  color: "#6b7280",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-2"
-              name="supplierCode"
-              placeholder="공급처코드"
-              value={editForm.supplierCode}
-              onChange={onEditChange}
-            />
-            <Form.Control
-              className="mb-2"
-              name="supplierName"
-              placeholder="공급처명"
-              value={editForm.supplierName}
-              onChange={onEditChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                공급처코드
+              </Form.Label>
+              <Form.Control
+                name="supplierCode"
+                placeholder="공급처코드"
+                value={editForm.supplierCode}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-2"
-              name="itemCode"
-              placeholder="품목코드"
-              value={editForm.itemCode}
-              onChange={onEditChange}
-            />
-            <Form.Control
-              className="mb-2"
-              name="itemName"
-              placeholder="품목명"
-              value={editForm.itemName}
-              onChange={onEditChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                공급처명
+              </Form.Label>
+              <Form.Control
+                name="supplierName"
+                placeholder="공급처명"
+                value={editForm.supplierName}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-2"
-              type="number"
-              name="qty"
-              placeholder="수량"
-              value={editForm.qty}
-              onChange={onEditChange}
-            />
-            <Form.Control
-              className="mb-2"
-              type="number"
-              name="unitPrice"
-              placeholder="단가"
-              value={editForm.unitPrice}
-              onChange={onEditChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                품목코드
+              </Form.Label>
+              <Form.Control
+                name="itemCode"
+                placeholder="품목코드"
+                value={editForm.itemCode}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-2"
-              type="date"
-              name="expectedDate"
-              value={editForm.expectedDate}
-              onChange={onEditChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                품목명
+              </Form.Label>
+              <Form.Control
+                name="itemName"
+                placeholder="품목명"
+                value={editForm.itemName}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Select className="mb-2" name="status" value={editForm.status} onChange={onEditChange}>
-              <option value="대기">대기</option>
-              <option value="진행">진행</option>
-              <option value="완료">완료</option>
-            </Form.Select>
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                수량
+              </Form.Label>
+              <Form.Control
+                type="number"
+                name="qty"
+                placeholder="수량"
+                value={editForm.qty}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-2"
-              name="remark"
-              placeholder="비고"
-              value={editForm.remark}
-              onChange={onEditChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                단가
+              </Form.Label>
+              <Form.Control
+                type="number"
+                name="unitPrice"
+                placeholder="단가"
+                value={editForm.unitPrice}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                입고예정일
+              </Form.Label>
+              <Form.Control
+                type="date"
+                name="expectedDate"
+                value={editForm.expectedDate}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                상태
+              </Form.Label>
+              <Form.Select
+                name="status"
+                value={editForm.status}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              >
+                <option value="대기">대기</option>
+                <option value="진행">진행</option>
+                <option value="완료">완료</option>
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-0">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                비고
+              </Form.Label>
+              <Form.Control
+                name="remark"
+                placeholder="비고"
+                value={editForm.remark}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
           </Form>
         </Modal.Body>
 
-        <Modal.Footer>
-          <Button variant="danger" onClick={handleDelete}>
+        <Modal.Footer
+          style={{
+            borderTop: "1px solid #dbe2ea",
+            padding: "16px 24px",
+            backgroundColor: "#f8fafc",
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: "10px",
+          }}
+        >
+          <Button
+            variant="danger"
+            onClick={handleDelete}
+            style={{
+              minWidth: "96px",
+              height: "42px",
+              borderRadius: "4px",
+              fontWeight: 600,
+            }}
+          >
             삭제
           </Button>
-          <Button variant="success" onClick={handleUpdate}>
+          <Button
+            variant="success"
+            onClick={handleUpdate}
+            style={{
+              minWidth: "96px",
+              height: "42px",
+              borderRadius: "4px",
+              fontWeight: 600,
+            }}
+          >
             수정
           </Button>
         </Modal.Footer>

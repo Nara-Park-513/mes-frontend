@@ -4,7 +4,7 @@ import Top from "../include/Top";
 import { Wrapper, DflexColumn, DflexColumn2, Content, Ctap } from "../styled/Sales.styles";
 
 import { Container, Row, Col, Tab, Tabs, Table, Button, Modal, Form, Pagination } from "react-bootstrap";
-import { Group, Left, Right, Text6, Dflex, DflexEnd, Center, PageTotal } from "../styled/Component.styles";
+import { Group, Text6, Center, PageTotal } from "../styled/Component.styles";
 import { Time, Select, Search } from "../styled/Input.styles";
 
 import * as XLSX from "xlsx";
@@ -24,7 +24,6 @@ type SalesOrderPayload = {
   remark: string;
 };
 
-// ✅ 응답에 id가 있어야 수정/삭제 가능
 type SalesOrderResponse = {
   id: number;
   orderDate: string;
@@ -81,7 +80,7 @@ const SalesManagement = () => {
   const [rows, setRows] = useState<TableRow[]>([]);
   const [orders, setOrders] = useState<SalesOrderResponse[]>([]);
 
-  // ✅ 등록 폼
+  // ✅ 등록 폼 + 검색 조건
   const [form, setForm] = useState({
     orderDate: "",
     customerCode: "",
@@ -95,7 +94,6 @@ const SalesManagement = () => {
     spec: "",
     remainQty: "",
     deliveryStatus: "미납",
-    // 검색 조건
     from: "",
     to: "",
     customer: "",
@@ -118,7 +116,6 @@ const SalesManagement = () => {
     remark: "",
   });
 
-  // ✅ 공용 change
   const handleChange = (e: React.ChangeEvent<any>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -129,7 +126,6 @@ const SalesManagement = () => {
     setEditForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ 목록 조회
   const fetchOrders = async (pageArg = page, sizeArg = size) => {
     const token = localStorage.getItem("token");
 
@@ -383,23 +379,63 @@ const SalesManagement = () => {
     fetchOrders(next, size).catch((e) => console.error(e));
   };
 
+  const thStyle: React.CSSProperties = {
+    whiteSpace: "nowrap",
+    padding: "14px 10px",
+    fontSize: "14px",
+    fontWeight: 700,
+    borderBottom: "none",
+    textAlign: "center",
+    verticalAlign: "middle",
+  };
+
+  const tdStyle: React.CSSProperties = {
+    padding: "13px 10px",
+    verticalAlign: "middle",
+    color: "#334155",
+    whiteSpace: "nowrap",
+    textAlign: "center",
+    fontSize: "14px",
+  };
+
+  const getHeaderMinWidth = (index: number) => {
+    const widthMap: Record<number, string> = {
+      0: "110px",
+      1: "110px",
+      2: "120px",
+      3: "110px",
+      4: "120px",
+      5: "70px",
+      6: "90px",
+      7: "90px",
+      8: "100px",
+      9: "110px",
+      10: "80px",
+      11: "110px",
+      12: "80px",
+    };
+
+    return widthMap[index] || "90px";
+  };
+
   return (
     <>
       <Wrapper>
         <Lnb />
-        <DflexColumn>
-          <Content>
+        <DflexColumn style={{ minWidth: 0 }}>
+          <Content style={{ minWidth: 0 }}>
             <Top />
           </Content>
 
-          <Container fluid className="p-0">
+          <Container fluid className="p-0" style={{ minWidth: 0 }}>
             <Row className="g-0 m-0">
-              <Col className="p-0">
+              <Col className="p-0" style={{ minWidth: 0 }}>
                 <Ctap
                   style={{
                     background: "#fff",
-                    padding: "24px 28px",
+                    padding: "24px 24px 20px",
                     border: "1px solid #e5e7eb",
+                    minWidth: 0,
                   }}
                 >
                   <div
@@ -424,259 +460,240 @@ const SalesManagement = () => {
                     className="mb-4"
                     style={{
                       border: "1px solid #e5e7eb",
-                      padding: "20px 24px",
+                      padding: "20px 20px 16px",
                       background: "#f9fafb",
                     }}
                   >
                     <div
                       style={{
                         display: "flex",
-                        alignItems: "flex-end",
-                        justifyContent: "space-between",
-                        gap: "20px",
+                        flexDirection: "column",
+                        gap: "16px",
                         width: "100%",
-                        overflow: "hidden",
                       }}
                     >
-                      <Left
+                      <div
                         style={{
-                          flex: 1,
-                          minWidth: 0,
-                          overflowX: "auto",
-                          overflowY: "hidden",
+                          display: "grid",
+                          gridTemplateColumns: "2fr 1fr 1fr 1fr auto",
+                          gap: "12px",
+                          alignItems: "end",
+                          width: "100%",
                         }}
                       >
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "flex-end",
-                            gap: "16px",
-                            flexWrap: "nowrap",
-                            minWidth: "max-content",
-                            paddingBottom: "2px",
-                          }}
-                        >
-                          <Group style={{ margin: 0, flexShrink: 0 }}>
-                            <Text6
-                              style={{
-                                display: "block",
-                                marginBottom: "8px",
-                                fontWeight: 600,
-                                color: "#374151",
-                                fontSize: "14px",
-                              }}
-                            >
-                              수주일자조회기간
-                            </Text6>
-
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "8px",
-                                height: "44px",
-                              }}
-                            >
-                              <Time
-                                type="date"
-                                name="from"
-                                value={form.from}
-                                onChange={handleChange}
-                                style={{
-                                  height: "44px",
-                                  width: "150px",
-                                  border: "1px solid #d1d5db",
-                                  borderRadius: "6px",
-                                  background: "#fff",
-                                  padding: "0 12px",
-                                }}
-                              />
-                              <span style={{ color: "#6b7280", fontWeight: 600, flexShrink: 0 }}>-</span>
-                              <Time
-                                type="date"
-                                name="to"
-                                value={form.to}
-                                onChange={handleChange}
-                                style={{
-                                  height: "44px",
-                                  width: "150px",
-                                  border: "1px solid #d1d5db",
-                                  borderRadius: "6px",
-                                  background: "#fff",
-                                  padding: "0 12px",
-                                }}
-                              />
-                            </div>
-                          </Group>
-
-                          <Group style={{ margin: 0, flexShrink: 0 }}>
-                            <Text6
-                              style={{
-                                display: "block",
-                                marginBottom: "8px",
-                                fontWeight: 600,
-                                color: "#374151",
-                                fontSize: "14px",
-                              }}
-                            >
-                              거래처
-                            </Text6>
-                            <Search
-                              type="search"
-                              name="customer"
-                              value={form.customer}
-                              onChange={handleChange}
-                              style={{
-                                height: "44px",
-                                width: "180px",
-                                border: "1px solid #d1d5db",
-                                borderRadius: "6px",
-                                background: "#fff",
-                                padding: "0 12px",
-                              }}
-                            />
-                          </Group>
-
-                          <Group style={{ margin: 0, flexShrink: 0 }}>
-                            <Text6
-                              style={{
-                                display: "block",
-                                marginBottom: "8px",
-                                fontWeight: 600,
-                                color: "#374151",
-                                fontSize: "14px",
-                              }}
-                            >
-                              품목
-                            </Text6>
-                            <Search
-                              type="search"
-                              name="item"
-                              value={form.item}
-                              onChange={handleChange}
-                              style={{
-                                height: "44px",
-                                width: "180px",
-                                border: "1px solid #d1d5db",
-                                borderRadius: "6px",
-                                background: "#fff",
-                                padding: "0 12px",
-                              }}
-                            />
-                          </Group>
-
-                          <Group style={{ margin: 0, flexShrink: 0 }}>
-                            <Text6
-                              style={{
-                                display: "block",
-                                marginBottom: "8px",
-                                fontWeight: 600,
-                                color: "#374151",
-                                fontSize: "14px",
-                              }}
-                            >
-                              납품여부
-                            </Text6>
-                            <Select
-                              name="deliveryYn"
-                              value={form.deliveryYn}
-                              onChange={handleChange}
-                              style={{
-                                height: "44px",
-                                width: "140px",
-                                border: "1px solid #d1d5db",
-                                borderRadius: "6px",
-                                background: "#fff",
-                                padding: "0 12px",
-                              }}
-                            >
-                              <option value="ALL">전체</option>
-                              <option value="N">미납</option>
-                              <option value="Y">납품완료</option>
-                            </Select>
-                          </Group>
-
-                          <Group style={{ margin: 0, flexShrink: 0 }}>
-                            <Button
-                              variant="dark"
-                              onClick={handleSearch}
-                              style={{
-                                height: "44px",
-                                minWidth: "92px",
-                                borderRadius: "6px",
-                                fontWeight: 600,
-                                padding: "0 20px",
-                              }}
-                            >
-                              검색
-                            </Button>
-                          </Group>
-                        </div>
-                      </Left>
-
-                      <Right
-                        style={{
-                          flexShrink: 0,
-                          display: "flex",
-                          justifyContent: "flex-end",
-                          alignItems: "flex-end",
-                        }}
-                      >
-                        <Group style={{ margin: 0 }}>
-                          <DflexEnd
+                        <Group style={{ margin: 0, minWidth: 0 }}>
+                          <Text6
                             style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "flex-end",
-                              gap: "12px",
-                              flexWrap: "nowrap",
-                              whiteSpace: "nowrap",
+                              display: "block",
+                              marginBottom: "8px",
+                              fontWeight: 600,
+                              color: "#374151",
+                              fontSize: "14px",
                             }}
                           >
-                            <Button
-                              variant="success"
-                              onClick={handleExcelDownload}
-                              style={{
-                                height: "44px",
-                                minWidth: "110px",
-                                borderRadius: "6px",
-                                fontWeight: 600,
-                                margin: 0,
-                              }}
-                            >
-                              엑셀 다운
-                            </Button>
+                            수주일자조회기간
+                          </Text6>
 
-                            <Button
-                              variant="primary"
-                              className="mx-0"
+                          <div
+                            style={{
+                              display: "grid",
+                              gridTemplateColumns: "1fr 16px 1fr",
+                              alignItems: "center",
+                              gap: "8px",
+                              height: "44px",
+                            }}
+                          >
+                            <Time
+                              type="date"
+                              name="from"
+                              value={form.from}
+                              onChange={handleChange}
                               style={{
                                 height: "44px",
-                                minWidth: "110px",
+                                width: "100%",
+                                border: "1px solid #d1d5db",
                                 borderRadius: "6px",
+                                background: "#fff",
+                                padding: "0 12px",
+                              }}
+                            />
+                            <span
+                              style={{
+                                color: "#6b7280",
                                 fontWeight: 600,
-                                margin: 0,
+                                textAlign: "center",
                               }}
                             >
-                              일괄 납품
-                            </Button>
-
-                            <Button
-                              variant="secondary"
-                              onClick={openCreate}
+                              -
+                            </span>
+                            <Time
+                              type="date"
+                              name="to"
+                              value={form.to}
+                              onChange={handleChange}
                               style={{
                                 height: "44px",
-                                minWidth: "110px",
+                                width: "100%",
+                                border: "1px solid #d1d5db",
                                 borderRadius: "6px",
-                                fontWeight: 600,
-                                margin: 0,
+                                background: "#fff",
+                                padding: "0 12px",
                               }}
-                            >
-                              수주 등록
-                            </Button>
-                          </DflexEnd>
+                            />
+                          </div>
                         </Group>
-                      </Right>
+
+                        <Group style={{ margin: 0, minWidth: 0 }}>
+                          <Text6
+                            style={{
+                              display: "block",
+                              marginBottom: "8px",
+                              fontWeight: 600,
+                              color: "#374151",
+                              fontSize: "14px",
+                            }}
+                          >
+                            거래처
+                          </Text6>
+                          <Search
+                            type="search"
+                            name="customer"
+                            value={form.customer}
+                            onChange={handleChange}
+                            style={{
+                              height: "44px",
+                              width: "100%",
+                              border: "1px solid #d1d5db",
+                              borderRadius: "6px",
+                              background: "#fff",
+                              padding: "0 12px",
+                            }}
+                          />
+                        </Group>
+
+                        <Group style={{ margin: 0, minWidth: 0 }}>
+                          <Text6
+                            style={{
+                              display: "block",
+                              marginBottom: "8px",
+                              fontWeight: 600,
+                              color: "#374151",
+                              fontSize: "14px",
+                            }}
+                          >
+                            품목
+                          </Text6>
+                          <Search
+                            type="search"
+                            name="item"
+                            value={form.item}
+                            onChange={handleChange}
+                            style={{
+                              height: "44px",
+                              width: "100%",
+                              border: "1px solid #d1d5db",
+                              borderRadius: "6px",
+                              background: "#fff",
+                              padding: "0 12px",
+                            }}
+                          />
+                        </Group>
+
+                        <Group style={{ margin: 0, minWidth: 0 }}>
+                          <Text6
+                            style={{
+                              display: "block",
+                              marginBottom: "8px",
+                              fontWeight: 600,
+                              color: "#374151",
+                              fontSize: "14px",
+                            }}
+                          >
+                            납품여부
+                          </Text6>
+                          <Select
+                            name="deliveryYn"
+                            value={form.deliveryYn}
+                            onChange={handleChange}
+                            style={{
+                              height: "44px",
+                              width: "100%",
+                              border: "1px solid #d1d5db",
+                              borderRadius: "6px",
+                              background: "#fff",
+                              padding: "0 12px",
+                            }}
+                          >
+                            <option value="ALL">전체</option>
+                            <option value="N">미납</option>
+                            <option value="Y">납품완료</option>
+                          </Select>
+                        </Group>
+
+                        <Group style={{ margin: 0 }}>
+                          <Button
+                            variant="dark"
+                            onClick={handleSearch}
+                            style={{
+                              height: "44px",
+                              minWidth: "86px",
+                              borderRadius: "6px",
+                              fontWeight: 600,
+                              padding: "0 20px",
+                            }}
+                          >
+                            검색
+                          </Button>
+                        </Group>
+                      </div>
+
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "flex-end",
+                          gap: "10px",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <Button
+                          variant="success"
+                          onClick={handleExcelDownload}
+                          style={{
+                            height: "44px",
+                            minWidth: "110px",
+                            borderRadius: "6px",
+                            fontWeight: 600,
+                          }}
+                        >
+                          엑셀 다운
+                        </Button>
+
+                        <Button
+                          variant="primary"
+                          className="mx-0"
+                          style={{
+                            height: "44px",
+                            minWidth: "110px",
+                            borderRadius: "6px",
+                            fontWeight: 600,
+                          }}
+                        >
+                          일괄 납품
+                        </Button>
+
+                        <Button
+                          variant="secondary"
+                          onClick={openCreate}
+                          style={{
+                            height: "44px",
+                            minWidth: "110px",
+                            borderRadius: "6px",
+                            fontWeight: 600,
+                          }}
+                        >
+                          수주 등록
+                        </Button>
+                      </div>
                     </div>
                   </DflexColumn2>
 
@@ -697,32 +714,27 @@ const SalesManagement = () => {
                       }}
                     >
                       <Tab eventKey="orders" title="수주관리">
-                        <div style={{ padding: "8px 8px 0 8px" }}>
-                          <Table responsive className="mt-3 mb-0 align-middle">
+                        <div style={{ padding: "8px 8px 0 8px", overflowX: "auto", overflowY: "hidden" }}>
+                          <Table className="mt-3 mb-0 align-middle" style={{ marginBottom: 0, minWidth: "1320px" }}>
                             <thead>
                               <tr>
                                 <th
                                   className="bg-secondary text-white"
                                   style={{
-                                    whiteSpace: "nowrap",
-                                    padding: "14px 12px",
-                                    fontSize: "14px",
-                                    fontWeight: 700,
-                                    borderBottom: "none",
+                                    ...thStyle,
+                                    minWidth: "52px",
                                   }}
                                 >
                                   #
                                 </th>
+
                                 {TABLE_HEADERS.map((title, index) => (
                                   <th
                                     key={index}
                                     className="bg-secondary text-white"
                                     style={{
-                                      whiteSpace: "nowrap",
-                                      padding: "14px 12px",
-                                      fontSize: "14px",
-                                      fontWeight: 700,
-                                      borderBottom: "none",
+                                      ...thStyle,
+                                      minWidth: getHeaderMinWidth(index),
                                     }}
                                   >
                                     {title}
@@ -736,31 +748,39 @@ const SalesManagement = () => {
                                 <tr key={rIdx}>
                                   <td
                                     style={{
-                                      padding: "13px 12px",
-                                      verticalAlign: "middle",
+                                      ...tdStyle,
                                       color: "#475569",
                                       fontWeight: 600,
-                                      whiteSpace: "nowrap",
                                     }}
+                                    title={String(rIdx + 1 + page * size)}
                                   >
                                     {rIdx + 1 + page * size}
                                   </td>
 
                                   {row.map((cell, cIdx) => {
+                                    const cellStyle: React.CSSProperties =
+                                      cIdx === 11
+                                        ? {
+                                            ...tdStyle,
+                                            maxWidth: "110px",
+                                            overflow: "hidden",
+                                            textOverflow: "ellipsis",
+                                          }
+                                        : tdStyle;
+
                                     if (cIdx === 4) {
                                       return (
                                         <td
                                           key={cIdx}
                                           style={{
+                                            ...cellStyle,
                                             cursor: "pointer",
                                             textDecoration: "underline",
-                                            padding: "13px 12px",
-                                            verticalAlign: "middle",
                                             color: "#0d6efd",
                                             fontWeight: 600,
-                                            whiteSpace: "nowrap",
                                           }}
                                           onClick={() => openDetailByIndex(rIdx)}
+                                          title={cell}
                                         >
                                           {cell}
                                         </td>
@@ -768,15 +788,7 @@ const SalesManagement = () => {
                                     }
 
                                     return (
-                                      <td
-                                        key={cIdx}
-                                        style={{
-                                          padding: "13px 12px",
-                                          verticalAlign: "middle",
-                                          color: "#334155",
-                                          whiteSpace: "nowrap",
-                                        }}
-                                      >
+                                      <td key={cIdx} style={cellStyle} title={cell}>
                                         {cell}
                                       </td>
                                     );
@@ -896,66 +908,226 @@ const SalesManagement = () => {
 
       {/* ✅ 등록 모달 */}
       <Modal show={showCreate} onHide={() => setShowCreate(false)} centered backdrop="static">
-        <Modal.Header closeButton>
-          <Modal.Title>수주 등록</Modal.Title>
+        <Modal.Header
+          closeButton
+          style={{
+            borderBottom: "1px solid #e5e7eb",
+            padding: "18px 20px",
+            background: "#f9fafb",
+          }}
+        >
+          <Modal.Title
+            style={{
+              fontSize: "18px",
+              fontWeight: 700,
+              color: "#111827",
+            }}
+          >
+            수주 등록
+          </Modal.Title>
         </Modal.Header>
 
-        <Modal.Body>
-          {errorMsg && <div className="alert alert-danger py-2">{errorMsg}</div>}
+        <Modal.Body
+          style={{
+            padding: "20px",
+            background: "#ffffff",
+          }}
+        >
+          {errorMsg && (
+            <div
+              className="alert alert-danger py-2"
+              style={{
+                marginBottom: "16px",
+                fontSize: "14px",
+              }}
+            >
+              {errorMsg}
+            </div>
+          )}
 
           <Form>
-            <Form.Group className="mb-2">
-              <Form.Label>수주일자</Form.Label>
-              <Form.Control type="date" name="orderDate" value={form.orderDate} onChange={handleChange} />
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontWeight: 600, color: "#374151", marginBottom: "8px" }}>
+                수주일자
+              </Form.Label>
+              <Form.Control
+                type="date"
+                name="orderDate"
+                value={form.orderDate}
+                onChange={handleChange}
+                style={{
+                  height: "44px",
+                  borderRadius: "6px",
+                  border: "1px solid #d1d5db",
+                }}
+              />
             </Form.Group>
 
-            <Form.Group className="mb-2">
-              <Form.Label>거래처코드</Form.Label>
-              <Form.Control name="customerCode" value={form.customerCode} onChange={handleChange} />
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontWeight: 600, color: "#374151", marginBottom: "8px" }}>
+                거래처코드
+              </Form.Label>
+              <Form.Control
+                name="customerCode"
+                value={form.customerCode}
+                onChange={handleChange}
+                style={{
+                  height: "44px",
+                  borderRadius: "6px",
+                  border: "1px solid #d1d5db",
+                }}
+              />
             </Form.Group>
 
-            <Form.Group className="mb-2">
-              <Form.Label>거래처명</Form.Label>
-              <Form.Control name="customerName" value={form.customerName} onChange={handleChange} />
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontWeight: 600, color: "#374151", marginBottom: "8px" }}>
+                거래처명
+              </Form.Label>
+              <Form.Control
+                name="customerName"
+                value={form.customerName}
+                onChange={handleChange}
+                style={{
+                  height: "44px",
+                  borderRadius: "6px",
+                  border: "1px solid #d1d5db",
+                }}
+              />
             </Form.Group>
 
-            <Form.Group className="mb-2">
-              <Form.Label>품목코드</Form.Label>
-              <Form.Control name="itemCode" value={form.itemCode} onChange={handleChange} />
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontWeight: 600, color: "#374151", marginBottom: "8px" }}>
+                품목코드
+              </Form.Label>
+              <Form.Control
+                name="itemCode"
+                value={form.itemCode}
+                onChange={handleChange}
+                style={{
+                  height: "44px",
+                  borderRadius: "6px",
+                  border: "1px solid #d1d5db",
+                }}
+              />
             </Form.Group>
 
-            <Form.Group className="mb-2">
-              <Form.Label>품목명</Form.Label>
-              <Form.Control name="itemName" value={form.itemName} onChange={handleChange} />
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontWeight: 600, color: "#374151", marginBottom: "8px" }}>
+                품목명
+              </Form.Label>
+              <Form.Control
+                name="itemName"
+                value={form.itemName}
+                onChange={handleChange}
+                style={{
+                  height: "44px",
+                  borderRadius: "6px",
+                  border: "1px solid #d1d5db",
+                }}
+              />
             </Form.Group>
 
-            <Form.Group className="mb-2">
-              <Form.Label>수주 수량</Form.Label>
-              <Form.Control type="number" name="orderQty" value={form.orderQty} onChange={handleChange} />
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontWeight: 600, color: "#374151", marginBottom: "8px" }}>
+                수주 수량
+              </Form.Label>
+              <Form.Control
+                type="number"
+                name="orderQty"
+                value={form.orderQty}
+                onChange={handleChange}
+                style={{
+                  height: "44px",
+                  borderRadius: "6px",
+                  border: "1px solid #d1d5db",
+                }}
+              />
             </Form.Group>
 
-            <Form.Group className="mb-2">
-              <Form.Label>단가</Form.Label>
-              <Form.Control type="number" name="price" value={form.price} onChange={handleChange} />
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontWeight: 600, color: "#374151", marginBottom: "8px" }}>
+                단가
+              </Form.Label>
+              <Form.Control
+                type="number"
+                name="price"
+                value={form.price}
+                onChange={handleChange}
+                style={{
+                  height: "44px",
+                  borderRadius: "6px",
+                  border: "1px solid #d1d5db",
+                }}
+              />
             </Form.Group>
 
-            <Form.Group className="mb-2">
-              <Form.Label>납품예정일</Form.Label>
-              <Form.Control type="date" name="deliveryDate" value={form.deliveryDate} onChange={handleChange} />
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontWeight: 600, color: "#374151", marginBottom: "8px" }}>
+                납품예정일
+              </Form.Label>
+              <Form.Control
+                type="date"
+                name="deliveryDate"
+                value={form.deliveryDate}
+                onChange={handleChange}
+                style={{
+                  height: "44px",
+                  borderRadius: "6px",
+                  border: "1px solid #d1d5db",
+                }}
+              />
             </Form.Group>
 
-            <Form.Group className="mb-2">
-              <Form.Label>비고</Form.Label>
-              <Form.Control name="remark" value={form.remark} onChange={handleChange} />
+            <Form.Group className="mb-0">
+              <Form.Label style={{ fontWeight: 600, color: "#374151", marginBottom: "8px" }}>
+                비고
+              </Form.Label>
+              <Form.Control
+                name="remark"
+                value={form.remark}
+                onChange={handleChange}
+                style={{
+                  height: "44px",
+                  borderRadius: "6px",
+                  border: "1px solid #d1d5db",
+                }}
+              />
             </Form.Group>
           </Form>
         </Modal.Body>
 
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowCreate(false)} disabled={saving}>
+        <Modal.Footer
+          style={{
+            borderTop: "1px solid #e5e7eb",
+            padding: "16px 20px",
+            background: "#f9fafb",
+            gap: "8px",
+          }}
+        >
+          <Button
+            variant="secondary"
+            onClick={() => setShowCreate(false)}
+            disabled={saving}
+            style={{
+              height: "42px",
+              minWidth: "90px",
+              borderRadius: "6px",
+              fontWeight: 600,
+            }}
+          >
             닫기
           </Button>
-          <Button variant="primary" onClick={handleCreateSave} disabled={saving}>
+          <Button
+            variant="primary"
+            onClick={handleCreateSave}
+            disabled={saving}
+            style={{
+              height: "42px",
+              minWidth: "90px",
+              borderRadius: "6px",
+              fontWeight: 600,
+            }}
+          >
             {saving ? "저장중..." : "저장"}
           </Button>
         </Modal.Footer>
@@ -963,64 +1135,212 @@ const SalesManagement = () => {
 
       {/* ✅ 상세(수정/삭제) 모달 */}
       <Modal show={showDetail} onHide={() => setShowDetail(false)} centered backdrop="static">
-        <Modal.Header closeButton>
-          <Modal.Title>수주 상세</Modal.Title>
+        <Modal.Header
+          closeButton
+          style={{
+            borderBottom: "1px solid #e5e7eb",
+            padding: "18px 20px",
+            background: "#f9fafb",
+          }}
+        >
+          <Modal.Title
+            style={{
+              fontSize: "18px",
+              fontWeight: 700,
+              color: "#111827",
+            }}
+          >
+            수주 상세
+          </Modal.Title>
         </Modal.Header>
 
-        <Modal.Body>
+        <Modal.Body
+          style={{
+            padding: "20px",
+            background: "#ffffff",
+          }}
+        >
           <Form>
-            <Form.Group className="mb-2">
-              <Form.Label>수주일자</Form.Label>
-              <Form.Control type="date" name="orderDate" value={editForm.orderDate} onChange={handleEditChange} />
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontWeight: 600, color: "#374151", marginBottom: "8px" }}>
+                수주일자
+              </Form.Label>
+              <Form.Control
+                type="date"
+                name="orderDate"
+                value={editForm.orderDate}
+                onChange={handleEditChange}
+                style={{
+                  height: "44px",
+                  borderRadius: "6px",
+                  border: "1px solid #d1d5db",
+                }}
+              />
             </Form.Group>
 
-            <Form.Group className="mb-2">
-              <Form.Label>거래처코드</Form.Label>
-              <Form.Control name="customerCode" value={editForm.customerCode} onChange={handleEditChange} />
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontWeight: 600, color: "#374151", marginBottom: "8px" }}>
+                거래처코드
+              </Form.Label>
+              <Form.Control
+                name="customerCode"
+                value={editForm.customerCode}
+                onChange={handleEditChange}
+                style={{
+                  height: "44px",
+                  borderRadius: "6px",
+                  border: "1px solid #d1d5db",
+                }}
+              />
             </Form.Group>
 
-            <Form.Group className="mb-2">
-              <Form.Label>거래처명</Form.Label>
-              <Form.Control name="customerName" value={editForm.customerName} onChange={handleEditChange} />
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontWeight: 600, color: "#374151", marginBottom: "8px" }}>
+                거래처명
+              </Form.Label>
+              <Form.Control
+                name="customerName"
+                value={editForm.customerName}
+                onChange={handleEditChange}
+                style={{
+                  height: "44px",
+                  borderRadius: "6px",
+                  border: "1px solid #d1d5db",
+                }}
+              />
             </Form.Group>
 
-            <Form.Group className="mb-2">
-              <Form.Label>품목코드</Form.Label>
-              <Form.Control name="itemCode" value={editForm.itemCode} onChange={handleEditChange} />
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontWeight: 600, color: "#374151", marginBottom: "8px" }}>
+                품목코드
+              </Form.Label>
+              <Form.Control
+                name="itemCode"
+                value={editForm.itemCode}
+                onChange={handleEditChange}
+                style={{
+                  height: "44px",
+                  borderRadius: "6px",
+                  border: "1px solid #d1d5db",
+                }}
+              />
             </Form.Group>
 
-            <Form.Group className="mb-2">
-              <Form.Label>품목명</Form.Label>
-              <Form.Control name="itemName" value={editForm.itemName} onChange={handleEditChange} />
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontWeight: 600, color: "#374151", marginBottom: "8px" }}>
+                품목명
+              </Form.Label>
+              <Form.Control
+                name="itemName"
+                value={editForm.itemName}
+                onChange={handleEditChange}
+                style={{
+                  height: "44px",
+                  borderRadius: "6px",
+                  border: "1px solid #d1d5db",
+                }}
+              />
             </Form.Group>
 
-            <Form.Group className="mb-2">
-              <Form.Label>수주 수량</Form.Label>
-              <Form.Control type="number" name="orderQty" value={editForm.orderQty} onChange={handleEditChange} />
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontWeight: 600, color: "#374151", marginBottom: "8px" }}>
+                수주 수량
+              </Form.Label>
+              <Form.Control
+                type="number"
+                name="orderQty"
+                value={editForm.orderQty}
+                onChange={handleEditChange}
+                style={{
+                  height: "44px",
+                  borderRadius: "6px",
+                  border: "1px solid #d1d5db",
+                }}
+              />
             </Form.Group>
 
-            <Form.Group className="mb-2">
-              <Form.Label>단가</Form.Label>
-              <Form.Control type="number" name="price" value={editForm.price} onChange={handleEditChange} />
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontWeight: 600, color: "#374151", marginBottom: "8px" }}>
+                단가
+              </Form.Label>
+              <Form.Control
+                type="number"
+                name="price"
+                value={editForm.price}
+                onChange={handleEditChange}
+                style={{
+                  height: "44px",
+                  borderRadius: "6px",
+                  border: "1px solid #d1d5db",
+                }}
+              />
             </Form.Group>
 
-            <Form.Group className="mb-2">
-              <Form.Label>납품예정일</Form.Label>
-              <Form.Control type="date" name="deliveryDate" value={editForm.deliveryDate} onChange={handleEditChange} />
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontWeight: 600, color: "#374151", marginBottom: "8px" }}>
+                납품예정일
+              </Form.Label>
+              <Form.Control
+                type="date"
+                name="deliveryDate"
+                value={editForm.deliveryDate}
+                onChange={handleEditChange}
+                style={{
+                  height: "44px",
+                  borderRadius: "6px",
+                  border: "1px solid #d1d5db",
+                }}
+              />
             </Form.Group>
 
-            <Form.Group className="mb-2">
-              <Form.Label>비고</Form.Label>
-              <Form.Control name="remark" value={editForm.remark} onChange={handleEditChange} />
+            <Form.Group className="mb-0">
+              <Form.Label style={{ fontWeight: 600, color: "#374151", marginBottom: "8px" }}>
+                비고
+              </Form.Label>
+              <Form.Control
+                name="remark"
+                value={editForm.remark}
+                onChange={handleEditChange}
+                style={{
+                  height: "44px",
+                  borderRadius: "6px",
+                  border: "1px solid #d1d5db",
+                }}
+              />
             </Form.Group>
           </Form>
         </Modal.Body>
 
-        <Modal.Footer>
-          <Button variant="danger" onClick={handleDelete}>
+        <Modal.Footer
+          style={{
+            borderTop: "1px solid #e5e7eb",
+            padding: "16px 20px",
+            background: "#f9fafb",
+            gap: "8px",
+          }}
+        >
+          <Button
+            variant="danger"
+            onClick={handleDelete}
+            style={{
+              height: "42px",
+              minWidth: "90px",
+              borderRadius: "6px",
+              fontWeight: 600,
+            }}
+          >
             삭제
           </Button>
-          <Button variant="success" onClick={handleUpdate}>
+          <Button
+            variant="success"
+            onClick={handleUpdate}
+            style={{
+              height: "42px",
+              minWidth: "90px",
+              borderRadius: "6px",
+              fontWeight: 600,
+            }}
+          >
             수정
           </Button>
         </Modal.Footer>

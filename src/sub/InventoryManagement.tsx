@@ -319,23 +319,43 @@ const InventoryManagement = () => {
     !!createForm.warehouse.trim() &&
     !!createForm.location.trim();
 
+  const thStyle: React.CSSProperties = {
+    whiteSpace: "nowrap",
+    padding: "13px 10px",
+    fontSize: "13px",
+    fontWeight: 700,
+    borderBottom: "none",
+    textAlign: "center",
+    verticalAlign: "middle",
+  };
+
+  const tdStyle: React.CSSProperties = {
+    padding: "12px 10px",
+    verticalAlign: "middle",
+    color: "#334155",
+    whiteSpace: "nowrap",
+    textAlign: "center",
+    fontSize: "13px",
+  };
+
   return (
     <>
       <Wrapper>
         <Lnb />
-        <DflexColumn>
-          <Content>
+        <DflexColumn style={{ minWidth: 0 }}>
+          <Content style={{ minWidth: 0 }}>
             <Top />
           </Content>
 
-          <Container fluid className="p-0">
+          <Container fluid className="p-0" style={{ minWidth: 0 }}>
             <Row className="g-0 m-0">
-              <Col className="p-0">
+              <Col className="p-0" style={{ minWidth: 0 }}>
                 <Ctap
                   style={{
                     background: "#fff",
-                    padding: "24px 28px",
+                    padding: "24px 24px 20px",
                     border: "1px solid #e5e7eb",
+                    minWidth: 0,
                   }}
                 >
                   <div
@@ -377,19 +397,21 @@ const InventoryManagement = () => {
                           display: "flex",
                           justifyContent: "flex-end",
                           alignItems: "center",
-                          gap: "12px",
-                          flexWrap: "nowrap",
+                          gap: "10px",
+                          flexWrap: "wrap",
                         }}
                       >
                         <Button
                           onClick={handleExcelDownload}
                           variant="success"
                           style={{
-                            height: "44px",
-                            minWidth: "120px",
+                            height: "42px",
+                            minWidth: "110px",
                             borderRadius: "6px",
                             fontWeight: 600,
                             margin: 0,
+                            padding: "0 14px",
+                            fontSize: "13px",
                           }}
                         >
                           엑셀 다운
@@ -398,11 +420,13 @@ const InventoryManagement = () => {
                         <Button
                           onClick={() => setShowCreate(true)}
                           style={{
-                            height: "44px",
-                            minWidth: "120px",
+                            height: "42px",
+                            minWidth: "110px",
                             borderRadius: "6px",
                             fontWeight: 600,
                             margin: 0,
+                            padding: "0 14px",
+                            fontSize: "13px",
                           }}
                         >
                           재고 등록
@@ -418,194 +442,205 @@ const InventoryManagement = () => {
                       overflow: "hidden",
                     }}
                   >
-                    <div style={{ padding: "12px 12px 0 12px" }}>
-                      <Table responsive className="mt-3 mb-0 align-middle">
-                        <thead>
-                          <tr className="text-center">
-                            <th
-                              className="bg-secondary text-white"
-                              style={{
-                                whiteSpace: "nowrap",
-                                padding: "14px 12px",
-                                fontSize: "14px",
-                                fontWeight: 700,
-                                borderBottom: "none",
-                              }}
-                            >
-                              #
-                            </th>
-                            {TABLE_HEADERS.map((h) => (
+                    <div
+                      style={{
+                        padding: "10px 10px 0 10px",
+                        minWidth: 0,
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "100%",
+                          overflowX: "auto",
+                          overflowY: "hidden",
+                        }}
+                      >
+                        <Table
+                          className="mt-3 mb-0 align-middle"
+                          style={{
+                            minWidth: "1450px",
+                            marginBottom: 0,
+                          }}
+                        >
+                          <thead>
+                            <tr className="text-center">
                               <th
-                                key={h.key as string}
                                 className="bg-secondary text-white"
                                 style={{
-                                  whiteSpace: "nowrap",
-                                  padding: "14px 12px",
-                                  fontSize: "14px",
-                                  fontWeight: 700,
-                                  borderBottom: "none",
+                                  ...thStyle,
+                                  minWidth: "60px",
                                 }}
                               >
-                                {h.label}
+                                #
                               </th>
-                            ))}
-                          </tr>
-                        </thead>
 
-                        <tbody>
-                          {(rows || []).map((r, i) => (
-                            <tr key={r.id ?? i} className="text-center">
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#475569",
-                                  fontWeight: 600,
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {i + 1 + page * size}
-                              </td>
+                              {TABLE_HEADERS.map((h) => {
+                                const widthMap: Record<string, string> = {
+                                  itemCode: "120px",
+                                  itemName: "160px",
+                                  itemGroup: "120px",
+                                  spec: "110px",
+                                  warehouse: "100px",
+                                  location: "110px",
+                                  stockQty: "90px",
+                                  safetyStock: "100px",
+                                  inPrice: "100px",
+                                  outPrice: "100px",
+                                  useYn: "90px",
+                                  remark: "180px",
+                                };
 
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.itemCode}
-                              </td>
-
-                              <td
-                                style={{
-                                  cursor: "pointer",
-                                  textDecoration: "underline",
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#0d6efd",
-                                  fontWeight: 600,
-                                  whiteSpace: "nowrap",
-                                }}
-                                onClick={() => openDetail(r.id)}
-                              >
-                                {r.itemName}
-                              </td>
-
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.itemGroup ?? ""}
-                              </td>
-
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.spec ?? ""}
-                              </td>
-
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.warehouse ?? ""}
-                              </td>
-
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.location ?? ""}
-                              </td>
-
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.stockQty}
-                              </td>
-
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.safetyStock ?? 0}
-                              </td>
-
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.inPrice ?? 0}
-                              </td>
-
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.outPrice ?? 0}
-                              </td>
-
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.useYn}
-                              </td>
-
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.remark ?? ""}
-                              </td>
+                                return (
+                                  <th
+                                    key={h.key as string}
+                                    className="bg-secondary text-white"
+                                    style={{
+                                      ...thStyle,
+                                      minWidth: widthMap[h.key as string] || "100px",
+                                    }}
+                                  >
+                                    {h.label}
+                                  </th>
+                                );
+                              })}
                             </tr>
-                          ))}
-                        </tbody>
-                      </Table>
+                          </thead>
+
+                          <tbody>
+                            {(rows || []).map((r, i) => (
+                              <tr key={r.id ?? i} className="text-center">
+                                <td
+                                  style={{
+                                    ...tdStyle,
+                                    color: "#475569",
+                                    fontWeight: 600,
+                                  }}
+                                  title={String(i + 1 + page * size)}
+                                >
+                                  {i + 1 + page * size}
+                                </td>
+
+                                <td
+                                  style={{
+                                    ...tdStyle,
+                                    maxWidth: "120px",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                  title={r.itemCode}
+                                >
+                                  {r.itemCode}
+                                </td>
+
+                                <td
+                                  style={{
+                                    ...tdStyle,
+                                    cursor: "pointer",
+                                    color: "#0d6efd",
+                                    fontWeight: 600,
+                                    textDecoration: "underline",
+                                    maxWidth: "160px",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                  title={r.itemName}
+                                  onClick={() => openDetail(r.id)}
+                                >
+                                  {r.itemName}
+                                </td>
+
+                                <td
+                                  style={{
+                                    ...tdStyle,
+                                    maxWidth: "120px",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                  title={r.itemGroup ?? ""}
+                                >
+                                  {r.itemGroup ?? ""}
+                                </td>
+
+                                <td
+                                  style={{
+                                    ...tdStyle,
+                                    maxWidth: "110px",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                  title={r.spec ?? ""}
+                                >
+                                  {r.spec ?? ""}
+                                </td>
+
+                                <td
+                                  style={{
+                                    ...tdStyle,
+                                    maxWidth: "100px",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                  title={r.warehouse ?? ""}
+                                >
+                                  {r.warehouse ?? ""}
+                                </td>
+
+                                <td
+                                  style={{
+                                    ...tdStyle,
+                                    maxWidth: "110px",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                  title={r.location ?? ""}
+                                >
+                                  {r.location ?? ""}
+                                </td>
+
+                                <td style={tdStyle} title={String(r.stockQty)}>
+                                  {r.stockQty}
+                                </td>
+
+                                <td style={tdStyle} title={String(r.safetyStock ?? 0)}>
+                                  {r.safetyStock ?? 0}
+                                </td>
+
+                                <td style={tdStyle} title={String(r.inPrice ?? 0)}>
+                                  {r.inPrice ?? 0}
+                                </td>
+
+                                <td style={tdStyle} title={String(r.outPrice ?? 0)}>
+                                  {r.outPrice ?? 0}
+                                </td>
+
+                                <td
+                                  style={{
+                                    ...tdStyle,
+                                    maxWidth: "90px",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                  title={r.useYn}
+                                >
+                                  {r.useYn}
+                                </td>
+
+                                <td
+                                  style={{
+                                    ...tdStyle,
+                                    maxWidth: "180px",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                  title={r.remark ?? ""}
+                                >
+                                  {r.remark ?? ""}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </Table>
+                      </div>
 
                       <Center
                         style={{
@@ -617,7 +652,7 @@ const InventoryManagement = () => {
                         }}
                       >
                         {totalPages > 0 && (
-                          <Pagination className="mb-0">
+                          <Pagination className="mb-0" size="sm">
                             <Pagination.First disabled={page === 0} onClick={() => goPage(0)} />
                             <Pagination.Prev disabled={page === 0} onClick={() => goPage(page - 1)} />
 
@@ -646,6 +681,7 @@ const InventoryManagement = () => {
                             color: "#64748b",
                             fontWeight: 600,
                             marginBottom: "4px",
+                            fontSize: "13px",
                           }}
                         >
                           총{totalElements}건 {page + 1} / {totalPages || 1} 페이지
@@ -661,227 +697,751 @@ const InventoryManagement = () => {
       </Wrapper>
 
       {/* ✅ 등록 모달 */}
-      <Modal show={showCreate} onHide={() => setShowCreate(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>재고 등록</Modal.Title>
+      <Modal show={showCreate} onHide={() => setShowCreate(false)} centered size="lg">
+        <Modal.Header
+          closeButton
+          style={{
+            borderBottom: "1px solid #dbe2ea",
+            padding: "20px 24px",
+            backgroundColor: "#f8fafc",
+          }}
+        >
+          <Modal.Title
+            style={{
+              fontSize: "20px",
+              fontWeight: 700,
+              color: "#111827",
+              letterSpacing: "-0.02em",
+            }}
+          >
+            재고 등록
+          </Modal.Title>
         </Modal.Header>
 
-        <Modal.Body>
+        <Modal.Body
+          style={{
+            padding: "24px",
+            backgroundColor: "#ffffff",
+          }}
+        >
           <Form>
-            <Form.Control
-              className="mb-2"
-              name="itemCode"
-              placeholder="품목코드"
-              value={createForm.itemCode}
-              onChange={onCreateChange}
-            />
-            <Form.Control
-              className="mb-2"
-              name="itemName"
-              placeholder="품목명"
-              value={createForm.itemName}
-              onChange={onCreateChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                품목코드
+              </Form.Label>
+              <Form.Control
+                name="itemCode"
+                placeholder="품목코드"
+                value={createForm.itemCode}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-2"
-              name="itemGroup"
-              placeholder="품목그룹 *"
-              value={createForm.itemGroup}
-              onChange={onCreateChange}
-              required
-            />
-            <Form.Control
-              className="mb-2"
-              name="spec"
-              placeholder="규격"
-              value={createForm.spec}
-              onChange={onCreateChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                품목명
+              </Form.Label>
+              <Form.Control
+                name="itemName"
+                placeholder="품목명"
+                value={createForm.itemName}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-2"
-              name="warehouse"
-              placeholder="창고 *"
-              value={createForm.warehouse}
-              onChange={onCreateChange}
-              required
-            />
-            <Form.Control
-              className="mb-2"
-              name="location"
-              placeholder="위치 *"
-              value={createForm.location}
-              onChange={onCreateChange}
-              required
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                품목그룹 *
+              </Form.Label>
+              <Form.Control
+                name="itemGroup"
+                placeholder="품목그룹"
+                value={createForm.itemGroup}
+                onChange={onCreateChange}
+                required
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-2"
-              type="number"
-              name="stockQty"
-              placeholder="현재고"
-              value={createForm.stockQty}
-              onChange={onCreateChange}
-            />
-            <Form.Control
-              className="mb-2"
-              type="number"
-              name="safetyStock"
-              placeholder="안전재고"
-              value={createForm.safetyStock}
-              onChange={onCreateChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                규격
+              </Form.Label>
+              <Form.Control
+                name="spec"
+                placeholder="규격"
+                value={createForm.spec}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-2"
-              type="number"
-              name="inPrice"
-              placeholder="입고단가"
-              value={createForm.inPrice}
-              onChange={onCreateChange}
-            />
-            <Form.Control
-              className="mb-2"
-              type="number"
-              name="outPrice"
-              placeholder="출고단가"
-              value={createForm.outPrice}
-              onChange={onCreateChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                창고 *
+              </Form.Label>
+              <Form.Control
+                name="warehouse"
+                placeholder="창고"
+                value={createForm.warehouse}
+                onChange={onCreateChange}
+                required
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Select className="mb-2" name="useYn" value={createForm.useYn} onChange={onCreateChange}>
-              <option value="Y">사용</option>
-              <option value="N">미사용</option>
-            </Form.Select>
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                위치 *
+              </Form.Label>
+              <Form.Control
+                name="location"
+                placeholder="위치"
+                value={createForm.location}
+                onChange={onCreateChange}
+                required
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-2"
-              name="remark"
-              placeholder="비고"
-              value={createForm.remark}
-              onChange={onCreateChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                현재고
+              </Form.Label>
+              <Form.Control
+                type="number"
+                name="stockQty"
+                placeholder="현재고"
+                value={createForm.stockQty}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                안전재고
+              </Form.Label>
+              <Form.Control
+                type="number"
+                name="safetyStock"
+                placeholder="안전재고"
+                value={createForm.safetyStock}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                입고단가
+              </Form.Label>
+              <Form.Control
+                type="number"
+                name="inPrice"
+                placeholder="입고단가"
+                value={createForm.inPrice}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                출고단가
+              </Form.Label>
+              <Form.Control
+                type="number"
+                name="outPrice"
+                placeholder="출고단가"
+                value={createForm.outPrice}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                사용여부
+              </Form.Label>
+              <Form.Select
+                name="useYn"
+                value={createForm.useYn}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              >
+                <option value="Y">사용</option>
+                <option value="N">미사용</option>
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-0">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                비고
+              </Form.Label>
+              <Form.Control
+                name="remark"
+                placeholder="비고"
+                value={createForm.remark}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
           </Form>
         </Modal.Body>
 
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowCreate(false)}>
+        <Modal.Footer
+          style={{
+            borderTop: "1px solid #dbe2ea",
+            padding: "16px 24px",
+            backgroundColor: "#f8fafc",
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: "10px",
+          }}
+        >
+          <Button
+            variant="secondary"
+            onClick={() => setShowCreate(false)}
+            style={{
+              minWidth: "96px",
+              height: "42px",
+              borderRadius: "4px",
+              fontWeight: 600,
+            }}
+          >
             닫기
           </Button>
-          <Button onClick={handleSave} disabled={!canSave}>
+          <Button
+            onClick={handleSave}
+            disabled={!canSave}
+            style={{
+              minWidth: "96px",
+              height: "42px",
+              borderRadius: "4px",
+              fontWeight: 600,
+            }}
+          >
             저장
           </Button>
         </Modal.Footer>
       </Modal>
 
       {/* ✅ 상세(수정/삭제) 모달 */}
-      <Modal show={showDetail} onHide={() => setShowDetail(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>재고 상세</Modal.Title>
+      <Modal show={showDetail} onHide={() => setShowDetail(false)} centered size="lg">
+        <Modal.Header
+          closeButton
+          style={{
+            borderBottom: "1px solid #dbe2ea",
+            padding: "20px 24px",
+            backgroundColor: "#f8fafc",
+          }}
+        >
+          <Modal.Title
+            style={{
+              fontSize: "20px",
+              fontWeight: 700,
+              color: "#111827",
+              letterSpacing: "-0.02em",
+            }}
+          >
+            재고 상세
+          </Modal.Title>
         </Modal.Header>
 
-        <Modal.Body>
+        <Modal.Body
+          style={{
+            padding: "24px",
+            backgroundColor: "#ffffff",
+          }}
+        >
           <Form>
-            <Form.Control
-              className="mb-2"
-              name="itemCode"
-              placeholder="품목코드"
-              value={editForm.itemCode}
-              onChange={onEditChange}
-            />
-            <Form.Control
-              className="mb-2"
-              name="itemName"
-              placeholder="품목명"
-              value={editForm.itemName}
-              onChange={onEditChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                품목코드
+              </Form.Label>
+              <Form.Control
+                name="itemCode"
+                placeholder="품목코드"
+                value={editForm.itemCode}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-2"
-              name="itemGroup"
-              placeholder="품목그룹"
-              value={editForm.itemGroup}
-              onChange={onEditChange}
-            />
-            <Form.Control
-              className="mb-2"
-              name="spec"
-              placeholder="규격"
-              value={editForm.spec}
-              onChange={onEditChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                품목명
+              </Form.Label>
+              <Form.Control
+                name="itemName"
+                placeholder="품목명"
+                value={editForm.itemName}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-2"
-              name="warehouse"
-              placeholder="창고"
-              value={editForm.warehouse}
-              onChange={onEditChange}
-            />
-            <Form.Control
-              className="mb-2"
-              name="location"
-              placeholder="위치"
-              value={editForm.location}
-              onChange={onEditChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                품목그룹
+              </Form.Label>
+              <Form.Control
+                name="itemGroup"
+                placeholder="품목그룹"
+                value={editForm.itemGroup}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-2"
-              type="number"
-              name="stockQty"
-              placeholder="현재고"
-              value={editForm.stockQty}
-              onChange={onEditChange}
-            />
-            <Form.Control
-              className="mb-2"
-              type="number"
-              name="safetyStock"
-              placeholder="안전재고"
-              value={editForm.safetyStock}
-              onChange={onEditChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                규격
+              </Form.Label>
+              <Form.Control
+                name="spec"
+                placeholder="규격"
+                value={editForm.spec}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-2"
-              type="number"
-              name="inPrice"
-              placeholder="입고단가"
-              value={editForm.inPrice}
-              onChange={onEditChange}
-            />
-            <Form.Control
-              className="mb-2"
-              type="number"
-              name="outPrice"
-              placeholder="출고단가"
-              value={editForm.outPrice}
-              onChange={onEditChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                창고
+              </Form.Label>
+              <Form.Control
+                name="warehouse"
+                placeholder="창고"
+                value={editForm.warehouse}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Select className="mb-2" name="useYn" value={editForm.useYn} onChange={onEditChange}>
-              <option value="Y">사용</option>
-              <option value="N">미사용</option>
-            </Form.Select>
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                위치
+              </Form.Label>
+              <Form.Control
+                name="location"
+                placeholder="위치"
+                value={editForm.location}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
 
-            <Form.Control
-              className="mb-2"
-              name="remark"
-              placeholder="비고"
-              value={editForm.remark}
-              onChange={onEditChange}
-            />
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                현재고
+              </Form.Label>
+              <Form.Control
+                type="number"
+                name="stockQty"
+                placeholder="현재고"
+                value={editForm.stockQty}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                안전재고
+              </Form.Label>
+              <Form.Control
+                type="number"
+                name="safetyStock"
+                placeholder="안전재고"
+                value={editForm.safetyStock}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                입고단가
+              </Form.Label>
+              <Form.Control
+                type="number"
+                name="inPrice"
+                placeholder="입고단가"
+                value={editForm.inPrice}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                출고단가
+              </Form.Label>
+              <Form.Control
+                type="number"
+                name="outPrice"
+                placeholder="출고단가"
+                value={editForm.outPrice}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                사용여부
+              </Form.Label>
+              <Form.Select
+                name="useYn"
+                value={editForm.useYn}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              >
+                <option value="Y">사용</option>
+                <option value="N">미사용</option>
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-0">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                비고
+              </Form.Label>
+              <Form.Control
+                name="remark"
+                placeholder="비고"
+                value={editForm.remark}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
           </Form>
         </Modal.Body>
 
-        <Modal.Footer>
-          <Button variant="danger" onClick={handleDelete}>
+        <Modal.Footer
+          style={{
+            borderTop: "1px solid #dbe2ea",
+            padding: "16px 24px",
+            backgroundColor: "#f8fafc",
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: "10px",
+          }}
+        >
+          <Button
+            variant="danger"
+            onClick={handleDelete}
+            style={{
+              minWidth: "96px",
+              height: "42px",
+              borderRadius: "4px",
+              fontWeight: 600,
+            }}
+          >
             삭제
           </Button>
-          <Button variant="success" onClick={handleUpdate}>
+          <Button
+            variant="success"
+            onClick={handleUpdate}
+            style={{
+              minWidth: "96px",
+              height: "42px",
+              borderRadius: "4px",
+              fontWeight: 600,
+            }}
+          >
             수정
           </Button>
         </Modal.Footer>

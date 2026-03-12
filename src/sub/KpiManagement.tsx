@@ -226,23 +226,43 @@ const KpiManagement = () => {
     fetchList(page);
   };
 
+  const thStyle: React.CSSProperties = {
+    whiteSpace: "nowrap",
+    padding: "13px 10px",
+    fontSize: "13px",
+    fontWeight: 700,
+    borderBottom: "none",
+    textAlign: "center",
+    verticalAlign: "middle",
+  };
+
+  const tdStyle: React.CSSProperties = {
+    padding: "12px 10px",
+    verticalAlign: "middle",
+    color: "#334155",
+    whiteSpace: "nowrap",
+    textAlign: "center",
+    fontSize: "13px",
+  };
+
   return (
     <>
       <Wrapper>
         <Lnb />
-        <DflexColumn>
-          <Content>
+        <DflexColumn style={{ minWidth: 0 }}>
+          <Content style={{ minWidth: 0 }}>
             <Top />
           </Content>
 
-          <Container fluid className="p-0">
+          <Container fluid className="p-0" style={{ minWidth: 0 }}>
             <Row className="g-0 m-0">
-              <Col className="p-0">
+              <Col className="p-0" style={{ minWidth: 0 }}>
                 <Ctap
                   style={{
                     background: "#fff",
-                    padding: "24px 28px",
+                    padding: "24px 24px 20px",
                     border: "1px solid #e5e7eb",
+                    minWidth: 0,
                   }}
                 >
                   <div
@@ -284,19 +304,21 @@ const KpiManagement = () => {
                           display: "flex",
                           justifyContent: "flex-end",
                           alignItems: "center",
-                          gap: "12px",
-                          flexWrap: "nowrap",
+                          gap: "10px",
+                          flexWrap: "wrap",
                         }}
                       >
                         <Button
                           onClick={handleExcelDownload}
                           variant="success"
                           style={{
-                            height: "44px",
-                            minWidth: "120px",
+                            height: "42px",
+                            minWidth: "110px",
                             borderRadius: "6px",
                             fontWeight: 600,
                             margin: 0,
+                            padding: "0 14px",
+                            fontSize: "13px",
                           }}
                         >
                           엑셀 다운
@@ -305,11 +327,13 @@ const KpiManagement = () => {
                         <Button
                           onClick={() => setShowCreate(true)}
                           style={{
-                            height: "44px",
-                            minWidth: "120px",
+                            height: "42px",
+                            minWidth: "110px",
                             borderRadius: "6px",
                             fontWeight: 600,
                             margin: 0,
+                            padding: "0 14px",
+                            fontSize: "13px",
                           }}
                         >
                           KPI 등록
@@ -325,183 +349,192 @@ const KpiManagement = () => {
                       overflow: "hidden",
                     }}
                   >
-                    <div style={{ padding: "12px 12px 0 12px" }}>
-                      <Table responsive className="mt-3 mb-0 align-middle">
-                        <thead>
-                          <tr className="text-center">
-                            <th
-                              className="bg-secondary text-white"
-                              style={{
-                                whiteSpace: "nowrap",
-                                padding: "14px 12px",
-                                fontSize: "14px",
-                                fontWeight: 700,
-                                borderBottom: "none",
-                              }}
-                            >
-                              #
-                            </th>
-                            {TABLE_HEADERS.map((h) => (
+                    <div
+                      style={{
+                        padding: "10px 10px 0 10px",
+                        minWidth: 0,
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "100%",
+                          overflowX: "auto",
+                          overflowY: "hidden",
+                        }}
+                      >
+                        <Table
+                          className="mt-3 mb-0 align-middle"
+                          style={{
+                            minWidth: "1320px",
+                            marginBottom: 0,
+                          }}
+                        >
+                          <thead>
+                            <tr className="text-center">
                               <th
-                                key={h.key as string}
                                 className="bg-secondary text-white"
                                 style={{
-                                  whiteSpace: "nowrap",
-                                  padding: "14px 12px",
-                                  fontSize: "14px",
-                                  fontWeight: 700,
-                                  borderBottom: "none",
+                                  ...thStyle,
+                                  minWidth: "60px",
                                 }}
                               >
-                                {h.label}
+                                #
                               </th>
-                            ))}
-                          </tr>
-                        </thead>
 
-                        <tbody>
-                          {rows.map((r, i) => (
-                            <tr key={r.id} className="text-center">
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#475569",
-                                  fontWeight: 600,
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {i + 1 + page * size}
-                              </td>
+                              {TABLE_HEADERS.map((h) => {
+                                const widthMap: Record<string, string> = {
+                                  kpiName: "180px",
+                                  kpiGroup: "120px",
+                                  owner: "110px",
+                                  periodType: "110px",
+                                  periodValue: "120px",
+                                  targetValue: "100px",
+                                  actualValue: "100px",
+                                  unit: "90px",
+                                  status: "110px",
+                                  useYn: "90px",
+                                  remark: "180px",
+                                };
 
-                              <td
-                                style={{
-                                  cursor: "pointer",
-                                  textDecoration: "underline",
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#0d6efd",
-                                  fontWeight: 600,
-                                  whiteSpace: "nowrap",
-                                }}
-                                onClick={() => openDetail(r.id)}
-                              >
-                                {r.kpiName}
-                              </td>
-
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.kpiGroup}
-                              </td>
-
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.owner}
-                              </td>
-
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.periodType}
-                              </td>
-
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.periodValue}
-                              </td>
-
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.targetValue}
-                              </td>
-
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.actualValue}
-                              </td>
-
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.unit}
-                              </td>
-
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.status}
-                              </td>
-
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.useYn}
-                              </td>
-
-                              <td
-                                style={{
-                                  padding: "13px 12px",
-                                  verticalAlign: "middle",
-                                  color: "#334155",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {r.remark}
-                              </td>
+                                return (
+                                  <th
+                                    key={h.key as string}
+                                    className="bg-secondary text-white"
+                                    style={{
+                                      ...thStyle,
+                                      minWidth: widthMap[h.key as string] || "100px",
+                                    }}
+                                  >
+                                    {h.label}
+                                  </th>
+                                );
+                              })}
                             </tr>
-                          ))}
-                        </tbody>
-                      </Table>
+                          </thead>
+
+                          <tbody>
+                            {rows.map((r, i) => (
+                              <tr key={r.id} className="text-center">
+                                <td
+                                  style={{
+                                    ...tdStyle,
+                                    color: "#475569",
+                                    fontWeight: 600,
+                                  }}
+                                  title={String(i + 1 + page * size)}
+                                >
+                                  {i + 1 + page * size}
+                                </td>
+
+                                <td
+                                  style={{
+                                    ...tdStyle,
+                                    cursor: "pointer",
+                                    textDecoration: "underline",
+                                    color: "#0d6efd",
+                                    fontWeight: 600,
+                                    maxWidth: "180px",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                  onClick={() => openDetail(r.id)}
+                                  title={r.kpiName}
+                                >
+                                  {r.kpiName}
+                                </td>
+
+                                <td
+                                  style={{
+                                    ...tdStyle,
+                                    maxWidth: "120px",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                  title={r.kpiGroup ?? ""}
+                                >
+                                  {r.kpiGroup}
+                                </td>
+
+                                <td
+                                  style={{
+                                    ...tdStyle,
+                                    maxWidth: "110px",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                  title={r.owner ?? ""}
+                                >
+                                  {r.owner}
+                                </td>
+
+                                <td style={tdStyle} title={r.periodType}>
+                                  {r.periodType}
+                                </td>
+
+                                <td
+                                  style={{
+                                    ...tdStyle,
+                                    maxWidth: "120px",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                  title={r.periodValue}
+                                >
+                                  {r.periodValue}
+                                </td>
+
+                                <td style={tdStyle} title={String(r.targetValue)}>
+                                  {r.targetValue}
+                                </td>
+
+                                <td style={tdStyle} title={String(r.actualValue)}>
+                                  {r.actualValue}
+                                </td>
+
+                                <td
+                                  style={{
+                                    ...tdStyle,
+                                    maxWidth: "90px",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                  title={r.unit ?? ""}
+                                >
+                                  {r.unit}
+                                </td>
+
+                                <td
+                                  style={{
+                                    ...tdStyle,
+                                    maxWidth: "110px",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                  title={r.status ?? ""}
+                                >
+                                  {r.status}
+                                </td>
+
+                                <td style={tdStyle} title={r.useYn}>
+                                  {r.useYn}
+                                </td>
+
+                                <td
+                                  style={{
+                                    ...tdStyle,
+                                    maxWidth: "180px",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                  title={r.remark ?? ""}
+                                >
+                                  {r.remark}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </Table>
+                      </div>
 
                       <Center
                         style={{
@@ -513,7 +546,7 @@ const KpiManagement = () => {
                         }}
                       >
                         {totalPages > 0 && (
-                          <Pagination className="mb-0">
+                          <Pagination className="mb-0" size="sm">
                             <Pagination.First disabled={page === 0} onClick={() => goPage(0)} />
                             <Pagination.Prev disabled={page === 0} onClick={() => goPage(page - 1)} />
 
@@ -539,6 +572,7 @@ const KpiManagement = () => {
                             color: "#64748b",
                             fontWeight: 600,
                             marginBottom: "4px",
+                            fontSize: "13px",
                           }}
                         >
                           총 {totalElements}건 / {page + 1}페이지
@@ -554,56 +588,552 @@ const KpiManagement = () => {
       </Wrapper>
 
       {/* 등록 모달 */}
-      <Modal show={showCreate} onHide={() => setShowCreate(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>KPI 등록</Modal.Title>
+      <Modal show={showCreate} onHide={() => setShowCreate(false)} centered size="lg">
+        <Modal.Header
+          closeButton
+          style={{
+            borderBottom: "1px solid #dbe2ea",
+            padding: "20px 24px",
+            backgroundColor: "#f8fafc",
+          }}
+        >
+          <Modal.Title
+            style={{
+              fontSize: "20px",
+              fontWeight: 700,
+              color: "#111827",
+              letterSpacing: "-0.02em",
+            }}
+          >
+            KPI 등록
+          </Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+
+        <Modal.Body
+          style={{
+            padding: "24px",
+            backgroundColor: "#ffffff",
+          }}
+        >
           <Form>
-            {Object.entries(createForm).map(([k, v]) => (
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontSize: "13px", fontWeight: 700, color: "#374151", marginBottom: "8px" }}>
+                KPI명
+              </Form.Label>
               <Form.Control
-                key={k}
-                className="mb-2"
-                name={k}
-                value={v as any}
+                name="kpiName"
+                value={createForm.kpiName}
                 onChange={onCreateChange}
-                placeholder={k}
+                placeholder="KPI명"
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
               />
-            ))}
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontSize: "13px", fontWeight: 700, color: "#374151", marginBottom: "8px" }}>
+                그룹
+              </Form.Label>
+              <Form.Control
+                name="kpiGroup"
+                value={createForm.kpiGroup}
+                onChange={onCreateChange}
+                placeholder="그룹"
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontSize: "13px", fontWeight: 700, color: "#374151", marginBottom: "8px" }}>
+                담당자
+              </Form.Label>
+              <Form.Control
+                name="owner"
+                value={createForm.owner}
+                onChange={onCreateChange}
+                placeholder="담당자"
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontSize: "13px", fontWeight: 700, color: "#374151", marginBottom: "8px" }}>
+                기간유형
+              </Form.Label>
+              <Form.Select
+                name="periodType"
+                value={createForm.periodType}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              >
+                <option value="MONTH">MONTH</option>
+                <option value="QUARTER">QUARTER</option>
+                <option value="YEAR">YEAR</option>
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontSize: "13px", fontWeight: 700, color: "#374151", marginBottom: "8px" }}>
+                기간
+              </Form.Label>
+              <Form.Control
+                name="periodValue"
+                value={createForm.periodValue}
+                onChange={onCreateChange}
+                placeholder="기간"
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontSize: "13px", fontWeight: 700, color: "#374151", marginBottom: "8px" }}>
+                목표
+              </Form.Label>
+              <Form.Control
+                type="number"
+                name="targetValue"
+                value={createForm.targetValue}
+                onChange={onCreateChange}
+                placeholder="목표"
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontSize: "13px", fontWeight: 700, color: "#374151", marginBottom: "8px" }}>
+                실적
+              </Form.Label>
+              <Form.Control
+                type="number"
+                name="actualValue"
+                value={createForm.actualValue}
+                onChange={onCreateChange}
+                placeholder="실적"
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontSize: "13px", fontWeight: 700, color: "#374151", marginBottom: "8px" }}>
+                단위
+              </Form.Label>
+              <Form.Control
+                name="unit"
+                value={createForm.unit}
+                onChange={onCreateChange}
+                placeholder="단위"
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontSize: "13px", fontWeight: 700, color: "#374151", marginBottom: "8px" }}>
+                상태
+              </Form.Label>
+              <Form.Select
+                name="status"
+                value={createForm.status}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              >
+                <option value="ON_TRACK">ON_TRACK</option>
+                <option value="RISK">RISK</option>
+                <option value="OFF_TRACK">OFF_TRACK</option>
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontSize: "13px", fontWeight: 700, color: "#374151", marginBottom: "8px" }}>
+                사용여부
+              </Form.Label>
+              <Form.Select
+                name="useYn"
+                value={createForm.useYn}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              >
+                <option value="Y">사용</option>
+                <option value="N">미사용</option>
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-0">
+              <Form.Label style={{ fontSize: "13px", fontWeight: 700, color: "#374151", marginBottom: "8px" }}>
+                비고
+              </Form.Label>
+              <Form.Control
+                name="remark"
+                value={createForm.remark}
+                onChange={onCreateChange}
+                placeholder="비고"
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
           </Form>
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowCreate(false)}>
+
+        <Modal.Footer
+          style={{
+            borderTop: "1px solid #dbe2ea",
+            padding: "16px 24px",
+            backgroundColor: "#f8fafc",
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: "10px",
+          }}
+        >
+          <Button
+            variant="secondary"
+            onClick={() => setShowCreate(false)}
+            style={{
+              minWidth: "96px",
+              height: "42px",
+              borderRadius: "4px",
+              fontWeight: 600,
+            }}
+          >
             닫기
           </Button>
-          <Button onClick={handleSave}>저장</Button>
+          <Button
+            onClick={handleSave}
+            style={{
+              minWidth: "96px",
+              height: "42px",
+              borderRadius: "4px",
+              fontWeight: 600,
+            }}
+          >
+            저장
+          </Button>
         </Modal.Footer>
       </Modal>
 
       {/* 상세 모달 */}
-      <Modal show={showDetail} onHide={() => setShowDetail(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>KPI 상세</Modal.Title>
+      <Modal show={showDetail} onHide={() => setShowDetail(false)} centered size="lg">
+        <Modal.Header
+          closeButton
+          style={{
+            borderBottom: "1px solid #dbe2ea",
+            padding: "20px 24px",
+            backgroundColor: "#f8fafc",
+          }}
+        >
+          <Modal.Title
+            style={{
+              fontSize: "20px",
+              fontWeight: 700,
+              color: "#111827",
+              letterSpacing: "-0.02em",
+            }}
+          >
+            KPI 상세
+          </Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+
+        <Modal.Body
+          style={{
+            padding: "24px",
+            backgroundColor: "#ffffff",
+          }}
+        >
           <Form>
-            {Object.entries(editForm).map(([k, v]) => (
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontSize: "13px", fontWeight: 700, color: "#374151", marginBottom: "8px" }}>
+                KPI명
+              </Form.Label>
               <Form.Control
-                key={k}
-                className="mb-2"
-                name={k}
-                value={v as any}
+                name="kpiName"
+                value={editForm.kpiName}
                 onChange={onEditChange}
-                placeholder={k}
+                placeholder="KPI명"
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
               />
-            ))}
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontSize: "13px", fontWeight: 700, color: "#374151", marginBottom: "8px" }}>
+                그룹
+              </Form.Label>
+              <Form.Control
+                name="kpiGroup"
+                value={editForm.kpiGroup}
+                onChange={onEditChange}
+                placeholder="그룹"
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontSize: "13px", fontWeight: 700, color: "#374151", marginBottom: "8px" }}>
+                담당자
+              </Form.Label>
+              <Form.Control
+                name="owner"
+                value={editForm.owner}
+                onChange={onEditChange}
+                placeholder="담당자"
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontSize: "13px", fontWeight: 700, color: "#374151", marginBottom: "8px" }}>
+                기간유형
+              </Form.Label>
+              <Form.Select
+                name="periodType"
+                value={editForm.periodType}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              >
+                <option value="MONTH">MONTH</option>
+                <option value="QUARTER">QUARTER</option>
+                <option value="YEAR">YEAR</option>
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontSize: "13px", fontWeight: 700, color: "#374151", marginBottom: "8px" }}>
+                기간
+              </Form.Label>
+              <Form.Control
+                name="periodValue"
+                value={editForm.periodValue}
+                onChange={onEditChange}
+                placeholder="기간"
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontSize: "13px", fontWeight: 700, color: "#374151", marginBottom: "8px" }}>
+                목표
+              </Form.Label>
+              <Form.Control
+                type="number"
+                name="targetValue"
+                value={editForm.targetValue}
+                onChange={onEditChange}
+                placeholder="목표"
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontSize: "13px", fontWeight: 700, color: "#374151", marginBottom: "8px" }}>
+                실적
+              </Form.Label>
+              <Form.Control
+                type="number"
+                name="actualValue"
+                value={editForm.actualValue}
+                onChange={onEditChange}
+                placeholder="실적"
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontSize: "13px", fontWeight: 700, color: "#374151", marginBottom: "8px" }}>
+                단위
+              </Form.Label>
+              <Form.Control
+                name="unit"
+                value={editForm.unit}
+                onChange={onEditChange}
+                placeholder="단위"
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontSize: "13px", fontWeight: 700, color: "#374151", marginBottom: "8px" }}>
+                상태
+              </Form.Label>
+              <Form.Select
+                name="status"
+                value={editForm.status}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              >
+                <option value="ON_TRACK">ON_TRACK</option>
+                <option value="RISK">RISK</option>
+                <option value="OFF_TRACK">OFF_TRACK</option>
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label style={{ fontSize: "13px", fontWeight: 700, color: "#374151", marginBottom: "8px" }}>
+                사용여부
+              </Form.Label>
+              <Form.Select
+                name="useYn"
+                value={editForm.useYn}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              >
+                <option value="Y">사용</option>
+                <option value="N">미사용</option>
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-0">
+              <Form.Label style={{ fontSize: "13px", fontWeight: 700, color: "#374151", marginBottom: "8px" }}>
+                비고
+              </Form.Label>
+              <Form.Control
+                name="remark"
+                value={editForm.remark}
+                onChange={onEditChange}
+                placeholder="비고"
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
           </Form>
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="danger" onClick={handleDelete}>
+
+        <Modal.Footer
+          style={{
+            borderTop: "1px solid #dbe2ea",
+            padding: "16px 24px",
+            backgroundColor: "#f8fafc",
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: "10px",
+          }}
+        >
+          <Button
+            variant="danger"
+            onClick={handleDelete}
+            style={{
+              minWidth: "96px",
+              height: "42px",
+              borderRadius: "4px",
+              fontWeight: 600,
+            }}
+          >
             삭제
           </Button>
-          <Button onClick={handleUpdate}>수정</Button>
+          <Button
+            onClick={handleUpdate}
+            style={{
+              minWidth: "96px",
+              height: "42px",
+              borderRadius: "4px",
+              fontWeight: 600,
+            }}
+          >
+            수정
+          </Button>
         </Modal.Footer>
       </Modal>
     </>
