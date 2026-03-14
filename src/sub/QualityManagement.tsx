@@ -907,7 +907,7 @@ const QualityManagement = () => {
             gap: "10px",
           }}
         >
-          <Button
+          {/*<Button
             variant="secondary"
             onClick={handleCloseCreate}
             style={{
@@ -918,7 +918,7 @@ const QualityManagement = () => {
             }}
           >
             닫기
-          </Button>
+          </Button>*/}
           <Button
             onClick={handleSave}
             disabled={!canSave}
