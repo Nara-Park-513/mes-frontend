@@ -24,10 +24,14 @@ const API_BASE = "http://localhost:9500";
 
 type QualityManagementItem = {
   id: number;
-  inspectionStandard: string;
-  processInspection: string;
-  defectManagement: string;
-  qualityHistory: string;
+  inspectionDate: string;
+  itemCode: string;
+  itemName: string;
+  inspectionQty: number;
+  defectQty: number;
+  judgementResult: string;
+  actionType: string;
+  actionStatus: string;
 };
 
 type PageResponse<T> = {
@@ -38,18 +42,29 @@ type PageResponse<T> = {
   size: number;
 };
 
-const TABLE_HEADERS: { key: keyof Omit<QualityManagementItem, "id">; label: string }[] = [
-  { key: "inspectionStandard", label: "검사기준관리" },
-  { key: "processInspection", label: "공정검사" },
-  { key: "defectManagement", label: "불량관리" },
-  { key: "qualityHistory", label: "품질이력" },
+const TABLE_HEADERS: {
+  key: keyof Omit<QualityManagementItem, "id">;
+  label: string;
+}[] = [
+  { key: "inspectionDate", label: "검사일자" },
+  { key: "itemCode", label: "품목코드" },
+  { key: "itemName", label: "품목명" },
+  { key: "inspectionQty", label: "검사수량" },
+  { key: "defectQty", label: "불량수량" },
+  { key: "judgementResult", label: "판정결과" },
+  { key: "actionType", label: "조치구분" },
+  { key: "actionStatus", label: "조치상태" },
 ];
 
 const emptyForm = {
-  inspectionStandard: "",
-  processInspection: "",
-  defectManagement: "",
-  qualityHistory: "",
+  inspectionDate: "",
+  itemCode: "",
+  itemName: "",
+  inspectionQty: "",
+  defectQty: "",
+  judgementResult: "",
+  actionType: "",
+  actionStatus: "",
 };
 
 const QualityManagement = () => {
@@ -67,17 +82,19 @@ const QualityManagement = () => {
   const [createForm, setCreateForm] = useState(emptyForm);
   const [editForm, setEditForm] = useState(emptyForm);
 
-  const stockMenu = [{ key: "quality", label: "품질관리", path: "/quality" }];
-
   const onCreateChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
     setCreateForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const onEditChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
     setEditForm((prev) => ({ ...prev, [name]: value }));
@@ -96,22 +113,28 @@ const QualityManagement = () => {
         return;
       }
 
-      const data = await res.json();
+      const data: PageResponse<any> | any[] = await res.json();
       console.log("quality list raw =", data);
 
       const list = Array.isArray(data) ? data : data.content ?? [];
 
       const normalized = list.map((item: any) => ({
         id: item.id,
-        inspectionStandard: item.inspectionStandard ?? "",
-        processInspection: item.processInspection ?? "",
-        defectManagement: item.defectManagement ?? "",
-        qualityHistory: item.qualityHistory ?? "",
+        inspectionDate: item.inspectionDate ?? "",
+        itemCode: item.itemCode ?? "",
+        itemName: item.itemName ?? "",
+        inspectionQty: Number(item.inspectionQty ?? 0),
+        defectQty: Number(item.defectQty ?? 0),
+        judgementResult: item.judgementResult ?? "",
+        actionType: item.actionType ?? "",
+        actionStatus: item.actionStatus ?? "",
       }));
 
       setRows(normalized);
       setTotalPages(Array.isArray(data) ? 1 : data.totalPages ?? 0);
-      setTotalElements(Array.isArray(data) ? normalized.length : data.totalElements ?? 0);
+      setTotalElements(
+        Array.isArray(data) ? normalized.length : data.totalElements ?? 0
+      );
     } catch (err) {
       console.error("품질관리 목록 조회 실패", err);
       setRows([]);
@@ -154,24 +177,40 @@ const QualityManagement = () => {
   };
 
   const handleSave = async () => {
-    if (!createForm.inspectionStandard.trim()) {
-      return alert("검사기준관리를 입력하세요");
+    if (!String(createForm.inspectionDate ?? "").trim()) {
+      return alert("검사일자를 입력하세요");
     }
-    if (!createForm.processInspection.trim()) {
-      return alert("공정검사를 입력하세요");
+    if (!String(createForm.itemCode ?? "").trim()) {
+      return alert("품목코드를 입력하세요");
     }
-    if (!createForm.defectManagement.trim()) {
-      return alert("불량관리를 입력하세요");
+    if (!String(createForm.itemName ?? "").trim()) {
+      return alert("품목명을 입력하세요");
     }
-    if (!createForm.qualityHistory.trim()) {
-      return alert("품질이력을 입력하세요");
+    if (!String(createForm.inspectionQty ?? "").trim()) {
+      return alert("검사수량을 입력하세요");
+    }
+    if (!String(createForm.defectQty ?? "").trim()) {
+      return alert("불량수량을 입력하세요");
+    }
+    if (!String(createForm.judgementResult ?? "").trim()) {
+      return alert("판정결과를 입력하세요");
+    }
+    if (!String(createForm.actionType ?? "").trim()) {
+      return alert("조치구분을 입력하세요");
+    }
+    if (!String(createForm.actionStatus ?? "").trim()) {
+      return alert("조치상태를 입력하세요");
     }
 
     const payload = {
-      inspectionStandard: createForm.inspectionStandard.trim(),
-      processInspection: createForm.processInspection.trim(),
-      defectManagement: createForm.defectManagement.trim(),
-      qualityHistory: createForm.qualityHistory.trim(),
+      inspectionDate: String(createForm.inspectionDate ?? "").trim(),
+      itemCode: String(createForm.itemCode ?? "").trim(),
+      itemName: String(createForm.itemName ?? "").trim(),
+      inspectionQty: Number(createForm.inspectionQty ?? 0),
+      defectQty: Number(createForm.defectQty ?? 0),
+      judgementResult: String(createForm.judgementResult ?? "").trim(),
+      actionType: String(createForm.actionType ?? "").trim(),
+      actionStatus: String(createForm.actionStatus ?? "").trim(),
     };
 
     try {
@@ -202,13 +241,30 @@ const QualityManagement = () => {
       const res = await fetch(`${API_BASE}/api/quality-management/${id}`);
       if (!res.ok) throw new Error("상세 조회 실패");
 
-      const data: QualityManagementItem = await res.json();
-      setSelected(data);
+      const data: any = await res.json();
+
+      const normalized: QualityManagementItem = {
+        id: data.id,
+        inspectionDate: data.inspectionDate ?? "",
+        itemCode: data.itemCode ?? "",
+        itemName: data.itemName ?? "",
+        inspectionQty: Number(data.inspectionQty ?? 0),
+        defectQty: Number(data.defectQty ?? 0),
+        judgementResult: data.judgementResult ?? "",
+        actionType: data.actionType ?? "",
+        actionStatus: data.actionStatus ?? "",
+      };
+
+      setSelected(normalized);
       setEditForm({
-        inspectionStandard: data.inspectionStandard ?? "",
-        processInspection: data.processInspection ?? "",
-        defectManagement: data.defectManagement ?? "",
-        qualityHistory: data.qualityHistory ?? "",
+        inspectionDate: normalized.inspectionDate,
+        itemCode: normalized.itemCode,
+        itemName: normalized.itemName,
+        inspectionQty: String(normalized.inspectionQty),
+        defectQty: String(normalized.defectQty),
+        judgementResult: normalized.judgementResult,
+        actionType: normalized.actionType,
+        actionStatus: normalized.actionStatus,
       });
       setShowDetail(true);
     } catch (err) {
@@ -220,34 +276,53 @@ const QualityManagement = () => {
   const handleUpdate = async () => {
     if (!selected) return;
 
-    if (!editForm.inspectionStandard.trim()) {
-      return alert("검사기준관리를 입력하세요");
+    if (!String(editForm.inspectionDate ?? "").trim()) {
+      return alert("검사일자를 입력하세요");
     }
-    if (!editForm.processInspection.trim()) {
-      return alert("공정검사를 입력하세요");
+    if (!String(editForm.itemCode ?? "").trim()) {
+      return alert("품목코드를 입력하세요");
     }
-    if (!editForm.defectManagement.trim()) {
-      return alert("불량관리를 입력하세요");
+    if (!String(editForm.itemName ?? "").trim()) {
+      return alert("품목명을 입력하세요");
     }
-    if (!editForm.qualityHistory.trim()) {
-      return alert("품질이력을 입력하세요");
+    if (!String(editForm.inspectionQty ?? "").trim()) {
+      return alert("검사수량을 입력하세요");
+    }
+    if (!String(editForm.defectQty ?? "").trim()) {
+      return alert("불량수량을 입력하세요");
+    }
+    if (!String(editForm.judgementResult ?? "").trim()) {
+      return alert("판정결과를 입력하세요");
+    }
+    if (!String(editForm.actionType ?? "").trim()) {
+      return alert("조치구분을 입력하세요");
+    }
+    if (!String(editForm.actionStatus ?? "").trim()) {
+      return alert("조치상태를 입력하세요");
     }
 
     const payload = {
-      inspectionStandard: editForm.inspectionStandard.trim(),
-      processInspection: editForm.processInspection.trim(),
-      defectManagement: editForm.defectManagement.trim(),
-      qualityHistory: editForm.qualityHistory.trim(),
+      inspectionDate: String(editForm.inspectionDate ?? "").trim(),
+      itemCode: String(editForm.itemCode ?? "").trim(),
+      itemName: String(editForm.itemName ?? "").trim(),
+      inspectionQty: Number(editForm.inspectionQty ?? 0),
+      defectQty: Number(editForm.defectQty ?? 0),
+      judgementResult: String(editForm.judgementResult ?? "").trim(),
+      actionType: String(editForm.actionType ?? "").trim(),
+      actionStatus: String(editForm.actionStatus ?? "").trim(),
     };
 
     try {
-      const res = await fetch(`${API_BASE}/api/quality-management/${selected.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        `${API_BASE}/api/quality-management/${selected.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (!res.ok) {
         const raw = await res.text().catch(() => "");
@@ -270,9 +345,12 @@ const QualityManagement = () => {
     if (!ok) return;
 
     try {
-      const res = await fetch(`${API_BASE}/api/quality-management/${selected.id}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `${API_BASE}/api/quality-management/${selected.id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!res.ok) {
         const raw = await res.text().catch(() => "");
@@ -289,10 +367,14 @@ const QualityManagement = () => {
   };
 
   const canSave =
-    !!createForm.inspectionStandard.trim() &&
-    !!createForm.processInspection.trim() &&
-    !!createForm.defectManagement.trim() &&
-    !!createForm.qualityHistory.trim();
+    !!String(createForm.inspectionDate ?? "").trim() &&
+    !!String(createForm.itemCode ?? "").trim() &&
+    !!String(createForm.itemName ?? "").trim() &&
+    !!String(createForm.inspectionQty ?? "").trim() &&
+    !!String(createForm.defectQty ?? "").trim() &&
+    !!String(createForm.judgementResult ?? "").trim() &&
+    !!String(createForm.actionType ?? "").trim() &&
+    !!String(createForm.actionStatus ?? "").trim();
 
   const thStyle: React.CSSProperties = {
     whiteSpace: "nowrap",
@@ -401,7 +483,7 @@ const QualityManagement = () => {
                     style={{
                       background: "#fff",
                       border: "1px solid #e5e7eb",
-                      overflow: "hidden",
+                      overflowX: "auto",
                     }}
                   >
                     <div
@@ -414,15 +496,20 @@ const QualityManagement = () => {
                         className="mt-3 mb-0 align-middle"
                         style={{
                           width: "100%",
+                          minWidth: "1200px",
                           marginBottom: 0,
                           tableLayout: "fixed",
                         }}
                       >
                         <colgroup>
-                          <col style={{ width: "25%" }} />
-                          <col style={{ width: "25%" }} />
-                          <col style={{ width: "25%" }} />
-                          <col style={{ width: "25%" }} />
+                          <col style={{ width: "13%" }} />
+                          <col style={{ width: "13%" }} />
+                          <col style={{ width: "18%" }} />
+                          <col style={{ width: "10%" }} />
+                          <col style={{ width: "10%" }} />
+                          <col style={{ width: "12%" }} />
+                          <col style={{ width: "12%" }} />
+                          <col style={{ width: "12%" }} />
                         </colgroup>
 
                         <thead>
@@ -430,8 +517,11 @@ const QualityManagement = () => {
                             {TABLE_HEADERS.map((h) => (
                               <th
                                 key={h.key}
-                                className="bg-secondary text-white"
-                                style={thStyle}
+                                style={{
+                                  ...thStyle,
+                                  backgroundColor: "#6b7280",
+                                  color: "#ffffff",
+                                }}
                               >
                                 {h.label}
                               </th>
@@ -440,35 +530,63 @@ const QualityManagement = () => {
                         </thead>
 
                         <tbody>
-                          {rows.map((row) => (
-                            <tr
-                              key={row.id}
-                              className="text-center"
-                              style={{ cursor: "pointer" }}
-                              onClick={() => openDetail(row.id)}
-                            >
+                          {rows.length === 0 ? (
+                            <tr>
                               <td
+                                colSpan={8}
                                 style={{
-                                  ...tdStyle,
-                                  fontWeight: 600,
-                                  textDecoration: "underline",
-                                  color: "#0d6efd",
+                                  padding: "24px",
+                                  textAlign: "center",
+                                  color: "#64748b",
+                                  fontSize: "14px",
                                 }}
-                                title={row.inspectionStandard}
                               >
-                                {row.inspectionStandard}
-                              </td>
-                              <td style={tdStyle} title={row.processInspection}>
-                                {row.processInspection}
-                              </td>
-                              <td style={tdStyle} title={row.defectManagement}>
-                                {row.defectManagement}
-                              </td>
-                              <td style={tdStyle} title={row.qualityHistory}>
-                                {row.qualityHistory}
+                                조회된 품질관리 데이터가 없습니다.
                               </td>
                             </tr>
-                          ))}
+                          ) : (
+                            rows.map((row) => (
+                              <tr
+                                key={row.id}
+                                className="text-center"
+                                style={{ cursor: "pointer" }}
+                                onClick={() => openDetail(row.id)}
+                              >
+                                <td
+                                  style={{
+                                    ...tdStyle,
+                                    fontWeight: 600,
+                                    textDecoration: "underline",
+                                    color: "#0d6efd",
+                                  }}
+                                  title={row.inspectionDate}
+                                >
+                                  {row.inspectionDate}
+                                </td>
+                                <td style={tdStyle} title={row.itemCode}>
+                                  {row.itemCode}
+                                </td>
+                                <td style={tdStyle} title={row.itemName}>
+                                  {row.itemName}
+                                </td>
+                                <td style={tdStyle} title={String(row.inspectionQty)}>
+                                  {row.inspectionQty}
+                                </td>
+                                <td style={tdStyle} title={String(row.defectQty)}>
+                                  {row.defectQty}
+                                </td>
+                                <td style={tdStyle} title={row.judgementResult}>
+                                  {row.judgementResult}
+                                </td>
+                                <td style={tdStyle} title={row.actionType}>
+                                  {row.actionType}
+                                </td>
+                                <td style={tdStyle} title={row.actionStatus}>
+                                  {row.actionStatus}
+                                </td>
+                              </tr>
+                            ))
+                          )}
                         </tbody>
                       </Table>
 
@@ -536,7 +654,6 @@ const QualityManagement = () => {
         </DflexColumn>
       </Wrapper>
 
-      {/* 등록 모달 */}
       <Modal show={showCreate} onHide={handleCloseCreate} centered size="lg">
         <Modal.Header
           closeButton
@@ -574,12 +691,12 @@ const QualityManagement = () => {
                   marginBottom: "8px",
                 }}
               >
-                검사기준관리
+                검사일자
               </Form.Label>
               <Form.Control
-                name="inspectionStandard"
-                placeholder="검사기준관리"
-                value={createForm.inspectionStandard}
+                type="date"
+                name="inspectionDate"
+                value={createForm.inspectionDate}
                 onChange={onCreateChange}
                 style={{
                   height: "46px",
@@ -599,12 +716,12 @@ const QualityManagement = () => {
                   marginBottom: "8px",
                 }}
               >
-                공정검사
+                품목코드
               </Form.Label>
               <Form.Control
-                name="processInspection"
-                placeholder="공정검사"
-                value={createForm.processInspection}
+                name="itemCode"
+                placeholder="품목코드"
+                value={createForm.itemCode}
                 onChange={onCreateChange}
                 style={{
                   height: "46px",
@@ -624,12 +741,12 @@ const QualityManagement = () => {
                   marginBottom: "8px",
                 }}
               >
-                불량관리
+                품목명
               </Form.Label>
               <Form.Control
-                name="defectManagement"
-                placeholder="불량관리"
-                value={createForm.defectManagement}
+                name="itemName"
+                placeholder="품목명"
+                value={createForm.itemName}
                 onChange={onCreateChange}
                 style={{
                   height: "46px",
@@ -638,6 +755,115 @@ const QualityManagement = () => {
                   boxShadow: "none",
                 }}
               />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                검사수량
+              </Form.Label>
+              <Form.Control
+                type="number"
+                name="inspectionQty"
+                placeholder="검사수량"
+                value={createForm.inspectionQty}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                불량수량
+              </Form.Label>
+              <Form.Control
+                type="number"
+                name="defectQty"
+                placeholder="불량수량"
+                value={createForm.defectQty}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                판정결과
+              </Form.Label>
+              <Form.Select
+                name="judgementResult"
+                value={createForm.judgementResult}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              >
+                <option value="">선택하세요</option>
+                <option value="합격">합격</option>
+                <option value="불합격">불합격</option>
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                조치구분
+              </Form.Label>
+              <Form.Select
+                name="actionType"
+                value={createForm.actionType}
+                onChange={onCreateChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              >
+                <option value="">선택하세요</option>
+                <option value="해당없음">해당없음</option>
+                <option value="재작업">재작업</option>
+                <option value="폐기">폐기</option>
+              </Form.Select>
             </Form.Group>
 
             <Form.Group className="mb-0">
@@ -649,12 +875,11 @@ const QualityManagement = () => {
                   marginBottom: "8px",
                 }}
               >
-                품질이력
+                조치상태
               </Form.Label>
-              <Form.Control
-                name="qualityHistory"
-                placeholder="품질이력"
-                value={createForm.qualityHistory}
+              <Form.Select
+                name="actionStatus"
+                value={createForm.actionStatus}
                 onChange={onCreateChange}
                 style={{
                   height: "46px",
@@ -662,7 +887,12 @@ const QualityManagement = () => {
                   border: "1px solid #cfd8e3",
                   boxShadow: "none",
                 }}
-              />
+              >
+                <option value="">선택하세요</option>
+                <option value="대기">대기</option>
+                <option value="진행중">진행중</option>
+                <option value="완료">완료</option>
+              </Form.Select>
             </Form.Group>
           </Form>
         </Modal.Body>
@@ -704,7 +934,6 @@ const QualityManagement = () => {
         </Modal.Footer>
       </Modal>
 
-      {/* 상세/수정 모달 */}
       <Modal show={showDetail} onHide={handleCloseDetail} centered size="lg">
         <Modal.Header
           closeButton
@@ -742,12 +971,12 @@ const QualityManagement = () => {
                   marginBottom: "8px",
                 }}
               >
-                검사기준관리
+                검사일자
               </Form.Label>
               <Form.Control
-                name="inspectionStandard"
-                placeholder="검사기준관리"
-                value={editForm.inspectionStandard}
+                type="date"
+                name="inspectionDate"
+                value={editForm.inspectionDate}
                 onChange={onEditChange}
                 style={{
                   height: "46px",
@@ -767,12 +996,12 @@ const QualityManagement = () => {
                   marginBottom: "8px",
                 }}
               >
-                공정검사
+                품목코드
               </Form.Label>
               <Form.Control
-                name="processInspection"
-                placeholder="공정검사"
-                value={editForm.processInspection}
+                name="itemCode"
+                placeholder="품목코드"
+                value={editForm.itemCode}
                 onChange={onEditChange}
                 style={{
                   height: "46px",
@@ -792,12 +1021,12 @@ const QualityManagement = () => {
                   marginBottom: "8px",
                 }}
               >
-                불량관리
+                품목명
               </Form.Label>
               <Form.Control
-                name="defectManagement"
-                placeholder="불량관리"
-                value={editForm.defectManagement}
+                name="itemName"
+                placeholder="품목명"
+                value={editForm.itemName}
                 onChange={onEditChange}
                 style={{
                   height: "46px",
@@ -806,6 +1035,115 @@ const QualityManagement = () => {
                   boxShadow: "none",
                 }}
               />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                검사수량
+              </Form.Label>
+              <Form.Control
+                type="number"
+                name="inspectionQty"
+                placeholder="검사수량"
+                value={editForm.inspectionQty}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                불량수량
+              </Form.Label>
+              <Form.Control
+                type="number"
+                name="defectQty"
+                placeholder="불량수량"
+                value={editForm.defectQty}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                판정결과
+              </Form.Label>
+              <Form.Select
+                name="judgementResult"
+                value={editForm.judgementResult}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              >
+                <option value="">선택하세요</option>
+                <option value="합격">합격</option>
+                <option value="불합격">불합격</option>
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "#374151",
+                  marginBottom: "8px",
+                }}
+              >
+                조치구분
+              </Form.Label>
+              <Form.Select
+                name="actionType"
+                value={editForm.actionType}
+                onChange={onEditChange}
+                style={{
+                  height: "46px",
+                  borderRadius: "4px",
+                  border: "1px solid #cfd8e3",
+                  boxShadow: "none",
+                }}
+              >
+                <option value="">선택하세요</option>
+                <option value="해당없음">해당없음</option>
+                <option value="재작업">재작업</option>
+                <option value="폐기">폐기</option>
+              </Form.Select>
             </Form.Group>
 
             <Form.Group className="mb-0">
@@ -817,12 +1155,11 @@ const QualityManagement = () => {
                   marginBottom: "8px",
                 }}
               >
-                품질이력
+                조치상태
               </Form.Label>
-              <Form.Control
-                name="qualityHistory"
-                placeholder="품질이력"
-                value={editForm.qualityHistory}
+              <Form.Select
+                name="actionStatus"
+                value={editForm.actionStatus}
                 onChange={onEditChange}
                 style={{
                   height: "46px",
@@ -830,7 +1167,12 @@ const QualityManagement = () => {
                   border: "1px solid #cfd8e3",
                   boxShadow: "none",
                 }}
-              />
+              >
+                <option value="">선택하세요</option>
+                <option value="대기">대기</option>
+                <option value="진행중">진행중</option>
+                <option value="완료">완료</option>
+              </Form.Select>
             </Form.Group>
           </Form>
         </Modal.Body>
