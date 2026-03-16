@@ -7,6 +7,7 @@ import { Container, Row, Col, Tab, Tabs, Table, Button, Modal, Form, Pagination 
 
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import SimpleModal from "../commons/SimpleModal";
 
 const API_BASE = "http://localhost:9500";
 
@@ -30,6 +31,13 @@ type PageResponse<T> = {
   size: number;
 };
 
+type AlertState = {
+  open: boolean;
+  message: string;
+  mode: "alert" | "confirm";
+  onConfirm?: (() => void) | null;
+};
+
 const TABLE_HEADERS = [
   { key: "orderDate", label: "지시일" },
   { key: "workOrderNo", label: "지시번호" },
@@ -47,6 +55,13 @@ const ProductionManagement = () => {
   const [size] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
   const [showCreate, setShowCreate] = useState(false);
+
+  const [alertState, setAlertState] = useState<AlertState>({
+    open: false,
+    message: "",
+    mode: "alert",
+    onConfirm: null,
+  });
 
   const [form, setForm] = useState({
     orderDate: "",
@@ -72,6 +87,32 @@ const ProductionManagement = () => {
     status: "",
   });
 
+  const showAlert = (message: string) => {
+    setAlertState({
+      open: true,
+      message,
+      mode: "alert",
+      onConfirm: null,
+    });
+  };
+
+  const showConfirm = (message: string, onConfirm: () => void) => {
+    setAlertState({
+      open: true,
+      message,
+      mode: "confirm",
+      onConfirm,
+    });
+  };
+
+  const closeAlert = () => {
+    setAlertState((prev) => ({
+      ...prev,
+      open: false,
+      onConfirm: null,
+    }));
+  };
+
   const handleChange = (e: React.ChangeEvent<any>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -80,13 +121,14 @@ const ProductionManagement = () => {
   const fetchOrders = async (p: number) => {
     try {
       const res = await fetch(`${API_BASE}/api/production/orders?page=${p}&size=${size}`);
-      if (!res.ok) throw new Error("서버 오류");
+      if (!res.ok) throw new Error();
 
       const data: PageResponse<ProductionOrder> = await res.json();
       setRows(data.content);
       setTotalPages(data.totalPages);
     } catch (err) {
       console.error("생산지시 목록 조회 실패", err);
+      showAlert("생산지시 목록을 불러오지 못했습니다.");
     }
   };
 
@@ -95,59 +137,81 @@ const ProductionManagement = () => {
   }, [page]);
 
   const openDetail = async (id: number) => {
-    const res = await fetch(`${API_BASE}/api/production/orders/${id}`);
-    if (!res.ok) throw new Error("상세 조회 실패");
+    try {
+      const res = await fetch(`${API_BASE}/api/production/orders/${id}`);
+      if (!res.ok) throw new Error();
 
-    const data: ProductionOrder = await res.json();
+      const data: ProductionOrder = await res.json();
 
-    setSelected(data);
+      setSelected(data);
 
-    setEditForm({
-      orderDate: data.orderDate || "",
-      workOrderNo: data.workOrderNo || "",
-      itemCode: data.itemCode || "",
-      itemName: data.itemName || "",
-      planQty: String(data.planQty ?? ""),
-      startDate: data.startDate || "",
-      endDate: data.endDate || "",
-      status: data.status || "",
-    });
+      setEditForm({
+        orderDate: data.orderDate || "",
+        workOrderNo: data.workOrderNo || "",
+        itemCode: data.itemCode || "",
+        itemName: data.itemName || "",
+        planQty: String(data.planQty ?? ""),
+        startDate: data.startDate || "",
+        endDate: data.endDate || "",
+        status: data.status || "",
+      });
 
-    setShowDetail(true);
+      setShowDetail(true);
+    } catch (err) {
+      console.error("생산지시 상세 조회 실패", err);
+      showAlert("생산지시 상세 정보를 불러오지 못했습니다.");
+    }
   };
 
   const handleUpdate = async () => {
     if (!selected) return;
 
-    const res = await fetch(`${API_BASE}/api/production/orders/${selected.id}`, {
-      method: "PUT",
-      headers: { "Content-type": "application/json" },
-      body: JSON.stringify({
-        ...editForm,
-        planQty: Number(editForm.planQty),
-      }),
-    });
+    try {
+      const res = await fetch(`${API_BASE}/api/production/orders/${selected.id}`, {
+        method: "PUT",
+        headers: { "Content-type": "application/json" },
+        body: JSON.stringify({
+          ...editForm,
+          planQty: Number(editForm.planQty),
+        }),
+      });
 
-    if (!res.ok) throw new Error("수정 실패");
+      if (!res.ok) throw new Error();
 
-    setShowDetail(false);
-    fetchOrders(page);
+      setShowDetail(false);
+      await fetchOrders(page);
+      showAlert("생산지시가 수정되었습니다.");
+    } catch (err) {
+      console.error("생산지시 수정 실패", err);
+      showAlert("생산지시를 수정하지 못했습니다.");
+    }
+  };
+
+  const handleDeleteConfirmed = async () => {
+    if (!selected) return;
+
+    closeAlert();
+
+    try {
+      const res = await fetch(`${API_BASE}/api/production/orders/${selected.id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error();
+
+      setShowDetail(false);
+      await fetchOrders(page);
+      showAlert("생산지시가 삭제되었습니다.");
+    } catch (err) {
+      console.error("생산지시 삭제 실패", err);
+      showAlert("생산지시를 삭제하지 못했습니다.");
+    }
   };
 
   const handleDelete = async () => {
     if (!selected) return;
 
-    const ok = window.confirm("정말 삭제 할까요?");
-    if (!ok) return;
-
-    const res = await fetch(`${API_BASE}/api/production/orders/${selected.id}`, {
-      method: "DELETE",
-    });
-
-    if (!res.ok) throw new Error("삭제 실패");
-
-    setShowDetail(false);
-    fetchOrders(page);
+    showConfirm("생산지시를 삭제하시겠습니까?", handleDeleteConfirmed);
   };
 
   const handleExcelDownload = () => {
@@ -183,18 +247,26 @@ const ProductionManagement = () => {
   const handleSave = async () => {
     const newWorkOrderNo = `WO-${Date.now()}`;
 
-    await fetch(`${API_BASE}/api/production/orders`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...form,
-        workOrderNo: newWorkOrderNo,
-        planQty: Number(form.planQty),
-      }),
-    });
+    try {
+      const res = await fetch(`${API_BASE}/api/production/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...form,
+          workOrderNo: newWorkOrderNo,
+          planQty: Number(form.planQty),
+        }),
+      });
 
-    setShowCreate(false);
-    fetchOrders(page);
+      if (!res.ok) throw new Error();
+
+      setShowCreate(false);
+      await fetchOrders(page);
+      showAlert("생산지시가 등록되었습니다.");
+    } catch (err) {
+      console.error("생산지시 등록 실패", err);
+      showAlert("생산지시를 등록하지 못했습니다.");
+    }
   };
 
   const thStyle: React.CSSProperties = {
@@ -1014,6 +1086,14 @@ const ProductionManagement = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      <SimpleModal
+        open={alertState.open}
+        message={alertState.message}
+        mode={alertState.mode}
+        onClose={closeAlert}
+        onConfirm={alertState.onConfirm ?? undefined}
+      />
     </>
   );
 };

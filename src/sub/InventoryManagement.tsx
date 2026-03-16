@@ -7,10 +7,10 @@ import { Container, Row, Col, Table, Button, Modal, Form, Pagination } from "rea
 
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import SimpleModal from "../commons/SimpleModal";
 
 const API_BASE = "http://localhost:9500";
 
-// ✅ 재고(품목 마스터 + 현재고) 예시 타입
 type InventoryItem = {
   id: number;
   itemCode: string;
@@ -36,6 +36,13 @@ type PageResponse<T> = {
   size: number;
 };
 
+type AlertState = {
+  open: boolean;
+  message: string;
+  mode: "alert" | "confirm";
+  onConfirm?: (() => void) | null;
+};
+
 const TABLE_HEADERS: { key: keyof InventoryItem; label: string }[] = [
   { key: "itemCode", label: "품목코드" },
   { key: "itemName", label: "품목명" },
@@ -58,7 +65,6 @@ const InventoryManagement = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
 
-  // ✅ 등록 모달
   const [showCreate, setShowCreate] = useState(false);
   const [createForm, setCreateForm] = useState({
     itemCode: "",
@@ -75,7 +81,6 @@ const InventoryManagement = () => {
     remark: "",
   });
 
-  // ✅ 상세(수정/삭제) 모달
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState<InventoryItem | null>(null);
   const [editForm, setEditForm] = useState({
@@ -93,6 +98,39 @@ const InventoryManagement = () => {
     remark: "",
   });
 
+  const [alertState, setAlertState] = useState<AlertState>({
+    open: false,
+    message: "",
+    mode: "alert",
+    onConfirm: null,
+  });
+
+  const showAlert = (message: string) => {
+    setAlertState({
+      open: true,
+      message,
+      mode: "alert",
+      onConfirm: null,
+    });
+  };
+
+  const showConfirm = (message: string, onConfirm: () => void) => {
+    setAlertState({
+      open: true,
+      message,
+      mode: "confirm",
+      onConfirm,
+    });
+  };
+
+  const closeAlert = () => {
+    setAlertState((prev) => ({
+      ...prev,
+      open: false,
+      onConfirm: null,
+    }));
+  };
+
   const onCreateChange = (e: React.ChangeEvent<any>) => {
     const { name, value } = e.target;
     setCreateForm((prev) => ({ ...prev, [name]: value }));
@@ -103,17 +141,18 @@ const InventoryManagement = () => {
     setEditForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ 목록 조회(페이징)
   const fetchList = async (p: number) => {
     try {
       const res = await fetch(`${API_BASE}/api/inventory/items?page=${p}&size=${size}`);
-      if (!res.ok) throw new Error("서버오류");
+      if (!res.ok) throw new Error();
+
       const data: PageResponse<InventoryItem> = await res.json();
       setRows(data.content);
       setTotalPages(data.totalPages);
       setTotalElements(data.totalElements);
     } catch (err) {
       console.error("재고 목록 조회 실패", err);
+      showAlert("재고 목록을 불러오지 못했습니다.");
     }
   };
 
@@ -126,7 +165,6 @@ const InventoryManagement = () => {
     setPage(next);
   };
 
-  // ✅ 엑셀 다운로드
   const handleExcelDownload = () => {
     const excelData: (string | number)[][] = [
       ["#", ...TABLE_HEADERS.map((h) => h.label)],
@@ -156,14 +194,31 @@ const InventoryManagement = () => {
     saveAs(blob, "재고관리_리스트.xlsx");
   };
 
-  // ✅ 등록 저장
   const handleSave = async () => {
-    if (!createForm.itemCode.trim()) return alert("품목코드는 필수 입니다");
-    if (!createForm.itemName.trim()) return alert("품목명은 필수 입니다");
-    if (!createForm.itemGroup.trim()) return alert("품목그룹은 필수 입니다");
-    if (!createForm.warehouse.trim()) return alert("창고는 필수 입니다");
-    if (!createForm.location.trim()) return alert("위치는 필수 입니다");
-    if (!createForm.spec.trim()) return alert("규격은  필수 입니다");
+    if (!createForm.itemCode.trim()) {
+      showAlert("품목코드를 입력해 주세요.");
+      return;
+    }
+    if (!createForm.itemName.trim()) {
+      showAlert("품목명을 입력해 주세요.");
+      return;
+    }
+    if (!createForm.itemGroup.trim()) {
+      showAlert("품목그룹을 입력해 주세요.");
+      return;
+    }
+    if (!createForm.warehouse.trim()) {
+      showAlert("창고를 입력해 주세요.");
+      return;
+    }
+    if (!createForm.location.trim()) {
+      showAlert("위치를 입력해 주세요.");
+      return;
+    }
+    if (!createForm.spec.trim()) {
+      showAlert("규격을 입력해 주세요.");
+      return;
+    }
 
     const stockQty = Number(createForm.stockQty || 0);
     const safetyStock = Number(createForm.safetyStock || 0);
@@ -185,74 +240,101 @@ const InventoryManagement = () => {
       remark: createForm.remark.trim() ? createForm.remark.trim() : null,
     };
 
-    const res = await fetch(`${API_BASE}/api/inventory/items`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    try {
+      const res = await fetch(`${API_BASE}/api/inventory/items`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    if (!res.ok) {
-      const raw = await res.text().catch(() => "");
-      console.log("등록 실패 응답: ", raw);
-      alert(raw || "등록 실패");
-      return;
+      if (!res.ok) {
+        const raw = await res.text().catch(() => "");
+        console.log("등록 실패 응답: ", raw);
+        throw new Error(raw || "등록 실패");
+      }
+
+      setShowCreate(false);
+      await fetchList(page);
+
+      setCreateForm({
+        itemCode: "",
+        itemName: "",
+        itemGroup: "",
+        spec: "",
+        warehouse: "",
+        location: "",
+        stockQty: "",
+        safetyStock: "",
+        inPrice: "",
+        outPrice: "",
+        useYn: "Y",
+        remark: "",
+      });
+
+      showAlert("재고가 등록되었습니다.");
+    } catch (err) {
+      console.error("재고 등록 실패", err);
+      showAlert("재고를 등록하지 못했습니다.");
     }
-
-    setShowCreate(false);
-    fetchList(page);
-
-    setCreateForm({
-      itemCode: "",
-      itemName: "",
-      itemGroup: "",
-      spec: "",
-      warehouse: "",
-      location: "",
-      stockQty: "",
-      safetyStock: "",
-      inPrice: "",
-      outPrice: "",
-      useYn: "Y",
-      remark: "",
-    });
   };
 
-  // ✅ 상세 열기
   const openDetail = async (id: number) => {
-    const res = await fetch(`${API_BASE}/api/inventory/items/${id}`);
-    if (!res.ok) throw new Error("상세 조회 실패");
+    try {
+      const res = await fetch(`${API_BASE}/api/inventory/items/${id}`);
+      if (!res.ok) throw new Error();
 
-    const data: InventoryItem = await res.json();
-    setSelected(data);
+      const data: InventoryItem = await res.json();
+      setSelected(data);
 
-    setEditForm({
-      itemCode: data.itemCode || "",
-      itemName: data.itemName || "",
-      itemGroup: data.itemGroup || "",
-      spec: data.spec || "",
-      warehouse: data.warehouse || "",
-      location: data.location || "",
-      stockQty: String(data.stockQty ?? ""),
-      safetyStock: String(data.safetyStock ?? ""),
-      inPrice: String(data.inPrice ?? ""),
-      outPrice: String(data.outPrice ?? ""),
-      useYn: (data.useYn || "Y") as "Y" | "N",
-      remark: data.remark || "",
-    });
+      setEditForm({
+        itemCode: data.itemCode || "",
+        itemName: data.itemName || "",
+        itemGroup: data.itemGroup || "",
+        spec: data.spec || "",
+        warehouse: data.warehouse || "",
+        location: data.location || "",
+        stockQty: String(data.stockQty ?? ""),
+        safetyStock: String(data.safetyStock ?? ""),
+        inPrice: String(data.inPrice ?? ""),
+        outPrice: String(data.outPrice ?? ""),
+        useYn: (data.useYn || "Y") as "Y" | "N",
+        remark: data.remark || "",
+      });
 
-    setShowDetail(true);
+      setShowDetail(true);
+    } catch (err) {
+      console.error("재고 상세 조회 실패", err);
+      showAlert("재고 상세 정보를 불러오지 못했습니다.");
+    }
   };
 
-  // ✅ 수정 저장
   const handleUpdate = async () => {
     if (!selected) return;
 
-    if (!editForm.itemCode.trim()) return alert("품목코드는 필수입니다");
-    if (!editForm.itemName.trim()) return alert("품목명은 필수입니다");
-    if (!editForm.itemGroup.trim()) return alert("품목그룹은 필수입니다");
-    if (!editForm.warehouse.trim()) return alert("창고는 필수입니다");
-    if (!editForm.location.trim()) return alert("위치는 필수입니다");
-    if (!editForm.spec.trim()) return alert("규격은 필수입니다");
+    if (!editForm.itemCode.trim()) {
+      showAlert("품목코드를 입력해 주세요.");
+      return;
+    }
+    if (!editForm.itemName.trim()) {
+      showAlert("품목명을 입력해 주세요.");
+      return;
+    }
+    if (!editForm.itemGroup.trim()) {
+      showAlert("품목그룹을 입력해 주세요.");
+      return;
+    }
+    if (!editForm.warehouse.trim()) {
+      showAlert("창고를 입력해 주세요.");
+      return;
+    }
+    if (!editForm.location.trim()) {
+      showAlert("위치를 입력해 주세요.");
+      return;
+    }
+    if (!editForm.spec.trim()) {
+      showAlert("규격을 입력해 주세요.");
+      return;
+    }
 
     const stockQty = Number(editForm.stockQty || 0);
     const safetyStock = Number(editForm.safetyStock || 0);
@@ -274,42 +356,56 @@ const InventoryManagement = () => {
       remark: editForm.remark.trim() ? editForm.remark.trim() : null,
     };
 
-    const res = await fetch(`${API_BASE}/api/inventory/items/${selected.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    try {
+      const res = await fetch(`${API_BASE}/api/inventory/items/${selected.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    if (!res.ok) {
-      const raw = await res.text().catch(() => "");
-      console.log("수정 실패 응답: ", raw);
-      alert(raw || "수정 실패");
-      return;
+      if (!res.ok) {
+        const raw = await res.text().catch(() => "");
+        console.log("수정 실패 응답: ", raw);
+        throw new Error(raw || "수정 실패");
+      }
+
+      setShowDetail(false);
+      await fetchList(page);
+      showAlert("재고가 수정되었습니다.");
+    } catch (err) {
+      console.error("재고 수정 실패", err);
+      showAlert("재고를 수정하지 못했습니다.");
     }
-
-    setShowDetail(false);
-    fetchList(page);
   };
 
-  // ✅ 삭제
+  const handleDeleteConfirmed = async () => {
+    if (!selected) return;
+
+    closeAlert();
+
+    try {
+      const res = await fetch(`${API_BASE}/api/inventory/items/${selected.id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const raw = await res.text().catch(() => "");
+        throw new Error(raw || "삭제 실패");
+      }
+
+      setShowDetail(false);
+      await fetchList(page);
+      showAlert("재고가 삭제되었습니다.");
+    } catch (err) {
+      console.error("재고 삭제 실패", err);
+      showAlert("재고를 삭제하지 못했습니다.");
+    }
+  };
+
   const handleDelete = async () => {
     if (!selected) return;
 
-    const ok = window.confirm("정말 삭제 할까요?");
-    if (!ok) return;
-
-    const res = await fetch(`${API_BASE}/api/inventory/items/${selected.id}`, {
-      method: "DELETE",
-    });
-
-    if (!res.ok) {
-      const raw = await res.text().catch(() => "");
-      alert(raw || "삭제 실패");
-      return;
-    }
-
-    setShowDetail(false);
-    fetchList(page);
+    showConfirm("재고를 삭제하시겠습니까?", handleDeleteConfirmed);
   };
 
   const canSave =
@@ -696,7 +792,6 @@ const InventoryManagement = () => {
         </DflexColumn>
       </Wrapper>
 
-      {/* ✅ 등록 모달 */}
       <Modal show={showCreate} onHide={() => setShowCreate(false)} centered size="lg">
         <Modal.Header
           closeButton
@@ -1073,7 +1168,6 @@ const InventoryManagement = () => {
         </Modal.Footer>
       </Modal>
 
-      {/* ✅ 상세(수정/삭제) 모달 */}
       <Modal show={showDetail} onHide={() => setShowDetail(false)} centered size="lg">
         <Modal.Header
           closeButton
@@ -1446,6 +1540,14 @@ const InventoryManagement = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      <SimpleModal
+        open={alertState.open}
+        message={alertState.message}
+        mode={alertState.mode}
+        onClose={closeAlert}
+        onConfirm={alertState.onConfirm ?? undefined}
+      />
     </>
   );
 };

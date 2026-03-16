@@ -9,6 +9,7 @@ import { Time, Select, Search } from "../styled/Input.styles";
 
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import SimpleModal from "../commons/SimpleModal";
 
 type TableRow = string[];
 
@@ -46,6 +47,13 @@ type PageResponse<T> = {
   size: number;
 };
 
+type AlertState = {
+  open: boolean;
+  message: string;
+  mode: "alert" | "confirm";
+  onConfirm?: (() => void) | null;
+};
+
 const API_BASE = "http://localhost:9500";
 
 const TABLE_HEADERS = [
@@ -75,6 +83,14 @@ const SalesManagement = () => {
   const [showCreate, setShowCreate] = useState(false);
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string>("");
+
+  // ✅ 공통 상단 알림
+  const [alertState, setAlertState] = useState<AlertState>({
+    open: false,
+    message: "",
+    mode: "alert",
+    onConfirm: null,
+  });
 
   // ✅ 화면용 rows + 원본 orders(수정/삭제용)
   const [rows, setRows] = useState<TableRow[]>([]);
@@ -115,6 +131,32 @@ const SalesManagement = () => {
     deliveryDate: "",
     remark: "",
   });
+
+  const showAlert = (message: string) => {
+    setAlertState({
+      open: true,
+      message,
+      mode: "alert",
+      onConfirm: null,
+    });
+  };
+
+  const showConfirm = (message: string, onConfirm: () => void) => {
+    setAlertState({
+      open: true,
+      message,
+      mode: "confirm",
+      onConfirm,
+    });
+  };
+
+  const closeAlert = () => {
+    setAlertState((prev) => ({
+      ...prev,
+      open: false,
+      onConfirm: null,
+    }));
+  };
 
   const handleChange = (e: React.ChangeEvent<any>) => {
     const { name, value } = e.target;
@@ -222,7 +264,9 @@ const SalesManagement = () => {
     setErrorMsg("");
 
     if (!form.orderDate || !form.customerCode || !form.customerName || !form.itemCode || !form.itemName) {
-      setErrorMsg("필수 항목(수주일자/거래처/품목)을 입력하세요.");
+      const msg = "필수 항목(수주일자/거래처/품목)을 입력하세요.";
+      setErrorMsg(msg);
+      showAlert(msg);
       return;
     }
 
@@ -230,11 +274,16 @@ const SalesManagement = () => {
     const price = Number(form.price || 0);
 
     if (!qty || qty <= 0) {
-      setErrorMsg("수주 수량(orderQty)은 1 이상이어야 합니다.");
+      const msg = "수주 수량(orderQty)은 1 이상이어야 합니다.";
+      setErrorMsg(msg);
+      showAlert(msg);
       return;
     }
+
     if (!price || price <= 0) {
-      setErrorMsg("단가(price)은 1 이상이어야 합니다.");
+      const msg = "단가(price)은 1 이상이어야 합니다.";
+      setErrorMsg(msg);
+      showAlert(msg);
       return;
     }
 
@@ -288,8 +337,11 @@ const SalesManagement = () => {
       }));
 
       setShowCreate(false);
+      showAlert("수주가 등록되었습니다.");
     } catch (err: any) {
-      setErrorMsg(err?.message || "저장 중 오류가 발생했습니다.");
+      const msg = err?.message || "저장 중 오류가 발생했습니다.";
+      setErrorMsg(msg);
+      showAlert(msg);
     } finally {
       setSaving(false);
     }
@@ -341,17 +393,19 @@ const SalesManagement = () => {
 
     if (!res.ok) {
       const raw = await res.text().catch(() => "");
-      alert(raw || "수정 실패");
+      showAlert(raw || "수정 실패");
       return;
     }
 
     setShowDetail(false);
     await fetchOrders(page, size);
+    showAlert("수주가 수정되었습니다.");
   };
 
-  const handleDelete = async () => {
+  const handleDeleteConfirmed = async () => {
     if (!selectedOrder) return;
-    if (!window.confirm("정말 삭제할까요?")) return;
+
+    closeAlert();
 
     const token = localStorage.getItem("token");
 
@@ -364,7 +418,7 @@ const SalesManagement = () => {
 
     if (!res.ok) {
       const raw = await res.text().catch(() => "");
-      alert(raw || "삭제 실패");
+      showAlert(raw || "삭제 실패");
       return;
     }
 
@@ -372,6 +426,13 @@ const SalesManagement = () => {
 
     const nextPage = page > 0 && rows.length === 1 ? page - 1 : page;
     await fetchOrders(nextPage, size);
+    showAlert("수주가 삭제되었습니다.");
+  };
+
+  const handleDelete = async () => {
+    if (!selectedOrder) return;
+
+    showConfirm("정말 삭제하시겠습니까?", handleDeleteConfirmed);
   };
 
   const goPage = (p: number) => {
@@ -906,7 +967,7 @@ const SalesManagement = () => {
         </DflexColumn>
       </Wrapper>
 
-      {/* ✅ 등록 모달 */}
+      {/* 등록 모달 */}
       <Modal show={showCreate} onHide={() => setShowCreate(false)} centered backdrop="static">
         <Modal.Header
           closeButton
@@ -933,18 +994,6 @@ const SalesManagement = () => {
             background: "#ffffff",
           }}
         >
-          {errorMsg && (
-            <div
-              className="alert alert-danger py-2"
-              style={{
-                marginBottom: "16px",
-                fontSize: "14px",
-              }}
-            >
-              {errorMsg}
-            </div>
-          )}
-
           <Form>
             <Form.Group className="mb-3">
               <Form.Label style={{ fontWeight: 600, color: "#374151", marginBottom: "8px" }}>
@@ -1133,7 +1182,7 @@ const SalesManagement = () => {
         </Modal.Footer>
       </Modal>
 
-      {/* ✅ 상세(수정/삭제) 모달 */}
+      {/* 상세(수정/삭제) 모달 */}
       <Modal show={showDetail} onHide={() => setShowDetail(false)} centered backdrop="static">
         <Modal.Header
           closeButton
@@ -1345,6 +1394,14 @@ const SalesManagement = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      <SimpleModal
+        open={alertState.open}
+        message={alertState.message}
+        mode={alertState.mode}
+        onClose={closeAlert}
+        onConfirm={alertState.onConfirm ?? undefined}
+      />
     </>
   );
 };

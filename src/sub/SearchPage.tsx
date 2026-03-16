@@ -32,22 +32,22 @@ type GlobalSearchResponse = {
 
 function buildUrl(hit: SearchHit) {
   switch (hit.type) {
-    case "inventory":
-      return `/im`;
-    case "kpi":
-      return `/kpi`;
-    case "member":
-      return `/members`;
+    case "sales":
+      return `/sales`;
     case "production":
       return `/pmanagement`;
     case "purchase":
       return `/pm`;
-    case "sales":
-      return `/sales`;
+    case "inventory":
+      return `/im`;
+    case "kpi":
+      return `/kpi`;
     case "standard":
       return `/standard`;
     case "system":
       return `/system`;
+    case "quality":
+      return `/quality`;
     default:
       return `/`;
   }

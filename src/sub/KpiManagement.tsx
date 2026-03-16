@@ -9,6 +9,7 @@ import { Container, Row, Col, Table, Button, Modal, Form, Pagination } from "rea
 
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import SimpleModal from "../commons/SimpleModal";
 
 const API_BASE = "http://localhost:9500";
 
@@ -33,6 +34,13 @@ type PageResponse<T> = {
   totalPages: number;
   number: number;
   size: number;
+};
+
+type AlertState = {
+  open: boolean;
+  message: string;
+  mode: "alert" | "confirm";
+  onConfirm?: (() => void) | null;
 };
 
 const TABLE_HEADERS: { key: keyof KpiItem; label: string }[] = [
@@ -60,6 +68,13 @@ const KpiManagement = () => {
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState<KpiItem | null>(null);
 
+  const [alertState, setAlertState] = useState<AlertState>({
+    open: false,
+    message: "",
+    mode: "alert",
+    onConfirm: null,
+  });
+
   const [createForm, setCreateForm] = useState({
     kpiName: "",
     kpiGroup: "",
@@ -76,6 +91,32 @@ const KpiManagement = () => {
 
   const [editForm, setEditForm] = useState({ ...createForm });
 
+  const showAlert = (message: string) => {
+    setAlertState({
+      open: true,
+      message,
+      mode: "alert",
+      onConfirm: null,
+    });
+  };
+
+  const showConfirm = (message: string, onConfirm: () => void) => {
+    setAlertState({
+      open: true,
+      message,
+      mode: "confirm",
+      onConfirm,
+    });
+  };
+
+  const closeAlert = () => {
+    setAlertState((prev) => ({
+      ...prev,
+      open: false,
+      onConfirm: null,
+    }));
+  };
+
   const onCreateChange = (e: React.ChangeEvent<any>) => {
     const { name, value } = e.target;
     setCreateForm((prev) => ({ ...prev, [name]: value }));
@@ -87,13 +128,18 @@ const KpiManagement = () => {
   };
 
   const fetchList = async (p: number) => {
-    const res = await fetch(`${API_BASE}/api/kpis?page=${p}&size=${size}`);
-    if (!res.ok) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/kpis?page=${p}&size=${size}`);
+      if (!res.ok) throw new Error();
 
-    const data: PageResponse<KpiItem> = await res.json();
-    setRows(data.content);
-    setTotalPages(data.totalPages);
-    setTotalElements(data.totalElements);
+      const data: PageResponse<KpiItem> = await res.json();
+      setRows(data.content);
+      setTotalPages(data.totalPages);
+      setTotalElements(data.totalElements);
+    } catch (err) {
+      console.error("KPI 목록 조회 실패", err);
+      showAlert("KPI 목록을 불러오지 못했습니다.");
+    }
   };
 
   useEffect(() => {
@@ -133,97 +179,117 @@ const KpiManagement = () => {
   };
 
   const handleSave = async () => {
-    const res = await fetch(`${API_BASE}/api/kpis`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...createForm,
-        targetValue: Number(createForm.targetValue || 0),
-        actualValue: Number(createForm.actualValue || 0),
-      }),
-    });
+    try {
+      const res = await fetch(`${API_BASE}/api/kpis`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...createForm,
+          targetValue: Number(createForm.targetValue || 0),
+          actualValue: Number(createForm.actualValue || 0),
+        }),
+      });
 
-    if (!res.ok) {
-      alert("등록 실패");
-      return;
+      if (!res.ok) throw new Error();
+
+      setShowCreate(false);
+      await fetchList(page);
+      setCreateForm({
+        kpiName: "",
+        kpiGroup: "",
+        owner: "",
+        periodType: "MONTH",
+        periodValue: "",
+        targetValue: "",
+        actualValue: "",
+        unit: "",
+        status: "ON_TRACK",
+        useYn: "Y",
+        remark: "",
+      });
+      showAlert("KPI가 등록되었습니다.");
+    } catch (err) {
+      console.error("KPI 등록 실패", err);
+      showAlert("KPI를 등록하지 못했습니다.");
     }
-
-    setShowCreate(false);
-    fetchList(page);
-    setCreateForm({
-      kpiName: "",
-      kpiGroup: "",
-      owner: "",
-      periodType: "MONTH",
-      periodValue: "",
-      targetValue: "",
-      actualValue: "",
-      unit: "",
-      status: "ON_TRACK",
-      useYn: "Y",
-      remark: "",
-    });
   };
 
   const openDetail = async (id: number) => {
-    const res = await fetch(`${API_BASE}/api/kpis/${id}`);
-    if (!res.ok) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/kpis/${id}`);
+      if (!res.ok) throw new Error();
 
-    const data: KpiItem = await res.json();
-    setSelected(data);
-    setEditForm({
-      kpiName: data.kpiName,
-      kpiGroup: data.kpiGroup ?? "",
-      owner: data.owner ?? "",
-      periodType: data.periodType,
-      periodValue: data.periodValue,
-      targetValue: String(data.targetValue),
-      actualValue: String(data.actualValue),
-      unit: data.unit ?? "",
-      status: data.status ?? "ON_TRACK",
-      useYn: data.useYn,
-      remark: data.remark ?? "",
-    });
-    setShowDetail(true);
+      const data: KpiItem = await res.json();
+      setSelected(data);
+      setEditForm({
+        kpiName: data.kpiName,
+        kpiGroup: data.kpiGroup ?? "",
+        owner: data.owner ?? "",
+        periodType: data.periodType,
+        periodValue: data.periodValue,
+        targetValue: String(data.targetValue),
+        actualValue: String(data.actualValue),
+        unit: data.unit ?? "",
+        status: data.status ?? "ON_TRACK",
+        useYn: data.useYn,
+        remark: data.remark ?? "",
+      });
+      setShowDetail(true);
+    } catch (err) {
+      console.error("KPI 상세 조회 실패", err);
+      showAlert("KPI 상세 정보를 불러오지 못했습니다.");
+    }
   };
 
   const handleUpdate = async () => {
     if (!selected) return;
 
-    const res = await fetch(`${API_BASE}/api/kpis/${selected.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...editForm,
-        targetValue: Number(editForm.targetValue || 0),
-        actualValue: Number(editForm.actualValue || 0),
-      }),
-    });
+    try {
+      const res = await fetch(`${API_BASE}/api/kpis/${selected.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...editForm,
+          targetValue: Number(editForm.targetValue || 0),
+          actualValue: Number(editForm.actualValue || 0),
+        }),
+      });
 
-    if (!res.ok) {
-      alert("수정 실패");
-      return;
+      if (!res.ok) throw new Error();
+
+      setShowDetail(false);
+      await fetchList(page);
+      showAlert("KPI가 수정되었습니다.");
+    } catch (err) {
+      console.error("KPI 수정 실패", err);
+      showAlert("KPI를 수정하지 못했습니다.");
     }
+  };
 
-    setShowDetail(false);
-    fetchList(page);
+  const handleDeleteConfirmed = async () => {
+    if (!selected) return;
+
+    closeAlert();
+
+    try {
+      const res = await fetch(`${API_BASE}/api/kpis/${selected.id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error();
+
+      setShowDetail(false);
+      await fetchList(page);
+      showAlert("KPI가 삭제되었습니다.");
+    } catch (err) {
+      console.error("KPI 삭제 실패", err);
+      showAlert("KPI를 삭제하지 못했습니다.");
+    }
   };
 
   const handleDelete = async () => {
     if (!selected) return;
-    if (!window.confirm("정말 삭제 할까요?")) return;
-
-    const res = await fetch(`${API_BASE}/api/kpis/${selected.id}`, {
-      method: "DELETE",
-    });
-
-    if (!res.ok) {
-      alert("삭제 실패");
-      return;
-    }
-
-    setShowDetail(false);
-    fetchList(page);
+    showConfirm("KPI를 삭제하시겠습니까?", handleDeleteConfirmed);
   };
 
   const thStyle: React.CSSProperties = {
@@ -587,7 +653,6 @@ const KpiManagement = () => {
         </DflexColumn>
       </Wrapper>
 
-      {/* 등록 모달 */}
       <Modal show={showCreate} onHide={() => setShowCreate(false)} centered size="lg">
         <Modal.Header
           closeButton
@@ -862,7 +927,6 @@ const KpiManagement = () => {
         </Modal.Footer>
       </Modal>
 
-      {/* 상세 모달 */}
       <Modal show={showDetail} onHide={() => setShowDetail(false)} centered size="lg">
         <Modal.Header
           closeButton
@@ -1136,6 +1200,14 @@ const KpiManagement = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      <SimpleModal
+        open={alertState.open}
+        message={alertState.message}
+        mode={alertState.mode}
+        onClose={closeAlert}
+        onConfirm={alertState.onConfirm ?? undefined}
+      />
     </>
   );
 };

@@ -3,8 +3,20 @@ import { useNavigate } from "react-router-dom";
 
 const API_BASE = "http://localhost:9500";
 
+type SearchType =
+  | "all"
+  | "sales"
+  | "production"
+  | "purchase"
+  | "inventory"
+  | "kpi"
+  | "standard"
+  | "system"
+  | "quality"
+  | "member";
+
 type SearchHit = {
-  type: string; // inventory/kpi/member/production/purchase/sales/standard/system
+  type: string;
   id: number;
   title: string;
   sub?: string;
@@ -23,27 +35,66 @@ type GlobalSearchResponse = {
   results: Record<string, Page<SearchHit>>;
 };
 
+const CATEGORY_ORDER: SearchType[] = [
+  "sales",
+  "production",
+  "purchase",
+  "inventory",
+  "kpi",
+  "standard",
+  "system",
+  "quality",
+  "member",
+  "all",
+];
+
 function buildUrl(hit: SearchHit) {
-  // ✅ type별 상세/목록 이동 규칙 (너 프로젝트 라우터에 맞게 바꿔)
   switch (hit.type) {
-    case "inventory":
-      return `/im`; // 목록 화면으로 이동
-    case "kpi":
-      return `/kpi`;
-    case "member":
-      return `/members`;
+    case "sales":
+      return `/sales`;
     case "production":
       return `/pmanagement`;
     case "purchase":
       return `/pm`;
-    case "sales":
-      return `/sales`;
+    case "inventory":
+      return `/im`;
+    case "kpi":
+      return `/kpi`;
     case "standard":
       return `/standard`;
     case "system":
       return `/system`;
+    case "quality":
+      return `/quality`;
+    case "member":
+      return `/members`;
     default:
       return `/`;
+  }
+}
+
+function getTypeLabel(type: string) {
+  switch (type) {
+    case "sales":
+      return "영업";
+    case "production":
+      return "생산";
+    case "purchase":
+      return "구매";
+    case "inventory":
+      return "재고";
+    case "kpi":
+      return "KPI";
+    case "standard":
+      return "기준";
+    case "system":
+      return "시스템";
+    case "quality":
+      return "품질";
+    case "member":
+      return "회원";
+    default:
+      return type;
   }
 }
 
@@ -51,17 +102,7 @@ export default function TopSearch() {
   const navigate = useNavigate();
 
   const [keyword, setKeyword] = useState("");
-  const [type, setType] = useState<
-    | "all"
-    | "inventory"
-    | "kpi"
-    | "member"
-    | "production"
-    | "purchase"
-    | "sales"
-    | "standard"
-    | "system"
-  >("all");
+  const [type, setType] = useState<SearchType>("all");
 
   const [loading, setLoading] = useState(false);
   const [hits, setHits] = useState<SearchHit[]>([]);
@@ -70,6 +111,7 @@ export default function TopSearch() {
 
   const doSearch = async (kw: string) => {
     const q = kw.trim();
+
     if (!q) {
       setHits([]);
       setOpen(false);
@@ -81,32 +123,46 @@ export default function TopSearch() {
     abortRef.current = controller;
 
     setLoading(true);
+
     try {
       const url =
         `${API_BASE}/api/search?keyword=${encodeURIComponent(q)}` +
         `&type=${encodeURIComponent(type)}` +
         `&page=0&size=5&sort=id,desc`;
 
-      const res = await fetch(url, { signal: controller.signal });
+      const res = await fetch(url, {
+        signal: controller.signal,
+        credentials: "include",
+      });
+
+      const raw = await res.text().catch(() => "");
       if (!res.ok) {
-        const raw = await res.text().catch(() => "");
         throw new Error(raw || "검색 실패");
       }
 
-      const data: GlobalSearchResponse = await res.json();
+      const data: GlobalSearchResponse = raw ? JSON.parse(raw) : { results: {} };
 
-      // ✅ type=all이면 results에 여러 페이지가 들어옴 → 합쳐서 보여주기
-      const merged: SearchHit[] = [];
-      Object.keys(data.results || {}).forEach((k) => {
-        const page = data.results[k];
-        if (page?.content?.length) merged.push(...page.content);
-      });
+      if (type === "all") {
+        const merged: SearchHit[] = [];
 
-      setHits(merged);
+        CATEGORY_ORDER.forEach((category) => {
+          if (category === "all") return;
+          const pageData = data.results?.[category];
+          if (pageData?.content?.length) {
+            merged.push(...pageData.content);
+          }
+        });
+
+        setHits(merged);
+      } else {
+        const pageData = data.results?.[type];
+        setHits(pageData?.content || []);
+      }
+
       setOpen(true);
     } catch (e: any) {
       if (e?.name === "AbortError") return;
-      console.error(e);
+      console.error("검색 실패", e);
       setHits([]);
       setOpen(true);
     } finally {
@@ -114,11 +170,12 @@ export default function TopSearch() {
     }
   };
 
-  // ✅ 디바운스: 타이핑 멈추면 300ms 뒤 검색
   useEffect(() => {
-    const t = setTimeout(() => doSearch(keyword), 300);
+    const t = setTimeout(() => {
+      doSearch(keyword);
+    }, 300);
+
     return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [keyword, type]);
 
   const onSubmit = (e: React.FormEvent) => {
@@ -128,8 +185,6 @@ export default function TopSearch() {
 
   const onPick = (hit: SearchHit) => {
     setOpen(false);
-    // 필요하면 keyword 유지/초기화 선택
-    // setKeyword("");
     navigate(buildUrl(hit));
   };
 
@@ -140,11 +195,10 @@ export default function TopSearch() {
         className="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search"
       >
         <div className="d-flex align-items-center" style={{ width: "100%" }}>
-          {/* type 필터 */}
           <select
             className="custom-select bg-light border-0 small"
             value={type}
-            onChange={(e) => setType(e.target.value as any)}
+            onChange={(e) => setType(e.target.value as SearchType)}
             style={{
               maxWidth: 140,
               marginRight: "10px",
@@ -152,13 +206,14 @@ export default function TopSearch() {
             }}
           >
             <option value="all">전체</option>
-            <option value="inventory">재고</option>
-            <option value="kpi">KPI</option>
             <option value="sales">영업</option>
             <option value="production">생산</option>
             <option value="purchase">구매</option>
+            <option value="inventory">재고</option>
+            <option value="kpi">KPI</option>
             <option value="standard">기준</option>
             <option value="system">시스템</option>
+            <option value="quality">품질</option>
             <option value="member">회원</option>
           </select>
 
@@ -187,7 +242,6 @@ export default function TopSearch() {
         </div>
       </form>
 
-      {/* ✅ 결과 드롭다운 */}
       {open && keyword.trim() && (
         <div
           className="dropdown-menu show p-2"
@@ -219,8 +273,8 @@ export default function TopSearch() {
               >
                 <div className="d-flex justify-content-between">
                   <strong>{h.title || "(제목없음)"}</strong>
-                  <span className="badge badge-light text-uppercase">
-                    {h.type}
+                  <span className="badge badge-secondary">
+                    {getTypeLabel(h.type)}
                   </span>
                 </div>
                 <div className="small text-muted">{h.sub}</div>

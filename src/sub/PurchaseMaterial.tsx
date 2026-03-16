@@ -7,10 +7,11 @@ import { Container, Row, Col, Table, Button, Modal, Form, Pagination } from "rea
 
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import SimpleModal from "../commons/SimpleModal";
 
 const API_BASE = "http://localhost:9500";
 
-//구매자재
+// 구매자재
 type PurchaseMaterialRow = {
   id: number;
   purchaseDate: string;
@@ -35,6 +36,13 @@ type PageResponse<T> = {
   size: number;
 };
 
+type AlertState = {
+  open: boolean;
+  message: string;
+  mode: "alert" | "confirm";
+  onConfirm?: (() => void) | null;
+};
+
 const TABLE_HEADERS = [
   { key: "purchaseDate", label: "구매일자" },
   { key: "purchaseNo", label: "구매번호" },
@@ -57,7 +65,7 @@ const PurchaseMaterial = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
 
-  //등록모달
+  // 등록모달
   const [showCreate, setShowCreate] = useState(false);
   const [createForm, setCreateForm] = useState({
     purchaseDate: "",
@@ -73,7 +81,7 @@ const PurchaseMaterial = () => {
     remark: "",
   });
 
-  //상세(수정/삭제)모달
+  // 상세(수정/삭제)모달
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState<PurchaseMaterialRow | null>(null);
   const [editForm, setEditForm] = useState({
@@ -90,6 +98,40 @@ const PurchaseMaterial = () => {
     remark: "",
   });
 
+  // 공통 상단 알림
+  const [alertState, setAlertState] = useState<AlertState>({
+    open: false,
+    message: "",
+    mode: "alert",
+    onConfirm: null,
+  });
+
+  const showAlert = (message: string) => {
+    setAlertState({
+      open: true,
+      message,
+      mode: "alert",
+      onConfirm: null,
+    });
+  };
+
+  const showConfirm = (message: string, onConfirm: () => void) => {
+    setAlertState({
+      open: true,
+      message,
+      mode: "confirm",
+      onConfirm,
+    });
+  };
+
+  const closeAlert = () => {
+    setAlertState((prev) => ({
+      ...prev,
+      open: false,
+      onConfirm: null,
+    }));
+  };
+
   const onCreateChange = (e: React.ChangeEvent<any>) => {
     const { name, value } = e.target;
     setCreateForm((prev) => ({ ...prev, [name]: value }));
@@ -100,17 +142,19 @@ const PurchaseMaterial = () => {
     setEditForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  //목록조회 (페이징)
+  // 목록조회 (페이징)
   const fetchList = async (p: number) => {
     try {
       const res = await fetch(`${API_BASE}/api/purchase/materials?page=${p}&size=${size}`);
-      if (!res.ok) throw new Error("서버오류");
+      if (!res.ok) throw new Error();
+
       const data: PageResponse<PurchaseMaterialRow> = await res.json();
       setRows(data.content);
       setTotalPages(data.totalPages);
       setTotalElements(data.totalElements);
     } catch (err) {
-      console.error("구매자재 목록 조회실패", err);
+      console.error("구매자재 목록 조회 실패", err);
+      showAlert("구매자재 목록을 불러오지 못했습니다.");
     }
   };
 
@@ -123,7 +167,7 @@ const PurchaseMaterial = () => {
     setPage(next);
   };
 
-  //엑셀 다운로드
+  // 엑셀 다운로드
   const handleExcelDownload = () => {
     const excelData: (string | number)[][] = [
       ["#", ...TABLE_HEADERS.map((h) => h.label)],
@@ -153,7 +197,7 @@ const PurchaseMaterial = () => {
     saveAs(blob, "구매자재관리_리스트.xlsx");
   };
 
-  //등록저장
+  // 등록저장
   const handleSave = async () => {
     const newPurchaseNo = createForm.purchaseNo?.trim()
       ? createForm.purchaseNo.trim()
@@ -163,74 +207,81 @@ const PurchaseMaterial = () => {
     const unitPrice: number = Number(createForm.unitPrice) || 0;
     const amount = qty * unitPrice;
 
-    const res = await fetch(`${API_BASE}/api/purchase/materials`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        purchaseDate: createForm.purchaseDate,
-        purchaseNo: newPurchaseNo,
-        supplierCode: createForm.supplierCode,
-        supplierName: createForm.supplierName,
-        itemCode: createForm.itemCode,
-        itemName: createForm.itemName,
-        qty,
-        unitPrice,
-        amount,
-        expectedDate: createForm.expectedDate,
-        status: createForm.status || "대기",
-        remark: createForm.remark || "",
-      }),
-    });
+    try {
+      const res = await fetch(`${API_BASE}/api/purchase/materials`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          purchaseDate: createForm.purchaseDate,
+          purchaseNo: newPurchaseNo,
+          supplierCode: createForm.supplierCode,
+          supplierName: createForm.supplierName,
+          itemCode: createForm.itemCode,
+          itemName: createForm.itemName,
+          qty,
+          unitPrice,
+          amount,
+          expectedDate: createForm.expectedDate,
+          status: createForm.status || "대기",
+          remark: createForm.remark || "",
+        }),
+      });
 
-    if (!res.ok) {
-      const raw = await res.text().catch(() => "");
-      alert(raw || "등록실패");
-      return;
+      if (!res.ok) throw new Error();
+
+      setShowCreate(false);
+      await fetchList(page);
+      setCreateForm({
+        purchaseDate: "",
+        purchaseNo: "",
+        supplierCode: "",
+        supplierName: "",
+        itemCode: "",
+        itemName: "",
+        qty: "",
+        unitPrice: "",
+        expectedDate: "",
+        status: "대기",
+        remark: "",
+      });
+      showAlert("구매자재가 등록되었습니다.");
+    } catch (err) {
+      console.error("구매자재 등록 실패", err);
+      showAlert("구매자재를 등록하지 못했습니다.");
     }
-
-    setShowCreate(false);
-    fetchList(page);
-    setCreateForm({
-      purchaseDate: "",
-      purchaseNo: "",
-      supplierCode: "",
-      supplierName: "",
-      itemCode: "",
-      itemName: "",
-      qty: "",
-      unitPrice: "",
-      expectedDate: "",
-      status: "대기",
-      remark: "",
-    });
   };
 
-  //상세열기
+  // 상세열기
   const openDetail = async (id: number) => {
-    const res = await fetch(`${API_BASE}/api/purchase/materials/${id}`);
-    if (!res.ok) throw new Error("상세 조회 실패");
+    try {
+      const res = await fetch(`${API_BASE}/api/purchase/materials/${id}`);
+      if (!res.ok) throw new Error();
 
-    const data: PurchaseMaterialRow = await res.json();
-    setSelected(data);
+      const data: PurchaseMaterialRow = await res.json();
+      setSelected(data);
 
-    setEditForm({
-      purchaseDate: data.purchaseDate || "",
-      purchaseNo: data.purchaseNo || "",
-      supplierCode: data.supplierCode || "",
-      supplierName: data.supplierName || "",
-      itemCode: data.itemCode || "",
-      itemName: data.itemName || "",
-      qty: String(data.qty ?? ""),
-      unitPrice: String(data.unitPrice ?? ""),
-      expectedDate: data.expectedDate || "",
-      status: data.status || "",
-      remark: data.remark || "",
-    });
+      setEditForm({
+        purchaseDate: data.purchaseDate || "",
+        purchaseNo: data.purchaseNo || "",
+        supplierCode: data.supplierCode || "",
+        supplierName: data.supplierName || "",
+        itemCode: data.itemCode || "",
+        itemName: data.itemName || "",
+        qty: String(data.qty ?? ""),
+        unitPrice: String(data.unitPrice ?? ""),
+        expectedDate: data.expectedDate || "",
+        status: data.status || "",
+        remark: data.remark || "",
+      });
 
-    setShowDetail(true);
+      setShowDetail(true);
+    } catch (err) {
+      console.error("구매자재 상세 조회 실패", err);
+      showAlert("구매자재 상세 정보를 불러오지 못했습니다.");
+    }
   };
 
-  //수정저장
+  // 수정저장
   const handleUpdate = async () => {
     if (!selected) return;
 
@@ -238,38 +289,55 @@ const PurchaseMaterial = () => {
     const unitPrice = Number(editForm.unitPrice || 0);
     const amount = qty * unitPrice;
 
-    const res = await fetch(`${API_BASE}/api/purchase/materials/${selected.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...editForm,
-        qty,
-        unitPrice,
-        amount,
-      }),
-    });
+    try {
+      const res = await fetch(`${API_BASE}/api/purchase/materials/${selected.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...editForm,
+          qty,
+          unitPrice,
+          amount,
+        }),
+      });
 
-    if (!res.ok) throw new Error("수정 실패");
+      if (!res.ok) throw new Error();
 
-    setShowDetail(false);
-    fetchList(page);
+      setShowDetail(false);
+      await fetchList(page);
+      showAlert("구매자재가 수정되었습니다.");
+    } catch (err) {
+      console.error("구매자재 수정 실패", err);
+      showAlert("구매자재를 수정하지 못했습니다.");
+    }
   };
 
-  //삭제
+  // 삭제 확인 후 삭제
+  const handleDeleteConfirmed = async () => {
+    if (!selected) return;
+
+    closeAlert();
+
+    try {
+      const res = await fetch(`${API_BASE}/api/purchase/materials/${selected.id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error();
+
+      setShowDetail(false);
+      await fetchList(page);
+      showAlert("구매자재가 삭제되었습니다.");
+    } catch (err) {
+      console.error("구매자재 삭제 실패", err);
+      showAlert("구매자재를 삭제하지 못했습니다.");
+    }
+  };
+
   const handleDelete = async () => {
     if (!selected) return;
 
-    const ok = window.confirm("정말 삭제 할까요?");
-    if (!ok) return;
-
-    const res = await fetch(`${API_BASE}/api/purchase/materials/${selected.id}`, {
-      method: "DELETE",
-    });
-
-    if (!res.ok) throw new Error("삭제 실패");
-
-    setShowDetail(false);
-    fetchList(page);
+    showConfirm("구매자재를 삭제하시겠습니까?", handleDeleteConfirmed);
   };
 
   const thStyle: React.CSSProperties = {
@@ -650,7 +718,7 @@ const PurchaseMaterial = () => {
         </DflexColumn>
       </Wrapper>
 
-      {/* ✅ 등록 모달 */}
+      {/* 등록 모달 */}
       <Modal show={showCreate} onHide={() => setShowCreate(false)} centered size="lg">
         <Modal.Header
           closeButton
@@ -997,7 +1065,7 @@ const PurchaseMaterial = () => {
         </Modal.Footer>
       </Modal>
 
-      {/* ✅ 상세(수정/삭제) 모달 */}
+      {/* 상세(수정/삭제) 모달 */}
       <Modal show={showDetail} onHide={() => setShowDetail(false)} centered size="lg">
         <Modal.Header
           closeButton
@@ -1345,6 +1413,14 @@ const PurchaseMaterial = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      <SimpleModal
+        open={alertState.open}
+        message={alertState.message}
+        mode={alertState.mode}
+        onClose={closeAlert}
+        onConfirm={alertState.onConfirm ?? undefined}
+      />
     </>
   );
 };

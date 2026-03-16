@@ -9,10 +9,10 @@ import { Container, Row, Col, Table, Button, Modal, Form, Pagination } from "rea
 
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import SimpleModal from "../commons/SimpleModal";
 
 const API_BASE = "http://localhost:9500";
 
-// ✅ 상태값 오타 정리: INACTIVE
 type SystemStatus = "ACTIVE" | "INACTIVE" | "MAINTENANCE";
 
 type SystemItem = {
@@ -36,6 +36,13 @@ type PageResponse<T> = {
   size: number;
 };
 
+type AlertState = {
+  open: boolean;
+  message: string;
+  mode: "alert" | "confirm";
+  onConfirm?: (() => void) | null;
+};
+
 const TABLE_HEADERS: { key: keyof SystemItem; label: string }[] = [
   { key: "systemCode", label: "시스템코드" },
   { key: "systemName", label: "시스템명" },
@@ -54,7 +61,6 @@ const SystemManagement = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
 
-  // 등록 모달
   const [showCreate, setShowCreate] = useState(false);
   const [createForm, setCreateForm] = useState({
     systemCode: "",
@@ -67,7 +73,6 @@ const SystemManagement = () => {
     remark: "",
   });
 
-  // 상세/수정 모달
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState<SystemItem | null>(null);
   const [editForm, setEditForm] = useState({
@@ -81,6 +86,39 @@ const SystemManagement = () => {
     remark: "",
   });
 
+  const [alertState, setAlertState] = useState<AlertState>({
+    open: false,
+    message: "",
+    mode: "alert",
+    onConfirm: null,
+  });
+
+  const showAlert = (message: string) => {
+    setAlertState({
+      open: true,
+      message,
+      mode: "alert",
+      onConfirm: null,
+    });
+  };
+
+  const showConfirm = (message: string, onConfirm: () => void) => {
+    setAlertState({
+      open: true,
+      message,
+      mode: "confirm",
+      onConfirm,
+    });
+  };
+
+  const closeAlert = () => {
+    setAlertState((prev) => ({
+      ...prev,
+      open: false,
+      onConfirm: null,
+    }));
+  };
+
   const onCreateChange = (e: React.ChangeEvent<any>) => {
     const { name, value } = e.target;
     setCreateForm((prev) => ({ ...prev, [name]: value }));
@@ -91,13 +129,12 @@ const SystemManagement = () => {
     setEditForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ 목록 조회
   const fetchList = async (p: number) => {
     try {
       const res = await fetch(`${API_BASE}/api/systems?page=${p}&size=${size}&sort=id,desc`, {
         cache: "no-store",
       });
-      if (!res.ok) throw new Error("서버 오류");
+      if (!res.ok) throw new Error();
 
       const data: PageResponse<SystemItem> = await res.json();
       console.log("systems list response", data);
@@ -108,6 +145,7 @@ const SystemManagement = () => {
       setTotalElements(data.totalElements);
     } catch (err) {
       console.error("시스템 목록 조회 실패", err);
+      showAlert("시스템 목록을 불러오지 못했습니다.");
     }
   };
 
@@ -115,13 +153,11 @@ const SystemManagement = () => {
     fetchList(page);
   }, [page]);
 
-  // ✅ 페이징 이동
   const goPage = (p: number) => {
     const next = Math.max(0, Math.min(p, totalPages - 1));
     setPage(next);
   };
 
-  // ✅ 엑셀 다운로드
   const handleExcelDownload = () => {
     const excelData: (string | number)[][] = [
       ["#", ...TABLE_HEADERS.map((h) => h.label)],
@@ -147,53 +183,57 @@ const SystemManagement = () => {
     saveAs(blob, "시스템관리_리스트.xlsx");
   };
 
-  // ✅ 등록 저장
   const handleSave = async () => {
-    const res = await fetch(`${API_BASE}/api/systems`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        systemCode: createForm.systemCode,
-        systemName: createForm.systemName,
-        systemGroup: createForm.systemGroup || null,
-        owner: createForm.owner || null,
-        version: createForm.version || null,
-        status: createForm.status || null,
-        useYn: createForm.useYn || "Y",
-        remark: createForm.remark || "",
-      }),
-    });
+    try {
+      const res = await fetch(`${API_BASE}/api/systems`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          systemCode: createForm.systemCode,
+          systemName: createForm.systemName,
+          systemGroup: createForm.systemGroup || null,
+          owner: createForm.owner || null,
+          version: createForm.version || null,
+          status: createForm.status || null,
+          useYn: createForm.useYn || "Y",
+          remark: createForm.remark || "",
+        }),
+      });
 
-    const raw = await res.text().catch(() => "");
-    console.log("system create status", res.status);
-    console.log("system create response", raw);
+      const raw = await res.text().catch(() => "");
+      console.log("system create status", res.status);
+      console.log("system create response", raw);
 
-    if (!res.ok) {
-      alert(raw || "등록 실패");
-      return;
+      if (!res.ok) {
+        throw new Error(raw || "등록 실패");
+      }
+
+      setShowCreate(false);
+      setPage(0);
+      await fetchList(0);
+
+      setCreateForm({
+        systemCode: "",
+        systemName: "",
+        systemGroup: "",
+        owner: "",
+        version: "",
+        status: "ACTIVE",
+        useYn: "Y",
+        remark: "",
+      });
+
+      showAlert("시스템이 등록되었습니다.");
+    } catch (err) {
+      console.error("시스템 등록 실패", err);
+      showAlert("시스템을 등록하지 못했습니다.");
     }
-
-    setShowCreate(false);
-    setPage(0);
-    fetchList(0);
-
-    setCreateForm({
-      systemCode: "",
-      systemName: "",
-      systemGroup: "",
-      owner: "",
-      version: "",
-      status: "ACTIVE",
-      useYn: "Y",
-      remark: "",
-    });
   };
 
-  // ✅ 상세 열기
   const openDetail = async (id: number) => {
     try {
       const res = await fetch(`${API_BASE}/api/systems/${id}`);
-      if (!res.ok) throw new Error("상세 조회 실패");
+      if (!res.ok) throw new Error();
 
       const data: SystemItem = await res.json();
       setSelected(data);
@@ -212,51 +252,63 @@ const SystemManagement = () => {
       setShowDetail(true);
     } catch (e) {
       console.error(e);
-      alert("상세 조회 실패");
+      showAlert("시스템 상세 정보를 불러오지 못했습니다.");
     }
   };
 
-  // ✅ 수정 저장
   const handleUpdate = async () => {
     if (!selected) return;
 
-    const res = await fetch(`${API_BASE}/api/systems/${selected.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...editForm,
-      }),
-    });
+    try {
+      const res = await fetch(`${API_BASE}/api/systems/${selected.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...editForm,
+        }),
+      });
 
-    if (!res.ok) {
-      const raw = await res.text().catch(() => "");
-      alert(raw || "수정 실패");
-      return;
+      if (!res.ok) {
+        const raw = await res.text().catch(() => "");
+        throw new Error(raw || "수정 실패");
+      }
+
+      setShowDetail(false);
+      await fetchList(page);
+      showAlert("시스템이 수정되었습니다.");
+    } catch (err) {
+      console.error("시스템 수정 실패", err);
+      showAlert("시스템을 수정하지 못했습니다.");
     }
-
-    setShowDetail(false);
-    fetchList(page);
   };
 
-  // ✅ 삭제
-  const handleDelete = async () => {
+  const handleDeleteConfirmed = async () => {
     if (!selected) return;
 
-    const ok = window.confirm("정말 삭제 할까요?");
-    if (!ok) return;
+    closeAlert();
 
-    const res = await fetch(`${API_BASE}/api/systems/${selected.id}`, {
-      method: "DELETE",
-    });
+    try {
+      const res = await fetch(`${API_BASE}/api/systems/${selected.id}`, {
+        method: "DELETE",
+      });
 
-    if (!res.ok) {
-      const raw = await res.text().catch(() => "");
-      alert(raw || "삭제 실패");
-      return;
+      if (!res.ok) {
+        const raw = await res.text().catch(() => "");
+        throw new Error(raw || "삭제 실패");
+      }
+
+      setShowDetail(false);
+      await fetchList(page);
+      showAlert("시스템이 삭제되었습니다.");
+    } catch (err) {
+      console.error("시스템 삭제 실패", err);
+      showAlert("시스템을 삭제하지 못했습니다.");
     }
+  };
 
-    setShowDetail(false);
-    fetchList(page);
+  const handleDelete = async () => {
+    if (!selected) return;
+    showConfirm("시스템을 삭제하시겠습니까?", handleDeleteConfirmed);
   };
 
   const thStyle: React.CSSProperties = {
@@ -575,7 +627,6 @@ const SystemManagement = () => {
         </DflexColumn>
       </Wrapper>
 
-      {/* ✅ 등록 모달 */}
       <Modal show={showCreate} onHide={() => setShowCreate(false)} centered size="lg">
         <Modal.Header
           closeButton
@@ -847,7 +898,6 @@ const SystemManagement = () => {
         </Modal.Footer>
       </Modal>
 
-      {/* ✅ 상세(수정/삭제) 모달 */}
       <Modal show={showDetail} onHide={() => setShowDetail(false)} centered size="lg">
         <Modal.Header
           closeButton
@@ -1119,6 +1169,14 @@ const SystemManagement = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      <SimpleModal
+        open={alertState.open}
+        message={alertState.message}
+        mode={alertState.mode}
+        onClose={closeAlert}
+        onConfirm={alertState.onConfirm ?? undefined}
+      />
     </>
   );
 };

@@ -9,6 +9,7 @@ import { Container, Row, Col, Table, Button, Modal, Form, Pagination } from "rea
 
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import SimpleModal from "../commons/SimpleModal";
 
 const API_BASE = "http://localhost:9500";
 
@@ -31,6 +32,13 @@ type PageResponse<T> = {
   size: number;
 };
 
+type AlertState = {
+  open: boolean;
+  message: string;
+  mode: "alert" | "confirm";
+  onConfirm?: (() => void) | null;
+};
+
 const TABLE_HEADERS: { key: keyof StandardItem; label: string }[] = [
   { key: "stdCode", label: "기준코드" },
   { key: "stdName", label: "기준명" },
@@ -47,7 +55,6 @@ const StandardManagement = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
 
-  // 등록 모달
   const [showCreate, setShowCreate] = useState(false);
   const [createForm, setCreateForm] = useState({
     stdCode: "",
@@ -58,7 +65,6 @@ const StandardManagement = () => {
     remark: "",
   });
 
-  // 상세/수정 모달
   const [showDetail, setShowDetail] = useState(false);
   const [selected, setSelected] = useState<StandardItem | null>(null);
   const [editForm, setEditForm] = useState({
@@ -70,6 +76,39 @@ const StandardManagement = () => {
     remark: "",
   });
 
+  const [alertState, setAlertState] = useState<AlertState>({
+    open: false,
+    message: "",
+    mode: "alert",
+    onConfirm: null,
+  });
+
+  const showAlert = (message: string) => {
+    setAlertState({
+      open: true,
+      message,
+      mode: "alert",
+      onConfirm: null,
+    });
+  };
+
+  const showConfirm = (message: string, onConfirm: () => void) => {
+    setAlertState({
+      open: true,
+      message,
+      mode: "confirm",
+      onConfirm,
+    });
+  };
+
+  const closeAlert = () => {
+    setAlertState((prev) => ({
+      ...prev,
+      open: false,
+      onConfirm: null,
+    }));
+  };
+
   const onCreateChange = (e: React.ChangeEvent<any>) => {
     const { name, value } = e.target;
     setCreateForm((prev) => ({ ...prev, [name]: value }));
@@ -80,11 +119,10 @@ const StandardManagement = () => {
     setEditForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 목록 조회
   const fetchList = async (p: number) => {
     try {
       const res = await fetch(`${API_BASE}/api/standards?page=${p}&size=${size}`);
-      if (!res.ok) throw new Error("서버 오류");
+      if (!res.ok) throw new Error();
 
       const data: PageResponse<StandardItem> = await res.json();
       setRows(data.content);
@@ -92,6 +130,7 @@ const StandardManagement = () => {
       setTotalElements(data.totalElements);
     } catch (err) {
       console.error("기준정보 목록 조회 실패", err);
+      showAlert("기준정보 목록을 불러오지 못했습니다.");
     }
   };
 
@@ -104,7 +143,6 @@ const StandardManagement = () => {
     setPage(next);
   };
 
-  // 엑셀 다운로드
   const handleExcelDownload = () => {
     const excelData = [
       ["#", ...TABLE_HEADERS.map((h) => h.label)],
@@ -127,88 +165,111 @@ const StandardManagement = () => {
     saveAs(new Blob([file]), "기준정보관리_리스트.xlsx");
   };
 
-  // 등록
   const handleSave = async () => {
-    const res = await fetch(`${API_BASE}/api/standards`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(createForm),
-    });
+    try {
+      const res = await fetch(`${API_BASE}/api/standards`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(createForm),
+      });
 
-    if (!res.ok) {
-      const raw = await res.text().catch(() => "");
-      alert(raw || "등록 실패");
-      return;
+      if (!res.ok) {
+        const raw = await res.text().catch(() => "");
+        throw new Error(raw || "등록 실패");
+      }
+
+      setShowCreate(false);
+      await fetchList(page);
+
+      setCreateForm({
+        stdCode: "",
+        stdName: "",
+        stdGroup: "",
+        unit: "",
+        useYn: "Y",
+        remark: "",
+      });
+
+      showAlert("기준정보가 등록되었습니다.");
+    } catch (err) {
+      console.error("기준정보 등록 실패", err);
+      showAlert("기준정보를 등록하지 못했습니다.");
     }
-
-    setShowCreate(false);
-    fetchList(page);
-
-    setCreateForm({
-      stdCode: "",
-      stdName: "",
-      stdGroup: "",
-      unit: "",
-      useYn: "Y",
-      remark: "",
-    });
   };
 
-  // 상세 열기
   const openDetail = async (id: number) => {
-    const res = await fetch(`${API_BASE}/api/standards/${id}`);
-    if (!res.ok) throw new Error("상세 조회 실패");
+    try {
+      const res = await fetch(`${API_BASE}/api/standards/${id}`);
+      if (!res.ok) throw new Error();
 
-    const data: StandardItem = await res.json();
-    setSelected(data);
-    setEditForm({
-      stdCode: data.stdCode,
-      stdName: data.stdName,
-      stdGroup: data.stdGroup,
-      unit: data.unit ?? "",
-      useYn: data.useYn,
-      remark: data.remark ?? "",
-    });
-    setShowDetail(true);
+      const data: StandardItem = await res.json();
+      setSelected(data);
+      setEditForm({
+        stdCode: data.stdCode,
+        stdName: data.stdName,
+        stdGroup: data.stdGroup,
+        unit: data.unit ?? "",
+        useYn: data.useYn,
+        remark: data.remark ?? "",
+      });
+      setShowDetail(true);
+    } catch (err) {
+      console.error("기준정보 상세 조회 실패", err);
+      showAlert("기준정보 상세 정보를 불러오지 못했습니다.");
+    }
   };
 
-  // 수정
   const handleUpdate = async () => {
     if (!selected) return;
 
-    const res = await fetch(`${API_BASE}/api/standards/${selected.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(editForm),
-    });
+    try {
+      const res = await fetch(`${API_BASE}/api/standards/${selected.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editForm),
+      });
 
-    if (!res.ok) {
-      const raw = await res.text().catch(() => "");
-      alert(raw || "수정 실패");
-      return;
+      if (!res.ok) {
+        const raw = await res.text().catch(() => "");
+        throw new Error(raw || "수정 실패");
+      }
+
+      setShowDetail(false);
+      await fetchList(page);
+      showAlert("기준정보가 수정되었습니다.");
+    } catch (err) {
+      console.error("기준정보 수정 실패", err);
+      showAlert("기준정보를 수정하지 못했습니다.");
     }
-
-    setShowDetail(false);
-    fetchList(page);
   };
 
-  // 삭제
+  const handleDeleteConfirmed = async () => {
+    if (!selected) return;
+
+    closeAlert();
+
+    try {
+      const res = await fetch(`${API_BASE}/api/standards/${selected.id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const raw = await res.text().catch(() => "");
+        throw new Error(raw || "삭제 실패");
+      }
+
+      setShowDetail(false);
+      await fetchList(page);
+      showAlert("기준정보가 삭제되었습니다.");
+    } catch (err) {
+      console.error("기준정보 삭제 실패", err);
+      showAlert("기준정보를 삭제하지 못했습니다.");
+    }
+  };
+
   const handleDelete = async () => {
     if (!selected) return;
-    if (!window.confirm("정말 삭제 할까요?")) return;
-
-    const res = await fetch(`${API_BASE}/api/standards/${selected.id}`, {
-      method: "DELETE",
-    });
-
-    if (!res.ok) {
-      const raw = await res.text().catch(() => "");
-      alert(raw || "삭제 실패");
-      return;
-    }
-
-    setShowDetail(false);
-    fetchList(page);
+    showConfirm("기준정보를 삭제하시겠습니까?", handleDeleteConfirmed);
   };
 
   const thStyle: React.CSSProperties = {
@@ -505,7 +566,6 @@ const StandardManagement = () => {
         </DflexColumn>
       </Wrapper>
 
-      {/* 등록 모달 */}
       <Modal show={showCreate} onHide={() => setShowCreate(false)} centered size="lg">
         <Modal.Header
           closeButton
@@ -724,7 +784,6 @@ const StandardManagement = () => {
         </Modal.Footer>
       </Modal>
 
-      {/* 상세/수정 모달 */}
       <Modal show={showDetail} onHide={() => setShowDetail(false)} centered size="lg">
         <Modal.Header
           closeButton
@@ -943,6 +1002,14 @@ const StandardManagement = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      <SimpleModal
+        open={alertState.open}
+        message={alertState.message}
+        mode={alertState.mode}
+        onClose={closeAlert}
+        onConfirm={alertState.onConfirm ?? undefined}
+      />
     </>
   );
 };

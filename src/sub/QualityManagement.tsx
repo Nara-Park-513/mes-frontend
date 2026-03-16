@@ -19,6 +19,7 @@ import {
   Form,
   Pagination,
 } from "react-bootstrap";
+import SimpleModal from "../commons/SimpleModal";
 
 const API_BASE = "http://localhost:9500";
 
@@ -40,6 +41,13 @@ type PageResponse<T> = {
   totalPages: number;
   number: number;
   size: number;
+};
+
+type AlertState = {
+  open: boolean;
+  message: string;
+  mode: "alert" | "confirm";
+  onConfirm?: (() => void) | null;
 };
 
 const TABLE_HEADERS: {
@@ -82,6 +90,39 @@ const QualityManagement = () => {
   const [createForm, setCreateForm] = useState(emptyForm);
   const [editForm, setEditForm] = useState(emptyForm);
 
+  const [alertState, setAlertState] = useState<AlertState>({
+    open: false,
+    message: "",
+    mode: "alert",
+    onConfirm: null,
+  });
+
+  const showAlert = (message: string) => {
+    setAlertState({
+      open: true,
+      message,
+      mode: "alert",
+      onConfirm: null,
+    });
+  };
+
+  const showConfirm = (message: string, onConfirm: () => void) => {
+    setAlertState({
+      open: true,
+      message,
+      mode: "confirm",
+      onConfirm,
+    });
+  };
+
+  const closeAlert = () => {
+    setAlertState((prev) => ({
+      ...prev,
+      open: false,
+      onConfirm: null,
+    }));
+  };
+
   const onCreateChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -110,6 +151,7 @@ const QualityManagement = () => {
         setRows([]);
         setTotalPages(0);
         setTotalElements(0);
+        showAlert("품질관리 목록을 불러오지 못했습니다.");
         return;
       }
 
@@ -140,6 +182,7 @@ const QualityManagement = () => {
       setRows([]);
       setTotalPages(0);
       setTotalElements(0);
+      showAlert("품질관리 목록을 불러오지 못했습니다.");
     }
   };
 
@@ -178,28 +221,36 @@ const QualityManagement = () => {
 
   const handleSave = async () => {
     if (!String(createForm.inspectionDate ?? "").trim()) {
-      return alert("검사일자를 입력하세요");
+      showAlert("검사일자를 입력해 주세요.");
+      return;
     }
     if (!String(createForm.itemCode ?? "").trim()) {
-      return alert("품목코드를 입력하세요");
+      showAlert("품목코드를 입력해 주세요.");
+      return;
     }
     if (!String(createForm.itemName ?? "").trim()) {
-      return alert("품목명을 입력하세요");
+      showAlert("품목명을 입력해 주세요.");
+      return;
     }
     if (!String(createForm.inspectionQty ?? "").trim()) {
-      return alert("검사수량을 입력하세요");
+      showAlert("검사수량을 입력해 주세요.");
+      return;
     }
     if (!String(createForm.defectQty ?? "").trim()) {
-      return alert("불량수량을 입력하세요");
+      showAlert("불량수량을 입력해 주세요.");
+      return;
     }
     if (!String(createForm.judgementResult ?? "").trim()) {
-      return alert("판정결과를 입력하세요");
+      showAlert("판정결과를 선택해 주세요.");
+      return;
     }
     if (!String(createForm.actionType ?? "").trim()) {
-      return alert("조치구분을 입력하세요");
+      showAlert("조치구분을 선택해 주세요.");
+      return;
     }
     if (!String(createForm.actionStatus ?? "").trim()) {
-      return alert("조치상태를 입력하세요");
+      showAlert("조치상태를 선택해 주세요.");
+      return;
     }
 
     const payload = {
@@ -224,15 +275,17 @@ const QualityManagement = () => {
 
       if (!res.ok) {
         const raw = await res.text().catch(() => "");
-        alert(raw || "저장 실패");
+        console.error("품질관리 저장 실패 응답", raw);
+        showAlert("품질관리 항목을 등록하지 못했습니다.");
         return;
       }
 
       handleCloseCreate();
-      fetchList(page);
+      await fetchList(page);
+      showAlert("품질관리 항목이 등록되었습니다.");
     } catch (err) {
       console.error("품질관리 저장 실패", err);
-      alert("저장 실패");
+      showAlert("품질관리 항목을 등록하지 못했습니다.");
     }
   };
 
@@ -269,7 +322,7 @@ const QualityManagement = () => {
       setShowDetail(true);
     } catch (err) {
       console.error("품질관리 상세 조회 실패", err);
-      alert("상세 조회 실패");
+      showAlert("품질관리 상세 정보를 불러오지 못했습니다.");
     }
   };
 
@@ -277,28 +330,36 @@ const QualityManagement = () => {
     if (!selected) return;
 
     if (!String(editForm.inspectionDate ?? "").trim()) {
-      return alert("검사일자를 입력하세요");
+      showAlert("검사일자를 입력해 주세요.");
+      return;
     }
     if (!String(editForm.itemCode ?? "").trim()) {
-      return alert("품목코드를 입력하세요");
+      showAlert("품목코드를 입력해 주세요.");
+      return;
     }
     if (!String(editForm.itemName ?? "").trim()) {
-      return alert("품목명을 입력하세요");
+      showAlert("품목명을 입력해 주세요.");
+      return;
     }
     if (!String(editForm.inspectionQty ?? "").trim()) {
-      return alert("검사수량을 입력하세요");
+      showAlert("검사수량을 입력해 주세요.");
+      return;
     }
     if (!String(editForm.defectQty ?? "").trim()) {
-      return alert("불량수량을 입력하세요");
+      showAlert("불량수량을 입력해 주세요.");
+      return;
     }
     if (!String(editForm.judgementResult ?? "").trim()) {
-      return alert("판정결과를 입력하세요");
+      showAlert("판정결과를 선택해 주세요.");
+      return;
     }
     if (!String(editForm.actionType ?? "").trim()) {
-      return alert("조치구분을 입력하세요");
+      showAlert("조치구분을 선택해 주세요.");
+      return;
     }
     if (!String(editForm.actionStatus ?? "").trim()) {
-      return alert("조치상태를 입력하세요");
+      showAlert("조치상태를 선택해 주세요.");
+      return;
     }
 
     const payload = {
@@ -326,23 +387,24 @@ const QualityManagement = () => {
 
       if (!res.ok) {
         const raw = await res.text().catch(() => "");
-        alert(raw || "수정 실패");
+        console.error("품질관리 수정 실패 응답", raw);
+        showAlert("품질관리 항목을 수정하지 못했습니다.");
         return;
       }
 
       handleCloseDetail();
-      fetchList(page);
+      await fetchList(page);
+      showAlert("품질관리 항목이 수정되었습니다.");
     } catch (err) {
       console.error("품질관리 수정 실패", err);
-      alert("수정 실패");
+      showAlert("품질관리 항목을 수정하지 못했습니다.");
     }
   };
 
-  const handleDelete = async () => {
+  const handleDeleteConfirmed = async () => {
     if (!selected) return;
 
-    const ok = window.confirm("정말 삭제하시겠습니까?");
-    if (!ok) return;
+    closeAlert();
 
     try {
       const res = await fetch(
@@ -354,16 +416,23 @@ const QualityManagement = () => {
 
       if (!res.ok) {
         const raw = await res.text().catch(() => "");
-        alert(raw || "삭제 실패");
+        console.error("품질관리 삭제 실패 응답", raw);
+        showAlert("품질관리 항목을 삭제하지 못했습니다.");
         return;
       }
 
       handleCloseDetail();
-      fetchList(page);
+      await fetchList(page);
+      showAlert("품질관리 항목이 삭제되었습니다.");
     } catch (err) {
       console.error("품질관리 삭제 실패", err);
-      alert("삭제 실패");
+      showAlert("품질관리 항목을 삭제하지 못했습니다.");
     }
+  };
+
+  const handleDelete = async () => {
+    if (!selected) return;
+    showConfirm("품질관리 항목을 삭제하시겠습니까?", handleDeleteConfirmed);
   };
 
   const canSave =
@@ -907,18 +976,6 @@ const QualityManagement = () => {
             gap: "10px",
           }}
         >
-          {/*<Button
-            variant="secondary"
-            onClick={handleCloseCreate}
-            style={{
-              minWidth: "96px",
-              height: "42px",
-              borderRadius: "4px",
-              fontWeight: 600,
-            }}
-          >
-            닫기
-          </Button>*/}
           <Button
             onClick={handleSave}
             disabled={!canSave}
@@ -1213,6 +1270,14 @@ const QualityManagement = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      <SimpleModal
+        open={alertState.open}
+        message={alertState.message}
+        mode={alertState.mode}
+        onClose={closeAlert}
+        onConfirm={alertState.onConfirm ?? undefined}
+      />
     </>
   );
 };
