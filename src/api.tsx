@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = 'http://localhost:8686/api' //스프링부트 서버주소
+const API_BASE = 'http://localhost:9500/api' //스프링부트 서버주소
 
 export const getProductionStatus = () => axios.get(`${API_BASE}/production`);
 export const getWorkOrders = () => axios.get(`${API_BASE}/work-orders`);

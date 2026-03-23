@@ -30,7 +30,7 @@ const Lnb = () => {
 
         {/* Nav Item - Dashboard */}
         <li className="nav-item">
-          <a className="nav-link" href="/">
+          <a className="nav-link" href="/admin">
             <i className="fas fa-fw fa-tachometer-alt" />
             <span>MES Dashboard</span>
           </a>
