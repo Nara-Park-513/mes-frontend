@@ -98,7 +98,6 @@ const Login = () => {
     <>
       <S.Wrapper>
         <S.Card>
-          <S.LeftImage />
           <S.Right>
             <S.Title>Welcome Back!</S.Title>
 
@@ -123,13 +122,14 @@ const Login = () => {
                   id="remember"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                />{" "}
+                />
                 <label htmlFor="remember">Save ID</label>
               </S.CheckboxWrapper>
 
               <S.Button type="submit">Login</S.Button>
 
               <S.Divider />
+
               <S.SocialButton
                 variant="google"
                 type="button"
@@ -138,18 +138,19 @@ const Login = () => {
                 Company Account Login
               </S.SocialButton>
 
-              <S.SocialButton variant="facebook">
+              <S.SocialButton variant="facebook" type="button">
                 Enterprise SSO
               </S.SocialButton>
 
-              <S.SocialButton variant="instagram">
+              <S.SocialButton variant="instagram" type="button">
                 Internal System Login
               </S.SocialButton>
             </S.Form>
 
-            <S.Divider />
-            <S.LinkText href="/forgot">Forgot Password?</S.LinkText>
-            <S.LinkText href="/member">Create an Account!</S.LinkText>
+            <S.BottomLinks>
+              <S.LinkText href="/forgot">Forgot Password?</S.LinkText>
+              <S.LinkText href="/member">Create an Account!</S.LinkText>
+            </S.BottomLinks>
           </S.Right>
         </S.Card>
       </S.Wrapper>
